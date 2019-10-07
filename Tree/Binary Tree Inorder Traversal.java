@@ -16,7 +16,7 @@ public class Solution {
   
         cur = stack.pop();
         res.add(cur.key);
-        cur = cur.right;
+        cur = cur.right; //很重要
       }
       return res;
     }

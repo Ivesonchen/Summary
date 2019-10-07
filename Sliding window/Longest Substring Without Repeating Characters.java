@@ -31,7 +31,7 @@ class Solution {
                 chars[s.charAt(end)] = true;
                 rst = Math.max(rst, end - start + 1);
                 end++;
-            }
+            } // init end to the end  and chars[]
             chars[s.charAt(start)] = false;
             start++;
         }

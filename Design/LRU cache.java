@@ -30,8 +30,8 @@ class LRUCache {
     class DoubleLinkedListNode {
         int key;
         int value;
-        DoubleLinkedListNode pre;
-        DoubleLinkedListNode next;
+        DoubleLinkedListNode pre;   //不含内容的空头
+        DoubleLinkedListNode next;  //不含内容的空头
     }
     
 
