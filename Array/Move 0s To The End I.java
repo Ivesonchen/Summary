@@ -28,7 +28,7 @@ public class Solution {
   
         return array;
     }
-  }
+}
 
 /*
   while(right < length){

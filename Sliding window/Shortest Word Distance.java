@@ -14,22 +14,22 @@ You may assume that word1 does not equal to word2, and word1 and word2 are both 
 public class Solution {
     public int shortestDistance(String[] words, String word1, String word2) {
       // Write your solution here
-          int indexWord1 = -1;
-          int indexWord2 = -1;
-          int distance = Integer.MAX_VALUE;
-          for (int i = 0; i < words.length; i++) {
-              if (words[i].equals(word1)) {
-                  indexWord1 = i;
-              } else if (words[i].equals(word2)) {
-                  indexWord2 = i;
-              }
-              if (indexWord1 >= 0 && indexWord2 >= 0) {
-                  distance = Math.min(distance, Math.abs(indexWord2 - indexWord1));
-              }
-          }
-          return distance;
+        int indexWord1 = -1;
+        int indexWord2 = -1;
+        int distance = Integer.MAX_VALUE;
+        for (int i = 0; i < words.length; i++) {
+            if (words[i].equals(word1)) {
+                indexWord1 = i;
+            } else if (words[i].equals(word2)) {
+                indexWord2 = i;
+            }
+            if (indexWord1 >= 0 && indexWord2 >= 0) {
+                distance = Math.min(distance, Math.abs(indexWord2 - indexWord1));
+            }
+        }
+        return distance;
     }
-  }
+}
 
   /**
    * /*
