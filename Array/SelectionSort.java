@@ -45,3 +45,6 @@ public class Solution {
       return array;
     }
   }
+  
+  //time complixity O(n**2)
+  //space complixity O(1)
