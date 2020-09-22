@@ -60,6 +60,8 @@ Thoughts:
         return rst;
     }
 
+    //Tao-Lu
+    //这个nextX 和 nextY 代表的 东西  有点另人头疼 注意一下 这个 computeDirection 的 套路
     private int computeDirection(boolean[][] visited, int x, int y, int currDirection) {
         int nextX = x + dx[currDirection];
         int nextY = y + dy[currDirection];

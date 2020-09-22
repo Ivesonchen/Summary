@@ -17,29 +17,39 @@ the traversal sequence is [1, 2, 3, 6, 9, 8, 7, 4, 5]
  */
 
 public class Solution {
-    public List<Integer> spiral(int[][] matrix) {
-      // Write your solution here
-      List<Integer> res = new ArrayList<>();
-  
-      helper(matrix, res, 0, matrix.length);
-    }
-  
-    public void helper(int[][] matrix, List<Integer> res, int offSet, int size){
-      if(size < 1) {
-        return;
-      } else if (size = 1) {
-        res.add(matrix[0 + offSet][0 + offSet]);
-        return;
-      }
-  
-      for(int i = offSet; i < size - 1){}; // top row from left to right - 1
-      for(){};// right column from top to bottom - 1
-      for(){};//bottom row from right to left - 1
-      for(){};//left column from bottom to top - 1
-  
-      helper(matrix, res, offSet + 1, size - 2);
-    }
+  public List<Integer> spiral(int[][] matrix) {
+    // Write your solution here
+    List<Integer> res = new ArrayList<>();
+
+    helper(matrix, res, 0, matrix.length);
+    return res;
   }
+
+  public void helper(int[][] matrix, List<Integer> res, int offSet, int size){
+    if(size < 1) {
+      return;
+    } else if (size == 1) {
+      res.add(matrix[0 + offSet][0 + offSet]);
+      return;
+    }
+
+    for(int i = 0; i < size - 1; i++){
+      res.add(matrix[offSet][i + offSet]);
+    }; // top row from left to right - 1
+    for(int i = 0; i < size - 1; i++){
+      res.add(matrix[i + offSet][offSet + size - 1]);
+    };// right column from top to bottom - 1
+
+    for(int i = 0; i < size - 1; i++){
+      res.add(matrix[offSet + size - 1][offSet + size - 1 - i]);
+    };//bottom row from right to left - 1
+    for(int i = 0; i < size - 1; i++){
+      res.add(matrix[offSet + size - 1 - i][offSet]);
+    };//left column from bottom to top - 1
+
+    helper(matrix, res, offSet + 1, size - 2);
+  }
+}
 
   /**
    * recursion     because of it's N * N    we can control it by using offSet to write the recursion rule (Cycle by cycle)
