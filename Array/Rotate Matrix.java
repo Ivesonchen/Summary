@@ -19,8 +19,6 @@ after rotation is
   {6,  9,  2},
 
   {5,  4,  3} }
-
-
  */
 
 public class Solution {
@@ -33,7 +31,8 @@ public class Solution {
                 matrix[i][j] = matrix[j][i];
                 matrix[j][i] = temp;
             }
-        }
+        } //左上到右下 对角线翻
+
         for(int i =0 ; i<matrix.length; i++){
             for(int j = 0; j<matrix.length/2; j++){ // i 从0到末   j走一半
                 int temp = 0;
@@ -41,9 +40,10 @@ public class Solution {
                 matrix[i][j] = matrix[i][matrix.length-1-j];
                 matrix[i][matrix.length-1-j] = temp;
             }
-        }
+        } // 左右对称 翻
     }
 }
 
-// clock wise 是 flip by diagonal then flip columns
-//anti clock wise 是 flip by diagonal the flip rows
+// clock wise 是 两种方法        1. 上下翻 -> 对角线翻   2. 对角线翻 -> 左右翻
+// anti clock wise 是两种方法    1. 左右翻 -> 对角线翻   2. 对角线翻 -> 上下翻
+
