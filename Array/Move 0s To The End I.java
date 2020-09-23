@@ -63,3 +63,26 @@ public class Solution {
   }
 
   return left;
+
+// 有点丑陋 
+  public int[] moveZero(int[] array) {
+    int i = 0, j = array.length - 1;
+
+    while(i < j) {
+      while(i < array.length && array[i] != 0){
+        i++;
+      }
+
+      while(j >= 0 && array[j] == 0) {
+        j--;
+      }
+      if(i < array.length && j >= 0 && i < j){
+        int temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+        i++;
+        j--;
+      }
+    }
+    return array;
+  }
