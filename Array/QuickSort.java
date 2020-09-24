@@ -61,6 +61,6 @@ public class Solution {
   
 /**
  * Worst complexity: n^2
-Average complexity: n*log(n)
-Best complexity: n*log(n)
+   Average complexity: n*log(n)
+   Best complexity: n*log(n)
  */
