@@ -12,6 +12,7 @@ class Solution {
         int right = nums.length - 1;
         
         int index = 0;
+        //Tao-Lu
         while(index <= right){
             if(nums[index] == 2){
                 swap(nums, index, right--);

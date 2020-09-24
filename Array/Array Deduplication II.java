@@ -30,14 +30,14 @@ public class Solution {
         }
         end++;
       }
-  
+      // start 是个 基础指针， end是个 每步都走的指针   最后start在的位置就是新数组的 右边界
       int[] res = new int[start];
       for(int i = 0; i < start; i ++){
         res[i] = array[i];
       }
       return res;
-    }
   }
+}
 
   /**
    * 使用 hashmap 来进行计数     注意 null 值 的比较
