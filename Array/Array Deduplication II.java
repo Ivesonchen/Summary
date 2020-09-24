@@ -13,6 +13,9 @@ Examples
  */
 
 
+  /**
+   * 使用 hashmap 来进行计数     注意 null 值 的比较
+   */
 public class Solution {
     public int[] dedup(int[] array) {
       // Write your solution here
@@ -23,7 +26,7 @@ public class Solution {
       Map<Integer, Integer> map = new HashMap<>();
   
       while(end < array.length){
-        if(map.getOrDefault(array[end], 0) != 2){
+        if(map.getOrDefault(array[end], 0) < 2){
           array[start] = array[end];
           map.put(array[end], map.getOrDefault(array[end], 0) + 1);
           start ++;
@@ -37,8 +40,28 @@ public class Solution {
       }
       return res;
   }
-}
 
   /**
-   * 使用 hashmap 来进行计数     注意 null 值 的比较
+   * 间距为二的 来查找 重复的值  可以随意扩展 间距为 2， 3， 4， 5
    */
+  public int[] dedup(int[] array){
+
+    if(array.length < 2) return array;
+
+    int start = 2;
+
+    for(int i = 2; i < array.length; i++){
+      if(array[i] != array[start - 2]){
+        array[start] = array[i];
+        start++;
+      }
+    }
+
+    int[] res = new int[start];
+
+    for(int i = 0; i < start; i++){
+      res[i] = array[i];
+    }
+    return res;
+  }
+}
