@@ -30,6 +30,8 @@ class Solution {
     }
 }
 /**
+ * 向左换 不需要 重新 比较 所以 index++, left++
+ * 向右换 需要重新比较     所以 index不++， right--
  * #### One pass
 - have two pointers, left/right
 - start tracks red, end tracks blue. Swap red/blue to right position, and left++ or right--.
