@@ -15,6 +15,7 @@ Examples
 
   /**
    * 使用 hashmap 来进行计数     注意 null 值 的比较
+   * O(n) O(n)
    */
 public class Solution {
     public int[] dedup(int[] array) {
@@ -51,7 +52,7 @@ public class Solution {
     int start = 2;
 
     for(int i = 2; i < array.length; i++){
-      if(array[i] != array[start - 2]){
+      if(array[i] != array[start - 2]){ //这个 start - 2       相当于  start 从0开始    i 从 0 开始
         array[start] = array[i];
         start++;
       }

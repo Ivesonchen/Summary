@@ -16,6 +16,7 @@ k << logn.
  * Two pass,  count sort.
  * 用一个数组来计算 array 中出现的所有次数
  * 然后利用这些计数 重新生成一个 所要求的的 array
+ * O(n) O(k)
  */
 
 public class Solution {
