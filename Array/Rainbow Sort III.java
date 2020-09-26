@@ -38,4 +38,49 @@ public class Solution {
       return array;
     }
 }
+
+/**
+ * O(nLok) O(1)
+ * 有点利用 quicksort中的 partition 的 思想
+ * 使用 规定的 k 带来确定的每次 partition 中的 piviot 的值
+ * 然后这个递归结束条件中还要加上color 最终指向一个color
+ */
+
+public int[] rainbowSortIII(int[] array, int k) {
+
+  if(array.length <= 1) return array;
+
+  doRainBowSort(array, 0, array.length - 1, 1, k);
+
+  return array;
+}
+
+public void doRainBowSort(int[] array, int left, int right, int colorFrom, int colorTo){
+if(left >= right) return;
+if(colorFrom >= colorTo) return;
+
+int i = left, j = right;
+int color = (colorFrom + colorTo) / 2;
+
+while(i <= j){
+
+  while(i <= right && array[i] <= color){
+    i ++;
+  }
+
+  while(left <= j && array[j] > color){
+    j --;
+  }
+
+  if(i <= j){
+    int temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+    i++;
+    j--;
+  }
+}
+doRainBowSort(array, left, j, colorFrom, color);
+doRainBowSort(array, i, right, color + 1, colorTo);
+}
   
