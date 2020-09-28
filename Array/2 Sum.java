@@ -14,6 +14,14 @@ A = {2, 4, 1}, target = 4, return false
  */
 // map key 存 complement value 存 index
 
+/**
+ * 方法1：暴力，复杂度O(n^2) 会超时
+
+方法2：hash。用一个哈希表，存储每个数对应的下标，复杂度O(n).
+
+方法3：先排序，然后左右夹逼，排序O(nlogn)，左右夹逼O(n)，最终O(nlogn)。但是注意，这题需要返回的是下标，而不是数字本身，而重新排序会导致index失真，因此这个方法行不通。
+ */
+
 public class Solution {
     public boolean existSum(int[] array, int target) {
       // Write your solution here
