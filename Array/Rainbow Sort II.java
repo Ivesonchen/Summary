@@ -20,11 +20,8 @@ public class Solution {
       for(int i = 0; i < array.length; i++){
         if(array[i] == 0){
           //swap(i, start)
-  
-          int temp = array[i];
-          array[i] = array[start];
-          array[start] = temp;
-  
+          swap(array, i, start);
+
           start ++;
         }
       }// red 0 给换到了最左边

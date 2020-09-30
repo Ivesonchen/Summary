@@ -56,31 +56,31 @@ public int[] rainbowSortIII(int[] array, int k) {
 }
 
 public void doRainBowSort(int[] array, int left, int right, int colorFrom, int colorTo){
-if(left >= right) return;
-if(colorFrom >= colorTo) return;
+  if(left >= right) return;
+  if(colorFrom >= colorTo) return;
 
-int i = left, j = right;
-int color = (colorFrom + colorTo) / 2;
+  int i = left, j = right;
+  int color = (colorFrom + colorTo) / 2;
 
-while(i <= j){
+  while(i <= j){
 
-  while(i <= right && array[i] <= color){
-    i ++;
+    while(i <= right && array[i] <= color){
+      i ++;
+    }
+
+    while(left <= j && array[j] > color){
+      j --;
+    }
+
+    if(i <= j){
+      int temp = array[i];
+      array[i] = array[j];
+      array[j] = temp;
+      i++;
+      j--;
+    }
   }
 
-  while(left <= j && array[j] > color){
-    j --;
-  }
-
-  if(i <= j){
-    int temp = array[i];
-    array[i] = array[j];
-    array[j] = temp;
-    i++;
-    j--;
-  }
+  doRainBowSort(array, left, j, colorFrom, color);
+  doRainBowSort(array, i, right, color + 1, colorTo);
 }
-doRainBowSort(array, left, j, colorFrom, color);
-doRainBowSort(array, i, right, color + 1, colorTo);
-}
-  
