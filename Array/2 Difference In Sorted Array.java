@@ -21,21 +21,44 @@ A = {1, 2, 3, 6, 9}, target = -2, return {2, 0} since A[0] - A[2] == 2.
  */
 //Tao-Lu 双指针 实现排列组合  + 条件筛选
 public class Solution {
-    public int[] twoDiff(int[] array, int target) {
-      // Write your solution here
-      for(int i = 0; i < array.length - 1; i++){
-        int j = i;
-        while(Math.abs(array[j] - array[i]) <= Math.abs(target)){
-          j++;
-          if(array[j] - array[i] == target){
-            return new int[]{i, j};
-          }
-          if(array[i] - array[j] == target){
-            return new int[]{j, i};
-          }
+  public int[] twoDiff(int[] array, int target) {
+    // Write your solution here
+    for(int i = 0; i < array.length - 1; i++){
+      int j = i;
+      while(Math.abs(array[j] - array[i]) <= Math.abs(target)){
+        j++;
+        if(array[j] - array[i] == target){
+          return new int[]{i, j};
+        }
+        if(array[i] - array[j] == target){
+          return new int[]{j, i};
         }
       }
-      return new int[0];
     }
+    return new int[0];
+  }
 }
 
+// 双指针 按道理移动
+public int[] twoDiff(int[] array, int target){
+    
+  int i = 0;
+  int j = i + 1;
+
+  while(j < array.length && i < array.length){
+    if(i != j && Math.abs(array[j] - array[i]) == Math.abs(target)){
+      if(array[j] - array[i] == target){
+        return new int[]{i, j};
+      }
+      if(array[i] - array[j] == target){
+        return new int[]{j, i};
+      }
+    } else if (Math.abs(array[j] - array[i]) > Math.abs(target)){
+      i++;
+    } else {
+      j++;
+    }
+  }
+
+  return new int[0];
+}

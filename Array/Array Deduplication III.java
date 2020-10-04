@@ -14,15 +14,15 @@ Examples
 
  // hashmap O(n) O(n)
 
-   /**
-   * 三指针  相当于  
-   * 
-   * slow 是基础指针
-   * 
-   * begin 和 fast 来测量重复数字的长度（有几个） 
-   * 
-   * O(n) O(1)
-   */
+/**
+ * 三指针  相当于  
+ * 
+ * slow 是基础指针
+ * 
+ * begin 和 fast 来测量重复数字的长度（有几个） 
+ * 
+ * O(n) O(1)
+ */
   //Tao-Lu
 public class Solution {
   public int[] dedup(int[] array) {

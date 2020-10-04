@@ -1,5 +1,7 @@
 /**
- * Given an array S of n integers, find three integers in S such that the sum is closest to a given number, target. Return the difference  between the sum of the three integers and the given number. You may assume that each input would have exactly one solution.
+ * Given an array S of n integers, find three integers in S such that the sum is closest to a given number, target. 
+ * Return the difference  between the sum of the three integers and the given number. 
+ * You may assume that each input would have exactly one solution.
 
 Example
 
@@ -12,29 +14,29 @@ Example
 
 // Tao-Lu
 public class Solution {
-    public int threeSumClosest(int[] num, int target) {
-      // Write your solution here
-  
-      int res = Integer.MAX_VALUE;
-      Arrays.sort(num);
-  
-      for(int i= 0; i < num.length - 2; i++){
-        int j = i + 1;
-        int k = num.length - 1;
-  
-        while(j < k){
-          int sum = num[i] + num[j] + num[k];
-          if(sum > target){
-            res = Math.min(res, Math.abs(target - sum));
-            k--;
-          } else {
-            res = Math.min(res, Math.abs(target - sum));
-            j++;
-          }
+  public int threeSumClosest(int[] num, int target) {
+    // Write your solution here
+
+    int res = Integer.MAX_VALUE;
+    Arrays.sort(num);
+
+    for(int i= 0; i < num.length - 2; i++){
+      int j = i + 1;
+      int k = num.length - 1;
+
+      while(j < k){
+        int sum = num[i] + num[j] + num[k];
+        if(sum > target){
+          res = Math.min(res, Math.abs(target - sum));
+          k--;
+        } else {
+          res = Math.min(res, Math.abs(target - sum));
+          j++;
         }
       }
-  
-      return res;
     }
+
+    return res;
   }
+}
   

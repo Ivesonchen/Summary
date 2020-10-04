@@ -10,11 +10,11 @@ Examples
 A = {1, 2, 2, 3, 2, 4}, target = 8, return [[1, 3, 4], [2, 2, 4]]
  */
 
- /**
+/**
   * 先排序，然后左右夹逼，复杂度 O(n^2)
 
-这个方法可以推广到k-sum，先排序，然后做k-2次循环，在最内层循环左右夹逼，时间复杂度是 max(O(nLogn), O(n^k-1))
-  */
+    这个方法可以推广到k-sum，先排序，然后做k-2次循环，在最内层循环左右夹逼，时间复杂度是 max(O(nLogn), O(n^k-1))
+*/
 // Tao-Lu
 public class Solution {
     public List<List<Integer>> allTriples(int[] array, int target) {
@@ -46,4 +46,4 @@ public class Solution {
       }
       return res;
     }
-  }
+}
