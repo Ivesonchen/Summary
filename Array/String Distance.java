@@ -12,7 +12,8 @@ Examples:
 array =  {"this", "is", "a", "is", "fox", "happy"}, the distance of "fox" and "is" is 1.
  */
 
- // 暗藏的规则  一直保持最大的 sourceIndex 和 targetIndxe 就可以。 然后一直取最小的 res
+ // 暗藏的规则  一直保持最新的 sourceIndex 和 targetIndex 就可以。  保持着两个 index 一直 指着 相邻的 word 
+ // 然后一直取最小的 res
  // O(n)
 
 public class Solution {

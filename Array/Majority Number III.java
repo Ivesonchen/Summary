@@ -11,7 +11,7 @@ A = {1, 2, 1, 2, 1}, K = 3, return [1, 2]
 A = {1, 2, 1, 2, 3, 3, 1}, K = 4, return [1, 2, 3]
 A = {2, 1}, K = 2, return []
 */
-
+// Tao-Lu 找 deduplication 的方法
 public class Solution {
     public List<Integer> majority(int[] array, int k) {
       // Write your solution here

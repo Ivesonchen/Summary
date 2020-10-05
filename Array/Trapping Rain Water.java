@@ -5,6 +5,9 @@ For example,
 Given [0,1,0,2,1,0,1,3,2,1,2,1], return 6.
  */
 
+ // move lower wall, because lower wall is more likely to leak water.
+ 
+
 public class Solution {
     public int trapWater(int[] A) {
       // Write your solution here
