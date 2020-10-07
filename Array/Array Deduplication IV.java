@@ -37,8 +37,8 @@ public class Solution {
   
       //edge case 可以加
       if (array.length == 0|| array.length == 1) {
-              return array;
-          }
+          return array;
+      }
   
       int top = -1, cur = 0;
   

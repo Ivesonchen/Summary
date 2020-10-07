@@ -46,5 +46,32 @@ public class Solution {
   
       return new String(res);
     }
+
+    public String removeSpaces(String input) {
+      char[] arr = input.toCharArray();
+      int slow = 0;
+      int fast = 0;
+      int word_count = 0;
+  
+      while(true){
+        while(fast < arr.length && arr[fast] == ' '){
+          fast++;                                         //1: skip all leading ' ' in front of each word
+        }
+  
+        if(fast == arr.length){
+          break;
+        }
+        if(word_count > 0){
+          arr[slow++] = ' ';                              //2: add ' ' in front of (2nd +) word
+        }
+  
+        while(fast < arr.length && arr[fast] != ' '){
+          arr[slow++] = arr[fast++];                      //3. copy a word
+        }
+        word_count++;
+      }
+  
+      return new String(Arrays.copyOfRange(arr, 0, slow));
+    }
   }
   
