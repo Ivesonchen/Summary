@@ -15,27 +15,27 @@ public class Solution {
   
       int maxLen = 0, start = -1;
   
-      for(int i = 0; i < input.length(); i++){
-        if(input.charAt(i) == '('){
-          stack.push(i);
-        } else {
-          if(stack.isEmpty()){
-            start = i;
-          } else {
-            stack.pop();
-  
-            if(stack.isEmpty()){
-              maxLen = Math.max(maxLen, i - start);
+        for(int i = 0; i < input.length(); i++){
+            if(input.charAt(i) == '('){
+            stack.push(i);
             } else {
-              maxLen = Math.max(maxLen, i - stack.peek());
+                if(stack.isEmpty()){
+                    start = i;
+                } else {
+                    stack.pop();
+        
+                    if(stack.isEmpty()){
+                    maxLen = Math.max(maxLen, i - start);
+                    } else {
+                    maxLen = Math.max(maxLen, i - stack.peek());
+                    }
+                }
             }
-          }
         }
-      }
       
       return maxLen;
     }
-  }
+}
 
   //Dynamic Programming, One Pass
 // Longest Valid Parenthese
