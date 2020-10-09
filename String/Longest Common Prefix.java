@@ -36,7 +36,7 @@ public class Solution {
       }
       return sb.toString();
     }
-  }
+}
   
 
   public String longestCommonPrefix(String[] strs) {

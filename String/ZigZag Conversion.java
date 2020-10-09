@@ -34,11 +34,13 @@ public class Solution {
   
         for(int j = nRows - 2; j > 0 && start < arr.length; j--){
           sb[j].append(arr[start++]);
+          //from bot to top    exclude head and tail
         }
       }
   
       for(int i = 1; i < nRows; i++){
         sb[0].append(sb[i]);
+        // combine all the stringbuffer to one
       }
   
       return sb[0].toString();
