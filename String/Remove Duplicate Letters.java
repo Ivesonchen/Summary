@@ -1,5 +1,6 @@
 /**
- * Given a string which contains only lowercase letters, remove duplicate letters so that every letter appear once and only once. You must make sure your result is the smallest in lexicographical order among all possible results.
+ * Given a string which contains only lowercase letters, remove duplicate letters so that every letter appear once and only once. 
+ * You must make sure your result is the smallest in lexicographical order among all possible results.
 
 Example:
 
@@ -36,7 +37,7 @@ public class Solution {
               // we remove it from the solution to keep the solution optimal
               while(!stack.isEmpty() && c < stack.peek() && last_occurrence.get(stack.peek()) > i){
                   seen.remove(stack.pop());
-              }
+              } // 这个循环保证了 stack里面每次插入新值之前 检测有没有 按照 字母顺序 排好 顺序
               seen.add(c);
               stack.push(c);
           }
