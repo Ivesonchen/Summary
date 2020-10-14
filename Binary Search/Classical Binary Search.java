@@ -14,6 +14,8 @@ Corner Cases
 What if A is null or A is of zero length? We should return -1 in this case.
  */
 
+// Tao-Lu  <= 
+
 public class Solution {
     public int binarySearch(int[] array, int target) {
       // Write your solution here
@@ -23,7 +25,7 @@ public class Solution {
       int right = array.length - 1;
   
       while(left <= right){
-        int mid = (left + right) / 2;
+        int mid = (left + right) / 2; // probably cause Integer overflow
         if(array[mid] == target){
           return mid;
         } else if(array[mid] < target){
