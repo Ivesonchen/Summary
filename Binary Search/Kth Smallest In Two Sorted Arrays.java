@@ -14,9 +14,9 @@ A = {1, 4, 6}, B = {2, 3}, the 3rd smallest number is 3.
 A = {1, 2, 3, 4}, B = {}, the 2nd smallest number is 2.
  */
 
- // merge 的思想 
 
- public class Solution {
+public class Solution {
+    // merge 的思想 
     public int kth(int[] a, int[] b, int k) {
       // Write your solution here
   

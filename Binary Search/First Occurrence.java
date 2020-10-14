@@ -25,7 +25,7 @@ public class Solution {
       while(left < right - 1){  // if left get right neighbors, then terminate
         int mid = (left + right) / 2;
         if(array[mid] == target){
-          right = mid;
+          right = mid;   // 向左查询的倾向 就算是相等了 也要向左继续找 直到推到头
         } else if(array[mid] < target){
           left = mid;
         } else {
