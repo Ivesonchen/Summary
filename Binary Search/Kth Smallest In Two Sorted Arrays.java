@@ -40,21 +40,46 @@ public class Solution {
     }
 
     private int helper(int[] a, int i, int[] b, int j, int k){
-        if(i >= a.length) return b[j + k - 1];
-        if(j >= b.length) return a[i + k - 1];
-    
-        if(k == 1) return Math.min(a[i], b[j]);
-    
+      if(i >= a.length) return b[j + k - 1];
+      if(j >= b.length) return a[i + k - 1];
+  
+      if(k == 1) return Math.min(a[i], b[j]);
+  
+      int amid = i + k/2 - 1;
+      int bmid = j + k/2 - 1;
+  
+      int aval = amid >= a.length ? Integer.MAX_VALUE : a[amid];
+      int bval = bmid >= b.length ? Integer.MAX_VALUE : b[bmid];
+  
+      if(aval >= bval){
+        return helper(a, i, b, bmid + 1, k - k/2);
+      } else {
+        return helper(a, amid + 1, b, j, k - k/2);
+      }
+    }
+
+    public int kth(int[] a, int[] b, int k){
+      int i = 0;
+      int j = 0;
+
+      while(k > 1 && i < a.length && j < b.length){
         int amid = i + k/2 - 1;
         int bmid = j + k/2 - 1;
-    
+        
         int aval = amid >= a.length ? Integer.MAX_VALUE : a[amid];
         int bval = bmid >= b.length ? Integer.MAX_VALUE : b[bmid];
-    
+
         if(aval >= bval){
-          return helper(a, i, b, bmid + 1, k - k/2);
+          j = bmid + 1;
+          k = k - k/2;
         } else {
-          return helper(a, amid + 1, b, j, k - k/2);
+          i = amid + 1;
+          k = k - k/2;
         }
       }
-  }
+      if(i >= a.length) return b[j + k - 1];
+      if(j >= b.length) return a[i + k - 1];
+
+      return Math.min(a[i], b[j]);
+    }
+}
