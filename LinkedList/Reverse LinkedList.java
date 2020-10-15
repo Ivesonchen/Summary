@@ -1,3 +1,4 @@
+//Iterative
 public ListNode ReverseLinkedList(ListNode head){
     if(head == null || head.next == null){
         return head;
@@ -18,7 +19,7 @@ public ListNode ReverseLinkedList(ListNode head){
     return pre;
 }
 
-
+//Recursive
 public ListNode ReverseLinkedList(ListNode head){
     if(head == null || head.next == null){
         return head;
