@@ -1,5 +1,6 @@
 /**
- * Given a target integer T, a non-negative integer K and an integer array A sorted in ascending order, find the K closest numbers to T in A. If there is a tie, the smaller elements are always preferred.
+ * Given a target integer T, a non-negative integer K and an integer array A sorted in ascending order, find the K closest numbers to T in A. 
+ * If there is a tie, the smaller elements are always preferred.
 
 Assumptions
 
@@ -13,6 +14,8 @@ Examples
 A = {1, 2, 3}, T = 2, K = 3, return {2, 1, 3} or {2, 3, 1}
 A = {1, 4, 6, 8}, T = 3, K = 3, return {4, 1, 6}
  */
+
+ // O(Logn + k)
 
 public class Solution {
     public int[] kClosest(int[] array, int target, int k) {
