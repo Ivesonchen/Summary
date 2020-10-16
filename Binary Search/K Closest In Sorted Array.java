@@ -32,7 +32,7 @@ public class Solution {
       while (left + 1 < right) {
         int mid = left + (right - left) / 2;
         if (array[mid] < target) {
-          left = mid;
+          left = mid;                         // 因为我们要找的是两个边界 所以并不能排除 mid 位置这个挡板
         } else {
           right = mid;
         }
