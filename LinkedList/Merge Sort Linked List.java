@@ -43,7 +43,10 @@ public class Solution {
         res.next = left;
         left = left.next;
         res = res.next;
-      }
+      }  //
+      /**
+       * if(left != null) res.next = left;
+       */
   
       while(right != null){
         res.next = right;
