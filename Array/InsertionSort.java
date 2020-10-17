@@ -14,7 +14,7 @@ What if the given array is of length zero? In this case, we do not need to do an
  // {4, 2, -1, 0}
 
  /**
-  * 从 第二位置的 数开始    取出此位置上的数 存为 key，
+    从 第二位置的 数开始    取出此位置上的数 存为 key，
     然后 向前比较 条件为 index >= 0 && key还比 pre位置的 值 小
     循环中 把 pre位置的值 顺便的 往后 复制移动 pre--
     蹦出循环的时候 把key放到该放的位置上 (注意 该放的位置是 pre + 1)
