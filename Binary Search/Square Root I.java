@@ -11,6 +11,8 @@ Input: 18, Return: 4
 Input: 4, Return: 2
  */
 
+ // 判断条件是 mid 的 平方 小于或等于 target 但是 mid + 1 的平方 大于 target
+
 public class Solution {
     public int sqrt(int x) {
       // Write your solution here
