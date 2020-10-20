@@ -43,3 +43,18 @@ public class Solution {
       }
     }
   }
+
+/**
+ * 同理适用于 last occurence
+ * int lastPossiableResult = -1;
+ * 
+ * while(left <= right){
+ * 
+ *  if(mid == target){
+ *    right = mid - 1;
+ *    lastPossiableResult = mid;
+ *  } else {
+ *    ..........
+ *  }
+ * }
+ */

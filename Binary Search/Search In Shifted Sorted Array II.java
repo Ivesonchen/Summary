@@ -18,33 +18,39 @@ What if A is null or A is of zero length? We should return -1 in this case.
  */
 
 public class Solution {
-    public int search(int[] array, int target) {
-      // Write your solution here
-      if(array == null || array.length == 0) return -1;
-      int start = 0, end = array.length - 1;
-      while(start <= end){
-        int mid = (start + end) / 2;
-        if(array[mid] == target){
-          return mid;
+  public int search(int[] array, int target) {
+    // Write your solution here
+    if(array == null || array.length == 0) return -1;
+    int start = 0, end = array.length - 1;
+    while(start <= end){
+      int mid = (start + end) / 2;
+      if(array[mid] == target){
+        while(mid >= 0 && array[mid] == target){
+          mid --;
         }
-        // right sorted || array[mid] < array[start]
-        if(array[mid] < array[end]){
-          if(array[mid] < target && target <= array[end]){
-            start = mid + 1;
-          } else {
-            end = mid - 1;
-          }
-        } else if(array[mid] > array[end]){ // left sorted  array[mid] > array[start] || 
-          if(array[start] <= target && target < array[mid]){
-            end = mid - 1;
-          } else {
-            start = mid + 1;
-          }
-        } else {
-          end--;
-        }
-  
+        return mid + 1;
       }
-      return -1;
+      // right sorted || array[mid] < array[start]
+      if(array[start] == array[end]) {
+        end--;
+        continue;
+      }
+      
+      if(array[mid] <= array[end]){       //右边这条线 
+        if(array[mid] < target && target <= array[end]){
+          start = mid + 1;
+        } else {
+          end = mid - 1;
+        }
+      } else { // 左边这条线
+        if(array[start] <= target && target < array[mid]){
+          end = mid - 1;
+        } else {
+          start = mid + 1;
+        }
+      }
+
     }
+    return -1;
   }
+}

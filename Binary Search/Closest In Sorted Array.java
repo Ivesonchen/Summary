@@ -25,7 +25,7 @@ public class Solution {
     int left = 0;
     int right = array.length -1;
 
-    while(left < right - 1){
+    while(left < right - 1){                  // 循环里面同时还要比较mid == target 所以区间会大一点
       int mid = left + (right - left) / 2;
 
       if(array[mid] == target){
