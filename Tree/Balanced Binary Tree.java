@@ -67,3 +67,25 @@ public class Solution {
 - 最后比较返回结果是不是<0. 是<0，那 return false.
 - Traverse 整个tree, O(n)
   */
+
+  public class Solution {
+    public boolean isBalanced(TreeNode root) {
+      // Write your solution here
+      if(root == null) return true;
+      
+      return getHeight(root) != -1;
+    }
+  
+    public int getHeight(TreeNode cur) {
+      if(cur == null) return 0;
+  
+      int left = getHeight(cur.left);
+      int right = getHeight(cur.right);
+  
+      if(left == -1 || right == -1 || Math.abs(left - right) > 1){
+        return -1;
+      }
+  
+      return Math.max(left, right) + 1;
+    }
+  }

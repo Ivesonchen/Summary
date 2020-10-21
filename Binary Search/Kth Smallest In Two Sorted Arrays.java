@@ -58,6 +58,13 @@ public class Solution {
       }
     }
 
+    /**
+     *            array a [----------------------------------]
+     *            array b [----------------------------------]
+     *   刚开始 ab 各给 2/k 长度
+     *   
+     */
+
     public int kth(int[] a, int[] b, int k){
       int i = 0;
       int j = 0;

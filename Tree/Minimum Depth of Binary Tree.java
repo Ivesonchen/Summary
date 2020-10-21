@@ -17,6 +17,8 @@ Given the below binary tree
 minimum depth is 2,path is 5→8.
  */
 
+ //Tao-lu   Tree 的 BFS 写法
+
 class Solution {
     public int minDepth(TreeNode root) {
         if (root == null) return 0;
