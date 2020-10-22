@@ -1,5 +1,7 @@
 /**
- * An image is represented by a binary matrix with 0 as a white pixel and 1 as a black pixel. The black pixels are connected, i.e., there is only one black region. Pixels are connected horizontally and vertically. Given the location (x, y) of one of the black pixels, return the area of the smallest (axis-aligned) rectangle that encloses all black pixels.
+ * An image is represented by a binary matrix with 0 as a white pixel and 1 as a black pixel. The black pixels are connected, i.e., there is only one black region. 
+ * Pixels are connected horizontally and vertically. 
+ * Given the location (x, y) of one of the black pixels, return the area of the smallest (axis-aligned) rectangle that encloses all black pixels.
 
 For example, given the following image:
 
@@ -18,8 +20,8 @@ public class Solution {
       // Write your solution here
       if(image.length == 0 || image[0].length == 0) return 0;
   
-      int rowNum = image.length, colNum = image[0].length;
-  
+      int rowNum = image.length, colNum = image[0].length;    // colNum and rowNum 为什么不用-1 
+                                                              // 是因为 这里的最后的结果值真的需要取到 bound 之外 来表明 一直到区间外都没有找到合适的列或行
       int left = horizontalSearch(0, y, 0, rowNum, image, 1);
       int right = horizontalSearch(y + 1, colNum, 0, rowNum, image, 0);
       int up = verticalSearch(0, x, left, right, image, 1);
