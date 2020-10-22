@@ -64,6 +64,42 @@ public class Solution {
     }
 }
 
+public class Solution {
+    public TreeNodeP lowestCommonAncestor(TreeNodeP one, TreeNodeP two) {
+      // Write your solution here.
+      int height1 = getHeight(one);
+      int height2 = getHeight(two);
+  
+      if(height1 > height2){
+        int diff = height1 - height2;
+        while(diff > 0){
+          one = one.parent;
+          diff--;
+        }
+      } else if(height1 < height2){
+        int diff = height2 - height1;
+        while(diff > 0){
+          two = two.parent;
+          diff--;
+        }
+      }
+      while(one != null && two != null && one != two){
+        one = one.parent;
+        two = two.parent;
+      }
+      return one;
+    }
+  
+    public int getHeight(TreeNodeP one){
+      int result = 0;
+      while(one != null){
+        result++;
+        one = one.parent;
+      }
+      return result;
+    }
+  }
+
  /**
   * 给一个Binary Tree root, 以及两个node A, B. 特点: node里面存了parent pointer. 找 lowest common ancestor
 
@@ -78,5 +114,4 @@ public class Solution {
 
 #### 注意
 - 无法从root去直接搜target node 而做成两个list. 因为根本不是Binary Search Tree！
-
-  */
+*/

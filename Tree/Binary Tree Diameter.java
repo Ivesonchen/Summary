@@ -40,33 +40,10 @@ public class Solution {
       int left = helper(cur.left, res);
       int right = helper(cur.right, res);
   
-      if(left != 0 && right != 0) {
+      if(left != 0 && right != 0) {                 // 一定要排除cur是叶子节点的情况
         res[0] = Math.max(res[0], left + right + 1);
       }
       return Math.max(left, right)  + 1;
-    }
-  }
-// nodes 到 nodes
-class Solution {
-    public int diameterOfBinaryTree(TreeNode root) {
-        int []res = new int[1];
-        
-        helper(root, res);
-        
-        return res[0];
-    }
-    
-    // signature: return the length of longest single path in the tree rooted at 'root'
-    public int helper(TreeNode root, int[] res){
-        // base case
-        if(root == null) return 0;
-        
-        int left = helper(root.left, res);
-        int right= helper(root.right, res);
-        
-        res[0] = Math.max(res[0], left + right);
-        
-        return Math.max(left, right) + 1;
     }
 }
 

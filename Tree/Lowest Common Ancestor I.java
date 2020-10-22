@@ -37,10 +37,11 @@ public class Solution {
       if(left != null && right != null) return root;
       return left == null ? right : left;
     }
-  }
-  /**
-   * Recursion 
-   * 将找到的目标往上返回       不同的case  如果同时找到了 就返回 那个父节点
-   * 
-   * 从下向上传值
-   */
+}
+
+/**
+ * Recursion 
+ * 将找到的目标往上返回       不同的case  如果同时找到了 就返回 那个父节点
+ * 
+ * 从下向上传值
+ */
