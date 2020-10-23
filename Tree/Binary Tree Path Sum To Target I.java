@@ -14,6 +14,7 @@ Given the below binary tree and target = 16,
 return true, as there exist a root-to-leaf path 5-8-3 which sum is 16.
  */
 
+// 需要深刻理解 recursion 的写法
 public class Solution {
     public boolean exist(TreeNode root, int target) {
       // Write your solution here
