@@ -1,3 +1,3 @@
 # Algo challenges
 
-## Laicode based
+## Laicode Training plan
