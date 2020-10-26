@@ -28,12 +28,13 @@ Example 3:
 "9,#,#,1"
 Return false
  */
-        // using a stack, scan left to right
-        // case 1: we see a number, just push it to the stack
-        // case 2: we see #, check if the top of stack is also #
-        // if so, pop #, pop the number in a while loop, until top of stack is not #
-        // if not, push it to stack
-        // in the end, check if stack size is 1, and stack top is #
+
+// using a stack, scan left to right
+// case 1: we see a number, just push it to the stack
+// case 2: we see #, check if the top of stack is also #
+// if so, pop #, pop the number in a while loop, until top of stack is not #
+// if not, push it to stack
+// in the end, check if stack size is 1, and stack top is #
 public class Solution {
     public boolean isValidSerialization(String preorder) {
       // Write your solution here
