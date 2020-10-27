@@ -1,5 +1,6 @@
 /**
- * Given a string S, you are allowed to convert it to a palindrome by adding characters in front of it. Find and return the shortest palindrome you can find by performing this transformation.
+ * Given a string S, you are allowed to convert it to a palindrome by adding characters in front of it. 
+ * Find and return the shortest palindrome you can find by performing this transformation.
 
 For example:
 
@@ -20,6 +21,7 @@ public class Solution {
           i++;
           j--;
         } else {
+          // 不停地 移动右侧的挡板 去掉字符
           i = 0;
           end--;
           j = end;
