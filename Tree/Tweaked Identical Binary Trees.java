@@ -31,6 +31,7 @@ the two binary trees are tweaked identical.
 特点: subtree如果是有旋转的, 只要tree node value相等, 就可以算是identical
 */
 
+// time O(min(m, n)) space O(min(m,n))
 public class Solution {
     public boolean isTweakedIdentical(TreeNode one, TreeNode two) {
       // Write your solution here
