@@ -1,5 +1,7 @@
 /**
- * Given a binary tree in which each node contains an integer number. Determine if there exists a path (the path can only be from one node to itself or to any of its descendants), the sum of the numbers on the path is the given target number.
+ * Given a binary tree in which each node contains an integer number. 
+ * Determine if there exists a path (the path can only be from one node to itself or to any of its descendants), 
+ * the sum of the numbers on the path is the given target number.
 
 Examples
 
