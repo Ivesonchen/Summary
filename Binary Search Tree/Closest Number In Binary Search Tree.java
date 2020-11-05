@@ -27,13 +27,13 @@ public class Solution {
       // Write your solution here
       int res = root.key;
       TreeNode cur = root;
-  
+
       while(cur != null){
         int value = cur.key;
         if(Math.abs(value - target) < Math.abs(res - target)){
           res = value;
         }
-  
+
         if(value < target){
           cur = cur.right;
         } else if(value > target){
@@ -42,10 +42,10 @@ public class Solution {
           return value;
         }
       }
-  
+
       return res;
     }
-  }
+}
 
 public class Solution {
     public int closest(TreeNode root, int target) {
@@ -77,5 +77,5 @@ public class Solution {
         return high;
       }
     }
-  }
+}
 
