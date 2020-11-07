@@ -27,6 +27,8 @@ the added edges are:
 
 35.right = 15
  */
+
+ // pre 代表了一个 可以被挂靠的 点 (means 它的 右节点为空)
 public class Solution {
     TreeNode pre = new TreeNode(-1);
   
