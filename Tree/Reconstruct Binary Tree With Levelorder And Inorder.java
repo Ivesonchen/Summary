@@ -58,19 +58,19 @@ public class Solution {
       return helper(inOrder, 0, inOrder.length - 1, map);
     }
   	// Recursive function to construct a binary tree from in-order and
-	// level-order traversals
+	  // level-order traversals
     public TreeNode helper(int[] inOrder, int start, int end, Map<Integer, Integer> map){
       if(start > end) return null;
   
-    // find the index of root node in inorder[] to determine the
-    // boundary of left and right subtree
+      // find the index of root node in inorder[] to determine the
+      // boundary of left and right subtree
       int index = start;
       for(int i = start + 1; i <= end; i++){
         if(map.get(inOrder[i]) < map.get(inOrder[index])){ // in the current range, trying to find the index of root of subTree
-                                                        // 如果 在一个区间中 某个 node 有最小的 index (在levelOrder 的序列中) 说明这个node是root
+                                                           // 如果 在一个区间中 某个 node 有最小的 index (在levelOrder 的序列中) 说明这个node是root
           index = i;
         }
-      }
+      }  // index 一直取最小 的i 然后 相当于 depth 最浅的 所以就是 root of subtree
   
       TreeNode root = new TreeNode(inOrder[index]);
   
