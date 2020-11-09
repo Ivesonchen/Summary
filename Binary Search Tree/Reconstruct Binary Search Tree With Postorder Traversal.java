@@ -48,3 +48,22 @@ public class Solution {
       return root;
     }
 }
+
+
+//Construct a BST using Post-Order traversal  另一种方法
+private static TreeNode ConstructBST(int[] nodes, int start, int end){
+  if(end<start)
+    return null;
+  TreeNode root = new TreeNode(nodes[end]);
+  if(end==start)
+    return root;
+  int i=end-1;
+  while(i>=start){
+    if(nodes[i]<root.val)
+      break;
+    i--;
+  }
+  root.left = ConstructBST(nodes, start, i);
+  root.right = ConstructBST(nodes, i+1, end-1);
+  return root;
+}
