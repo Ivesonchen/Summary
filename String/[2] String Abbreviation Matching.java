@@ -47,7 +47,7 @@ public class Solution {
         }
       }
   
-          if(i == -1 && j == -1) return true;
+      if(i == -1 && j == -1) return true;
   
       return false;
     }
