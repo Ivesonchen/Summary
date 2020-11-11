@@ -8,12 +8,16 @@ space: O(2^n)
 #### DFS
 - dfs的两种路子: 1. pick&&skip dfs, 2. for loop dfs
 - 1. pick&&skip dfs: 取或者不取 + backtracking. 当level/index到底，return 一个list. Bottom-up, reach底部, 才生产第一个solution.
-- 2. for loop dfs: for loop + backtracking. 记得：做subset的时候, 每个dfs recursive call是一种独特可能，先加进rst.  top-bottom: 有一个solution, 就先加上.
+- 2. for loop dfs: for loop + backtracking. 确定每次都要pick 
+     记得：做subset的时候, 每个dfs recursive call是一种独特可能，先加进rst.  
+     top-bottom: 有一个solution, 就先加上.
 - Time&&space: subset means independent choice of either pick&&not pick. You pick n times: `O(2^n)`, 3ms
  */
 
 // pick&&skip dfs, backtracking, 
 // bottom-up: reach leaf to save result
+
+// StringBuilder    是可以被传入 dfs的 
 class Solution {
     public List<List<Integer>> subsets(int[] nums) {
         List<List<Integer>> result = new ArrayList<>();
@@ -55,10 +59,11 @@ class Solution {
     }
 
     private void dfs(List<List<Integer>> result, List<Integer> list, int[] nums, int depth) {
+        result.add(new ArrayList<>(list));
+
         for (int i = depth; i < nums.length; i++) {
             list.add(nums[i]);
-            result.add(new ArrayList<>(list));
-            dfs(result, list, nums, i + 1);
+            dfs(result, list, nums, i + 1);    // 注意这里是 i+1 不是 depth + 1 !!!!!!!!!!!!
             list.remove(list.size() - 1);
         }
     }

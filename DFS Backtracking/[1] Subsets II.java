@@ -11,7 +11,6 @@ sapce: O(2^n)
 - 为了除去duplicated result, skip used item at current level: `if (i > depth && nums[i] == nums[i - 1]) continue;`
 - sort O(nlogn), subset: O(2^n)
 - space O(2^n), save results
-
  */
 
  /*
