@@ -11,6 +11,7 @@ space: O(2^n)
 - 2. for loop dfs: for loop + backtracking. 确定每次都要pick 
      记得：做subset的时候, 每个dfs recursive call是一种独特可能，先加进rst.  
      top-bottom: 有一个solution, 就先加上.
+     https://assets.leetcode.com/static_assets/discuss/uploads/files/1503221799085-78.subsets-resized.png
 - Time&&space: subset means independent choice of either pick&&not pick. You pick n times: `O(2^n)`, 3ms
  */
 
@@ -68,3 +69,4 @@ class Solution {
         }
     }
 }
+
