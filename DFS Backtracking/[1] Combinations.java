@@ -30,33 +30,47 @@ once size met, add to result, also no need to further dfs.
 dfs: result,list, index, k, n
 */
 
-class Solution {
-    public List<List<Integer>> combine (int n, int k) {
-        List<List<Integer>> result = new ArrayList<>();
-        // check edge case
-        if (k <= 0 || n <= 0) {
-            return result;
-        }
+public class Solution {
+    public List<List<Integer>> combine(int n, int k) {
+      // Write your solution here
+      List<List<Integer>> res = new ArrayList<>();
+      List<Integer> list = new ArrayList<>();
+      if(n <= 0) return res;
+      if(k <= 0){
+        res.add(list);
+        return res;
+      }
+      dfs(res, list, 1, n, k);
+  
+      return res;
+    }
+  
+    public void dfs(List<List<Integer>> res, List<Integer> list, int depth, int n, int k){
+      if(k == 0) {
+        res.add(new ArrayList<>(list));
+        return;
+      }
+  
+      for(int i = depth; i <= n; i ++){
+        list.add(i);
+        dfs(res, list, i + 1, n, k - 1);
+        list.remove(list.size() - 1);
+      }
+    }
+}
 
-        // init result, dfs
-        dfs(result, new ArrayList<>(), 1, k , n);
-        return result;
+// 另一种 backtracking 的方法
+public void dfs(List<List<Integer>> res, List<Integer> list, int depth, int n, int k){
+    if(list.size() == k){
+        res.add(new ArrayList<>(list));
+        return;
     }
 
-    private void dfs(List<List<Integer>> result, List<Integer> list, int index, int k, int n) {
-        // for loop
-        // check size, dfs with i + 1
-        for (int i = index; i <= n; i++) {
-            list.add(i);
-            // add to result
-            if (list.size() == k) {
-                result.add(new ArrayList<>(list));
-                list.remove(list.size() - 1);
-                continue;
-            }
+    if(depth > n) return;// 在 depth 增加之前 给停掉 (不能提高到 check size 之前, 因为需要 check size 这个动作来作为 叶子节点 处理list结果)
 
-            dfs(result, list, i + 1, k, n);
-            list.remove(list.size() - 1);
-        }
-    }
+    list.add(depth);
+    dfs(res, list, depth + 1, n, k);
+    list.remove(list.size() - 1);
+
+    dfs(res, list, depth + 1, n, k);
 }
