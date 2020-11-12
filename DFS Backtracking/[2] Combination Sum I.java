@@ -45,8 +45,7 @@ class Solution {
     }
 
     // for loop, where dfs is performed
-    private void dfs(List<List<Integer>> result, List<Integer> list,
-                     int[] candidates, int index, int target) {
+    private void dfs(List<List<Integer>> result, List<Integer> list, int[] candidates, int index, int target) {
         for (int i = index; i < candidates.length; i++) {
             int value = candidates[i];
             list.add(value);
@@ -61,6 +60,25 @@ class Solution {
     }
 }
 
+/**
+ * more clear dfs template 
+ * 
+  public void dfs(List<List<Integer>> res, List<Integer> list, int index, int[] candidates, int target){
+    if(target == 0){
+      res.add(new ArrayList<>(list));
+      return;
+    }
+
+    ?? else if(target < 0) return;  another option
+
+    for(int i = index; i < candidates.length; i++){
+      if(target - candidates[i] < 0) continue; 
+      list.add(candidates[i]);
+      dfs(res, list, i, candidates, target - candidates[i]);
+      list.remove(list.size() - 1);
+    }
+  }
+ */
 
 /**
  *      1  2  3  4  5

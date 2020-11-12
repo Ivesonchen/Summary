@@ -62,8 +62,7 @@ class Solution {
         return result;
     }
 
-    private void dfs(List<List<Integer>> result, List<Integer> list,
-                     int[] candidates, int index, int target) {
+    private void dfs(List<List<Integer>> result, List<Integer> list, int[] candidates, int index, int target) {
         // for loop, where dfs is performed
         for (int i = index; i < candidates.length; i++) {
             // ensures at same for loop round, the same item (sorted && neighbor) won't be picked 2 times
@@ -81,3 +80,22 @@ class Solution {
         return candidates == null || candidates.length == 0 || target <= 0;
     }
 }
+
+/**
+ * another more clear option
+public void dfs(List<List<Integer>> res, List<Integer> list, int index, int[] num, int target){
+    if(target == 0){
+      res.add(new ArrayList<>(list));
+      return;
+    } else if(target < 0){
+      return;
+    }
+
+    for(int i = index; i < num.length; i++){
+      if(i > index && num[i] == num[i - 1]) continue;
+      list.add(num[i]);
+      dfs(res, list, i + 1, num, target - num[i]);
+      list.remove(list.size() - 1);
+    }
+  }
+ */
