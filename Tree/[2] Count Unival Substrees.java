@@ -45,3 +45,29 @@ class Solution {
 /**
  * DFS travsel all the node in the root tree and check every subtree if it's a Unival Tree
  */
+
+ // from bottom to up   根据合理条件 发现合成的root 为 univaltree 时 count ++
+
+public int countUnivalSubtrees(TreeNode root) {
+    if(root == null) return 0;
+    helper(root);
+    
+    return count;
+}
+
+public boolean helper(TreeNode node){
+    if(node == null) return true;
+    
+    boolean left = helper(node.left);
+    boolean right = helper(node.right);
+    
+    if(!left || !right) return false;
+    
+    boolean flag = true;
+    
+    if(node.left != null && node.left.val != node.val) flag = false;
+    if(node.right != null && node.right.val != node.val) flag = false;
+    if(flag) count++;
+    
+    return flag;        
+}
