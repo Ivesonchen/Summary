@@ -18,7 +18,8 @@ return 6. (Placing a post office at (1,1), the distance that post office to all 
 https://zhengyang2015.gitbooks.io/lintcode/content/build_post_office_573.html
  */
 /**
- * 这道题可以用dp来做，但是会超时。首先扫描一遍将所有house的点记录下来，然后遍历图中所有0的点，计算每个0的点到这些house的距离和，选最小的那个即可。这种情况下可以优化到O(k * n ^ 2)，
+ * 这道题可以用dp来做，但是会超时。首先扫描一遍将所有house的点记录下来，然后遍历图中所有0的点，计算每个0的点到这些house的距离和，选最小的那个即可。
+ * 这种情况下可以优化到O(k * n ^ 2)，
  * 但是如果数据量很大还是过不了。
 因此需要减少搜索的点。想到的方法是在所有房子围成的形状的重心位置附近建邮局则到所有房子的距离之和最短（怎么证明？）。因此步骤如下：
 首先找到所有房子的重心。找所有房子x值的median和y值的median（如果是奇数个就是排序后取中间值，如果是偶数则取中间两个数再取平均值）即为重心。
