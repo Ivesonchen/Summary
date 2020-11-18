@@ -15,6 +15,15 @@ Examples
 
 {4, 0, 1, 0, 0}, if the initial position is 2, you are not able to reach the right end of array, return -1 in this case.
  */
+
+ /**
+  * 将初始化的位置可到达的范围 入 queue
+
+    将 1 ~ 最大可到达的范围 都入 queue (同时进行左右范围检测 && 使用set 来去除重复的可以到达的点)
+
+    每一层BFS counter + 1
+    return counter at the end
+  */
 public class Solution {
     public int minJump(int[] array, int index) {
       // Write your solution here
