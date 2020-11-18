@@ -41,6 +41,7 @@ public class Solution {
         int c = point.col;
         int d = point.distance;
         if(r < 0 || r >= m || c < 0 || c >= n || (rooms[r][c] != Integer.MAX_VALUE && d != 0)) continue;
+        // 超越边界 或者 在扩展过程中间(非 入口) 遇到不是空位的格子
   
         rooms[r][c] = Math.min(rooms[r][c], d);
   
