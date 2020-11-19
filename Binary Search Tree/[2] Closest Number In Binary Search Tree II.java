@@ -1,5 +1,6 @@
 /**
- * In a binary search tree, find k nodes containing the closest numbers to the given target number. return them in sorted array
+ * In a binary search tree, find k nodes containing the closest numbers to the given target number. 
+ * return them in sorted array
 
 Assumptions:
 
