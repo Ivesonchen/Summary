@@ -100,7 +100,7 @@ public class Solution {
         }
         if(count < k) low = mid + 1;
         else hi = mid;
-      }·
+      }
       return low;
     }
   }
