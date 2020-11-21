@@ -38,20 +38,20 @@ public class Solution {
         public int compare(Point a, Point b){
           return a.height - b.height;
         }
-      });
+      }); // 按照每个点的height排序
   
       int m = matrix.length;
       int n = matrix[0].length;
       boolean[][] visited = new boolean[m][n];
 
-      // Initially, add all the Cells which are on borders to the queue.
+      // Initially, add all the Cells which are on borders to the queue.    左右墙
       for(int i = 0; i < m; i++){
         visited[i][0] = true;
         visited[i][n - 1] = true;
         queue.offer(new Point(i, 0, matrix[i][0]));
         queue.offer(new Point(i, n - 1, matrix[i][n - 1]));
       }
-      for(int i = 0; i < n; i++){
+      for(int i = 0; i < n; i++){                                           // 上下墙
         visited[0][i] = true;
         visited[m - 1][i] = true;
         queue.offer(new Point(0, i, matrix[0][i]));
@@ -70,8 +70,8 @@ public class Solution {
           int col = point.col + dir[1];
           if(row >= 0 && row < m && col >= 0 && col < n && !visited[row][col]){
             visited[row][col] = true;
-            res += Math.max(0, point.height - matrix[row][col]);
-            queue.offer(new Point(row, col, Math.max(matrix[row][col], point.height)));
+            res += Math.max(0, point.height - matrix[row][col]);       // 以墙的高度 减 新的一步的高度
+            queue.offer(new Point(row, col, Math.max(matrix[row][col], point.height)));     // 将新的一步的高度 设置为墙的高度
           }
         }
       }
