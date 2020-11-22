@@ -23,6 +23,9 @@ Thoughts:
     int[] dx = {0, 1, 0, -1}; // RIGHT->DOWN->LEFT->UP
     int[] dy = {1, 0, -1, 0};
 
+    //另一种表示direction的方式
+    int[][] dir = {{0,1}, {1,0}, {0,-1}, {-1,0}};
+
     public List<Integer> spiralOrder(int[][] matrix) {
         // check edge case
         List<Integer> rst = new ArrayList<>();
@@ -65,6 +68,11 @@ Thoughts:
     private int computeDirection(boolean[][] visited, int x, int y, int currDirection) {
         int nextX = x + dx[currDirection];
         int nextY = y + dy[currDirection];
+
+        // 另一种 dir 方向使用方式
+        // int nextX = x + dir[currDirection][0];
+        // int nextY = y + dir[currDirection][1];
+
         if (nextX >= 0 && nextX < visited.length && nextY >= 0 && nextY < visited[0].length && !visited[nextX][nextY]) {
             return currDirection;
         }
