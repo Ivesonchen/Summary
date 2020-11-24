@@ -1,5 +1,6 @@
 /**
- * Given an array A of length N containing all positive integers from [1...N]. How to get an array B such that B[i] represents how many elements A[j] (j > i) in array A that are smaller than A[i].
+ * Given an array A of length N containing all positive integers from [1...N]. 
+ * How to get an array B such that B[i] represents how many elements A[j] (j > i) in array A that are smaller than A[i].
 
 Assumptions:
 

@@ -11,6 +11,11 @@ Examples
 {1, 2, 3, 3, 4, 4, 5}, longest ascending subarray is {1, 2, 3}, length is 3.
  */
 
+/*
+    {7, 2, 3, 1, 5, 8, 9, 6}
+     1  1  2  1  2  3  4  1    生成这样一个数组  维持一个 global Max value
+*/
+
 public class Solution {
     public int longest(int[] array) {
       // Write your solution here
