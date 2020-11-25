@@ -30,7 +30,9 @@ public class Solution {
 }
 
 /**
- * 
+ * dp[0] = true;
+ * i == [0 ~ end]
+ * j == [0 ~ i]   dp[i] 代表了 位置i 能否被到达
  */
 public boolean canJump(int[] nums){
     if(nums == null || nums.length == 0) return true;
