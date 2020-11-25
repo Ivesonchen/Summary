@@ -28,3 +28,25 @@ public class Solution {
       return true;
     }
 }
+
+/**
+ * 
+ */
+public boolean canJump(int[] nums){
+    if(nums == null || nums.length == 0) return true;
+    int n = nums.length;
+    boolean[] dp = new boolean[n];
+    dp[0] = true;
+
+    for(int i = 1; i < n; i++){
+        dp[i] = false;
+        for(int j = 0; j < i; j++){           
+            // 任何一个位置i 之前的位置([0 ~ i] 出现过 dp[j] == True 并且此位置可以reach或超过end 点，就把dp[i] 设为true)
+            if(dp[j] && j + nums[j] >= i){
+                dp[i] = true;
+                break;
+            }
+        }
+    }
+    return dp[n - 1];
+}
