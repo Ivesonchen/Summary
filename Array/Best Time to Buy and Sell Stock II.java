@@ -22,5 +22,4 @@ class Solution {
 
 /*
 - Greedy, 每次有相邻的diff符合profit条件, 就卖了, 最后把所有的diff加在一起. 计算delta, 其实简单粗暴, 也还不错.
-
 */

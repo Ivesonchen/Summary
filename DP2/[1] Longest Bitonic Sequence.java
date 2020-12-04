@@ -21,6 +21,8 @@ Examples:
   lds[i] stores the length of the longest Decreasing subsequence starting from arr[i]. 
   Finally, we need to return the max value of lis[i] + lds[i] – 1 where i is from 0 to n-1.
   */
+
+  
 public class Solution {
     public int longestBitonic(int[] array) {
       // Write your solution here
