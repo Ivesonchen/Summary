@@ -26,11 +26,11 @@ transactions = [buy, sell, cooldown, buy, sell]
 
     4. 状态转移
         hold[i] 取以下情况最大值
-                1. 第i天买入	   unhold[i - 2] - prices[i]
-                2. 第i天没有买入 hold[i - 1]
+            1. 第i天买入	        unhold[i - 2] - prices[i]
+            2. 第i天没有买入         hold[i - 1]
         unhold[i] 取一下情况最大值
-            1. 第i天有卖出      hold[i - 1] + prices[i]
-            2. 第i天没有卖出	  unhold[i - 1]
+            1. 第i天有卖出           hold[i - 1] + prices[i]
+            2. 第i天没有卖出	     unhold[i - 1]
 
     Time: O(n)
     Space: O(n) ---> O(1)
