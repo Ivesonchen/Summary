@@ -49,6 +49,7 @@ public class Solution {
 
   /**
    * 在状态转移方程中，我们可以发现 f[i]仅仅依赖前两项，因此用两个整数变量即可代替一位数组，将空间复杂度降为O(1)。
+   * Rolling array
    */
 
    // House Robber
@@ -72,6 +73,9 @@ public class Solution {
     }
 }
 
+// 1    2   3   4   5   6   7   8   9
+// pre cur  x
+// 思想就是 要pre + x 还是 只要 cur
 public int rob(int[] num) {
     int prevMax = 0;
     int currMax = 0;
