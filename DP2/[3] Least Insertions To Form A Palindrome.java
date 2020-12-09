@@ -7,8 +7,8 @@ Assumptions:
 The given string is not null.
  */
 
- /**
-  * Intuition
+/**
+ * Intuition
     Split the string s into to two parts,
     and we try to make them symmetrical by adding letters.
 
@@ -36,7 +36,7 @@ The given string is not null.
     Complexity
     Time O(N^2)
     Space O(N^2)
-  */
+*/
 
 public class Solution {
     public int leastInsertion(String input) {
