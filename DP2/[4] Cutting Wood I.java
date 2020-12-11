@@ -10,7 +10,7 @@ L = 10, A = {2, 4, 7}, the minimum total cost is 10 + 4 + 6 = 20 (cut at 4 first
  */
 
  // 类似于 burst balloons
-public class Solution {
+ public class Solution {
     public int minCost(int[] cuts, int length) {
       // Write your solution here
       List<Integer> A = new ArrayList<>();
@@ -19,19 +19,19 @@ public class Solution {
       A.add(0);
       A.add(length);
       Collections.sort(A);
-      int k = A.size();
-      int[][] dp = new int[k][k];
-  
-      for(int d = 2; d < k; d++){
-        for(int i = 0; i < k - d; i++){
-          dp[i][i + d] = 1000000000;
-          for(int m = i + 1; m < i + d; m++){
-            dp[i][i + d] = Math.min(dp[i][i + d], dp[i][m] + dp[m][i + d] + A.get(i + d) - A.get(i));
+      int n = A.size();
+      int[][] dp = new int[n][n];
+        
+      for(int d = 2; d < n; d++){                   //计算粒度
+        for(int i = 0; i < n - d; i++){             //i为左边界         j为右边界
+          int j = i + d;
+          dp[i][j] = 1000000000;
+          for(int k = i + 1; k < j; k++){           //左右之间走一遍
+            dp[i][j] = Math.min(dp[i][j], dp[i][k] + dp[k][j] + A.get(j) - A.get(i));
           }
         }
       }
   
-      return dp[0][k - 1];
+      return dp[0][n - 1];
     }
   }
-  
