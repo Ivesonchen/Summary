@@ -19,6 +19,7 @@ nums = [4,1,3,9] -->  [4,3,9] -->   [4,9]   -->   [9]  --> []
 coins =  4*1*3      +  4*3*9      + 1*4*9      + 1*9*1   = 165
 
 https://www.youtube.com/watch?v=_4qGDebH_ws
+https://github.com/grandyang/leetcode/issues/312
  */
 
  //To-Do
