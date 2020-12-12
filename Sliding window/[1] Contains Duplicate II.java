@@ -7,14 +7,13 @@
  //[[1,2,3,4,5,6,7,8,8],1]
 
  /**
-  * #### HashSet
-- 很巧妙地根据k range地条件, 把HashSet里面的值控制在[i - k, i]
-- 每次不断地往set里面加新元素, 从set里减去末尾index的元素
-- 而set.add(x)如果遇到重复, 会return false.
-- 一旦在这个length k 的 range里面, 有重复, 就符合条件. 
-- Time O(n)
-
-  */
+ #### HashSet
+    - 很巧妙地根据k range地条件, 把HashSet里面的值控制在[i - k, i]
+    - 每次不断地往set里面加新元素, 从set里减去末尾index的元素
+    - 而set.add(x)如果遇到重复, 会return false.
+    - 一旦在这个length k 的 range里面, 有重复, 就符合条件. 
+    - Time O(n)
+*/
 
 public class Solution {
     public boolean containsNearbyDuplicate(int[] nums, int k) {
@@ -35,13 +34,12 @@ public class Solution {
     }
   }
 
-  /**
-   * /*
-Thoughts:
-Store in hashmap<value, index>. When there is a duplicate, check against k.
-Though, quite slow: O(n * h), where h is the possible duplicates.
- In the extreme case when n = h, it becomes O(n^2)
-*/
+/** 
+  Thoughts:
+  Store in hashmap<value, index>. When there is a duplicate, check against k.
+  Though, quite slow: O(n * h), where h is the possible duplicates.
+  In the extreme case when n = h, it becomes O(n^2)
+ */
 
 class Solution {
     public boolean containsNearbyDuplicate(int[] nums, int k) {
