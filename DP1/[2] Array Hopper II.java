@@ -41,17 +41,21 @@ public class Solution {
 }
 
 
-// Greedy 
-  public int minJump(int[] nums){
-      if(nums == null || nums.length <= 1) return 0;
+// Greedy
+/**
+ * 每个位置i 都在更新 当前的maxrange  固定值赋给farest 相当于手里的路费 （懒惰的）
+ * 当 当前手里的（懒惰的）路费花光时再去更新 counter (代表了 numbers of jumps)
+ */
+public int minJump(int[] nums){
+    if(nums == null || nums.length <= 1) return 0;
 
-      int counter = 0, farest = 0, maxRange = 0, n = nums.length;
-      for(int i = 0; i < n - 1; i++){
-          maxRange = Math.max(maxRange, nums[i] + i);
-          if(i == farest){
-              counter++;
-              farest = maxRange;
-          }
-      }
-      return counter;
-  }
+    int counter = 0, farest = 0, maxRange = 0, n = nums.length;
+    for(int i = 0; i < n - 1; i++){
+        maxRange = Math.max(maxRange, nums[i] + i);
+        if(i == farest){
+            counter++;
+            farest = maxRange;
+        }
+    }
+    return counter;
+}
