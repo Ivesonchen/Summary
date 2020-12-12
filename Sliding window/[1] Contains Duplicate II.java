@@ -4,6 +4,8 @@
  * such that nums[i] = nums[j] and the absolute difference between i and j is at most k.
  */
 
+ //[[1,2,3,4,5,6,7,8,8],1]
+
  /**
   * #### HashSet
 - 很巧妙地根据k range地条件, 把HashSet里面的值控制在[i - k, i]
@@ -46,7 +48,7 @@ class Solution {
         if (nums == null || nums.length == 0 || k <= 0) {
             return false;
         }
-        final Map<Integer, List<Integer>> map = new HashMap<>();
+        Map<Integer, List<Integer>> map = new HashMap<>();
         for (int i = 0; i < nums.length; i++) {
             if (map.containsKey(nums[i])) {
                 for (int index : map.get(nums[i])) {

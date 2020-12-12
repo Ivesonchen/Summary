@@ -4,6 +4,9 @@
  *  and it should return false if every element is distinct.
  */
 
+ /**
+  * set 去重   O(n)
+  */
 public class Solution {
     public boolean containsDuplicate(int[] nums) {
       // Write your solution here
