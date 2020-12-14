@@ -2,14 +2,14 @@
  * Find all occurrence of anagrams of a given string s in a given string l. 
  * Return the list of starting indices.
 
-Assumptions
+    Assumptions
 
-s is not null or empty.
-l is not null.
-Examples
+    s is not null or empty.
+    l is not null.
+    Examples
 
-l = "abcbac", s = "ab", return [0, 3] 
-since the substring with length 2 starting from index 0/3 are all anagrams of "ab" ("ab", "ba").
+    l = "abcbac", s = "ab", return [0, 3] 
+    since the substring with length 2 starting from index 0/3 are all anagrams of "ab" ("ab", "ba").
  */
 
  /**
@@ -21,12 +21,12 @@ since the substring with length 2 starting from index 0/3 are all anagrams of "a
   */
 
  /*
-Thoughts:
-1. Two pointers with range of p.length(). O(n)
-2. Use counter to count the character apperance in s and p.
-3. For s, when moving the pointer, always -- on past index, and ++ on new index
-4. Compare countS, countP => O(26)
-Overall O(n)
+    Thoughts:
+    1. Two pointers with range of p.length(). O(n)
+    2. Use counter to count the character apperance in s and p.
+    3. For s, when moving the pointer, always -- on past index, and ++ on new index
+    4. Compare countS, countP => O(26)
+    Overall O(n)
 */
 
 class Solution {
