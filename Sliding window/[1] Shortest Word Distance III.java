@@ -25,7 +25,7 @@ public class Solution {
       int distance = Integer.MAX_VALUE;
       for (int i = 0; i < words.length; i++) {
           if (words[i].equals(word1)) {
-              if(flag){ // 如果两个词相同   则只更新一个index
+              if(flag){ // 如果两个词相同   则只更新一个index       因为index2之后还会更新一次 相当于排除了之后那个word2的判断
                 indexWord1 = indexWord2;
                 indexWord2 = i;
               } else {
