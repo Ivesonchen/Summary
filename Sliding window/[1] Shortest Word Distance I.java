@@ -9,7 +9,7 @@ Given word1 = "makes", word2 = "coding", return 1.
 
 Note:
 You may assume that word1 does not equal to word2, and word1 and word2 are both in the list.
- */
+*/
 
 public class Solution {
     public int shortestDistance(String[] words, String word1, String word2) {
@@ -31,13 +31,12 @@ public class Solution {
     }
 }
 
-  /**
-   * /*
-Thoughts:
-For word A and B.
-At one time, A can only be most close to two possible B's from left or right.
-For the current A, left-B is known and right-B is unkown, but will encounter in the future.
-Therefore, we always only have to keep the two index: indexA, indexB updated and always try to calculate the latest amount the two.
-This is quite Greedy.
-O(n)
+/**
+    Thoughts:
+    For word A and B.
+    At one time, A can only be most close to two possible B's from left or right.
+    For the current A, left-B is known and right-B is unkown, but will encounter in the future.
+    Therefore, we always only have to keep the two index: indexA, indexB updated and always try to calculate the latest amount the two.
+    This is quite Greedy.
+    O(n)
 */
