@@ -23,13 +23,11 @@ public class TicTacToe {
         
         rows[row] += toAdd;
         cols[col] += toAdd;
-        if (row == col)
-        {
+        if (row == col){
             diagonal += toAdd;
         }
         
-        if (col == (cols.length - row - 1))
-        {
+        if (col == (cols.length - row - 1)){
             antiDiagonal += toAdd;
         }
         
