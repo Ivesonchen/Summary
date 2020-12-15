@@ -5,6 +5,8 @@
 
 For example, the longest substring without repeating letters for "bcdfbd" is "bcdf", 
 we should return 4 in this case.
+
+https://leetcode.com/problems/longest-substring-without-repeating-characters/solution/
  */
 
  /**
@@ -36,6 +38,42 @@ class Solution {
             start++;
         }
         return rst;
+    }
+}
+
+// 利用 0 来做是否初始化的判断
+public class Solution {
+    public int longest(String input) {
+      // Write your solution here
+      if(input == null || input.length() == 0) return 0;
+      int[] record = new int[26];
+  
+      int res = 0;
+      int last = 0;
+  
+      for(int i = 0; i < input.length(); i++){
+  
+        last = Math.max(record[input.charAt(i) - 'a'], last);
+        res = Math.max(res, i - last + 1);
+        record[input.charAt(i) - 'a'] = i + 1;
+      }
+  
+      return res;
+    }
+  }
+
+// 这个方法更清楚 best
+public class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        int[] m = new int[256];
+        Arrays.fill(m, -1);
+        int res = 0, left = -1;
+        for (int i = 0; i < s.length(); ++i) {
+            left = Math.max(left, m[s.charAt(i)]);
+            m[s.charAt(i)] = i;
+            res = Math.max(res, i - left);
+        }
+        return res;
     }
 }
 
