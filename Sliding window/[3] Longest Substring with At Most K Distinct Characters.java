@@ -9,6 +9,29 @@ Tags Expand
 String Two Pointers LintCode Copyright Hash Table
 */
 
+// Better coding way    k 可以换成 2
+public int lengthOfLongestSubstringKDistinct(String input, int k) {
+    // Write your solution here
+    String s = input;
+    if (s == null || s.length() == 0) return 0;
+    int n = s.length();
+    Map<Character, Integer> lastOccurMap = new HashMap<>();  //正是由于这个 才能确切的每次从左边删除一个 字符
+    int left = 0, res = 0;
+
+    for(int i = 0; i < s.length(); i++){
+        lastOccurMap.put(s.charAt(i), i);
+        while(lastOccurMap.size() > k){
+            if(lastOccurMap.get(s.charAt(left)) == left) {
+                lastOccurMap.remove(s.charAt(left));
+            }
+            left ++;
+        }
+        res = Math.max(res, i - left + 1);
+    }
+
+    return res;
+}
+
 class Solution {
     public int lengthOfLongestSubstringTwoDistinct(String s, int k) {
         if (s == null || s.length() == 0) return 0;
