@@ -4,6 +4,8 @@
 For example, given the range [5, 7], you should return 4.
 
 https://leetcode.com/problems/bitwise-and-of-numbers-range/discuss/56729/Bit-operation-solution(JAVA)
+
+ In one word, this problem is asking us to find the common prefix of m and n 's binary code.
  */
 
 
