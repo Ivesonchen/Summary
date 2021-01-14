@@ -21,7 +21,7 @@ public class Solution {
       }
       return res;
     }
-  }
+}
 
   /**
    * #### Iterative: Stack
@@ -38,25 +38,21 @@ curr下一轮还是去找自己的left-most child，不断重复curr and curr.le
 
 class Solution {
   public List < Integer > inorderTraversal(TreeNode root) {
-      List < Integer > res = new ArrayList < > ();
+      List<Integer> res = new ArrayList<>();
       helper(root, res);
       return res;
   }
 
-  public void helper(TreeNode root, List < Integer > res) {
-      if (root != null) {
-          if (root.left != null) {
-              helper(root.left, res);
-          }
-          res.add(root.val);
-          if (root.right != null) {
-              helper(root.right, res);
-          }
-      }
+  public void helper(TreeNode root, List <Integer> res) {
+    if (root == null) return;
+
+    helper(root.left, res);
+    res.add(root.val);
+    helper(root.right, res);
   }
 }
 
-//Morris Traversal
+//Morris Traversal    往左捋直树杈
 /**
  * Step 1: Initialize current as root
 

@@ -4,7 +4,7 @@ public class Solution {
     public List<Integer> preOrder(TreeNode root) {
       // Write your solution here
       List<Integer> res = new ArrayList<>();
-      Stack<TreeNode> stack = new Stack<>();
+      Deque<TreeNode> stack = new ArrayDeque<>();
       if(root == null) return res;
   
       stack.add(root);
@@ -40,9 +40,8 @@ public class Solution {
   class Solution {
     public List<Integer> preorderTraversal(TreeNode root) {
         List<Integer> rst = new ArrayList<>();
-        if (root == null) {
-            return rst;
-        }
+        if (root == null) return rst;
+        
         rst.add(root.val);
         rst.addAll(preorderTraversal(root.left));
         rst.addAll(preorderTraversal(root.right));
