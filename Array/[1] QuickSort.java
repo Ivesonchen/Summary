@@ -51,6 +51,7 @@ public class Solution {
         }
       }
   
+      // 将pivod 转移到i + 1的位置
       // int temp = array[r];
       array[r] = array[i + 1];
       array[i + 1] = pivod;
