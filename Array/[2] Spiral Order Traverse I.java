@@ -13,7 +13,10 @@ Examples
   {7,  8,  9} }
 
 the traversal sequence is [1, 2, 3, 6, 9, 8, 7, 4, 5]
+ */
 
+/**
+ * recursion     because of it's N * N    we can control it by using offSet to write the recursion rule (Cycle by cycle)
  */
 
 public class Solution {
@@ -50,7 +53,3 @@ public class Solution {
     helper(matrix, res, offSet + 1, size - 2);
   }
 }
-
-  /**
-   * recursion     because of it's N * N    we can control it by using offSet to write the recursion rule (Cycle by cycle)
-   */

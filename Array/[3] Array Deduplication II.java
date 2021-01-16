@@ -14,7 +14,7 @@ Examples
 
 
   /**
-   * 使用 hashmap 来进行计数     注意 null 值 的比较
+   * 使用 hashmap 来进行计数     注意 null 值 的比较     end 指针开始走  对于每个新位置 检测计数器是不是 小于2  如果是 复制和更新计数器  如果不是 进入下一个end位置
    * O(n) O(n)
    */
 public class Solution {
@@ -46,7 +46,6 @@ public class Solution {
    * 间距为二的 来查找 重复的值  可以随意扩展 间距为 2， 3， 4， 5
    */
   public int[] dedup(int[] array){
-
     if(array.length < 2) return array;
 
     int start = 2;

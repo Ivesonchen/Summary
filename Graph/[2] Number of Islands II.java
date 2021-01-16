@@ -65,8 +65,8 @@ public class Solution {
           //对于四周 去找 核心root
           int rootNb = findIsland(roots, nb);
           if(root != rootNb){
-            roots[root] = rootNb;
-            root = rootNb;
+            roots[root] = rootNb; // 合并一下   更新本地的root值
+            root = rootNb;        // 更新一下手里拿的 要比对的值   更新下一个方向要比对的值
             count --;
           }
         }

@@ -19,7 +19,8 @@ the traversal sequence is [1, 2, 3, 4, 8, 12, 11, 10, 9, 5, 6, 7]
 Thoughts:
 - Keep visited
 - keep moving until hit visited, then turn
-*/class Solution {
+*/
+class Solution {
     int[] dx = {0, 1, 0, -1}; // RIGHT->DOWN->LEFT->UP
     int[] dy = {1, 0, -1, 0};
 
