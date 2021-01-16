@@ -16,7 +16,7 @@ What if the given array is of length zero? In this case, we do not need to do an
  // 思路  递归思想   先分叉    然后 再merge
  // 因为是原地 merge 所以要 使用 l, r, mid 这样的指针来标记subArray 的边界
 
- //Tao-Lu
+ // Tao-Lu
  // 两个Array merge 的时候   注意 while循环的 套路 很有用
 
 public class Solution {
@@ -87,8 +87,8 @@ public class Solution {
   }
   
   /**
-   * Worst complexity: n*log(n)
-     Average complexity: n*log(n)
-     Best complexity: n*log(n)
-     Space complexity: n
-   */
+    Worst complexity: n*log(n)
+    Average complexity: n*log(n)
+    Best complexity: n*log(n)
+    Space complexity: n
+  */

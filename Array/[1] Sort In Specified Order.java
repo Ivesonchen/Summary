@@ -15,6 +15,8 @@ A1 = {2, 1, 2, 5, 7, 1, 9, 3}, A2 = {2, 1, 3}, A1 is sorted to {2, 2, 1, 1, 3, 5
 
 /**                                     数值    出现次数
  * maintain 一个 ordered map （treemap<Integer, Integer>）
+ * 
+ * sorted by key   然后生成 
  */
 
 public class Solution {

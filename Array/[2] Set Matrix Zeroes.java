@@ -1,10 +1,11 @@
 /**
 Given a m x n matrix, if an element is 0, set its entire row and column to 0.
 
-E.g.    Input: Matrix =  [[1, 1, 1, 1, 0],
-                          [0, 1, 1, 0, 1],
-                          [1, 1, 1, 0, 1],
-                          [1, 1, 1, 1, 1]]
+E.g.    
+Input: Matrix =  [[1, 1, 1, 1, 0],
+                  [0, 1, 1, 0, 1],
+                  [1, 1, 1, 0, 1],
+                  [1, 1, 1, 1, 1]]
 
 Output: Matrix = [[0, 0, 0, 0, 0],
                   [0, 0, 0, 0, 0],
