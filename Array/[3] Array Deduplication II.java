@@ -19,8 +19,7 @@ Examples
    */
 public class Solution {
     public int[] dedup(int[] array) {
-      // Write your solution here
-  
+      // Write your solution here                                                                   
       int start = 0;
       int end = 0;
   
