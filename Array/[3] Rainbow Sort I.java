@@ -32,7 +32,7 @@ class Solution {
 }
 /**
  * left 和 right 分别代表着左右两个栅栏   并不是传统意义上的 搜索指针   所以 while 循环里面  不需要 额外的 while 来搜索
- * 向左换 不需要 重新 比较 所以 index++, left++
+ * 向左换 不需要 重新 比较 所以 index++, left++      left指针的左边要么是0 要么是1
  * 向右换 需要重新比较     所以 index不++， right--
  * #### One pass
 - have two pointers, left/right

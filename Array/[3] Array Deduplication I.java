@@ -32,18 +32,19 @@ public class Solution {
     }
 
     return res;
+    //    return Arrays.copyOfRange(array, 0, start);
   }
 }
 
-// 比较 i 和 i - 1 的值   如果不等  说明此位置的值是可以的   count 是可以进入下一个位置的
+// 比较 i 和 start - 1 的值   如果不等  说明此位置的值是可以的   count 是可以进入下一个位置的
 
 public static int removeDuplicates(int[] nums) {
   if (nums == null || nums.length == 0) return 0;
-  int count = 1;
+  int start = 1;
   for (int i = 1; i < nums.length; i++) {
-      if (nums[i - 1] != nums[i]) {
+      if (nums[start - 1] != nums[i]) {
           nums[count++] = nums[i];
       }
   }
-  return count;
-}
+  return start;
+} 

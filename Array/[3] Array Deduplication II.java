@@ -39,6 +39,8 @@ public class Solution {
         res[i] = array[i];
       }
       return res;
+
+      // return Arrays.copyOfRange(array, 0, start);
   }
 
   /**
@@ -62,5 +64,6 @@ public class Solution {
       res[i] = array[i];
     }
     return res;
+    //     return Arrays.copyOfRange(array, 0, start);
   }
 }

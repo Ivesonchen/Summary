@@ -23,7 +23,8 @@ public class Solution {
           if(array[i] != 0) {
             int temp = array[i];
             array[i] = array[start];
-            array[start++] = temp;
+            array[start] = temp;
+            start ++;
           }
         }
   
@@ -88,7 +89,6 @@ public class Solution {
     里面   
     第一个 while(left < array.length && condition) 循环 left ++
     第二个 while(right >= 0 && condition) 循环 right --
-
  * 
  */
 

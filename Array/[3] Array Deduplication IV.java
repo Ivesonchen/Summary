@@ -1,5 +1,6 @@
 /**
- * Given an unsorted integer array, remove adjacent duplicate elements repeatedly, from left to right. For each group of elements with the same value do not keep any of them.
+ * Given an unsorted integer array, remove adjacent duplicate elements repeatedly, from left to right. 
+ * For each group of elements with the same value do not keep any of them.
 
 Do this in-place, using the left side of the original array. Return the array after deduplication.
 
@@ -12,7 +13,7 @@ Examples
  */
 
 /**
- * (如果 array/string+stack 的题目看见让你用 in-place, 不要慌, 指针可以解决)
+(如果 array/string+stack 的题目看见让你用 in-place, 不要慌, 指针可以解决)
 
 structure:
 
@@ -27,12 +28,10 @@ cur: pointer points to current processing number
 如果 array[cur] != stack.top, 那么把当前值 push 到 stack 上, cur++;
 
 time O(n)
-
 space O(1)
  */
 
 public class Solution {
-  
     public int[] dedup(int[] array){
   
       //edge case 可以加

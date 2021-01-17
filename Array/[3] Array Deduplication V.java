@@ -13,8 +13,9 @@ Examples
 
 {2, 1, 2, 2, 2, 3} --> {2, 1, 2, 2, 3}  
  */
+
 // 还是三指针的做法     注意最外层的while循环条件 永远是以 最 fast的那个指针 为条件
-  //Tao-Lu
+//Tao-Lu
 public class Solution {
     public int[] dedup(int[] array) {
       // Write your solution here

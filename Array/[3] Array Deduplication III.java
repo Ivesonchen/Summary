@@ -1,7 +1,8 @@
 /**
  * Given a sorted integer array, remove duplicate elements. 
  * For each group of elements with the same value do not keep any of them. 
- * Do this in-place, using the left side of the original array and and maintain the relative order of the elements of the array. 
+ * Do this in-place, using the left side of the original array and and 
+ * maintain the relative order of the elements of the array. 
  * Return the array after deduplication.
 
 Assumptions
@@ -28,10 +29,10 @@ public class Solution {
   public int[] dedup(int[] array) {
     // Write your solution here
 
-    int fast = 0; 
     int slow = 0;
-
+    int fast = 0; 
     int begin = slow;
+
     while(fast < array.length){
 
       while(fast < array.length && array[begin] == array[fast]){

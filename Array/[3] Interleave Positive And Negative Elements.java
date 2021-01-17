@@ -1,7 +1,9 @@
 /**
- * Given an array with both positive and negative numbers in random order. Shuffle the array so that positive and negative numbers are put in position with even and odd indices, respectively.
+ * Given an array with both positive and negative numbers in random order. 
+ * Shuffle the array so that positive and negative numbers are put in position with even and odd indices, respectively.
 
-If there are more positive/negative numbers, put them at the end of the array. The ordering of positive/negative numbers does not matter.
+If there are more positive/negative numbers, put them at the end of the array. 
+The ordering of positive/negative numbers does not matter.
 
 Assumptions:
 
@@ -24,6 +26,7 @@ public class Solution {
   
       int left = 0, right = len - 1;
   
+      // sort function  左边是正数部分 右边是负数部分
       while(left <= right){
         if(array[left] < 0) {
           swap(array, left, right);
@@ -31,14 +34,15 @@ public class Solution {
         } else {
           left++;
         }
-      }   // 类似于 quicksort 的 partition， 用0作为pivot  左边都是正数 右边都是负数
+      }   //类似于 quicksort 的 partition， 用0作为pivot  左边都是正数 右边都是负数
   
       int i = 1;
       while(i < len && left < len){
         swap(array, i, left);
         left++;
         i += 2;
-      }  // 然后 把右边的负数给插入到左边相应的位置
+      }  
+      // 然后 把右边的负数给插入到左边相应的位置
       return array;
     }
   
