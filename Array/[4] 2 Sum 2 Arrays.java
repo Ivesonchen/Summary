@@ -1,5 +1,6 @@
 /**
- * Given two arrays A and B, determine whether or not there exists a pair of elements, one drawn from each array, that sums to the given target number.
+ * Given two arrays A and B, determine whether or not there exists a pair of elements, one drawn from each array, 
+ * that sums to the given target number.
 
 Assumptions
 
