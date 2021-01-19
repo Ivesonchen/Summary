@@ -13,6 +13,7 @@ A = {1, 4, 7, 13}, target = 7, closest pair is 1 + 7 = 8, return [1, 7].
 
  // option 1: brute force 的话 n ^ 2
 
+ 
  // option 2: ez O(nlogn)
 public class Solution {
     public List<Integer> closest(int[] array, int target) {
