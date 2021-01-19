@@ -21,6 +21,24 @@ A = {2, 4, 1}, target = 4, return false
 
 方法3：先排序，然后左右夹逼，排序O(nlogn)，左右夹逼O(n)，最终O(nlogn)。但是注意，这题需要返回的是下标，而不是数字本身，而重新排序会导致index失真，因此这个方法行不通。
  */
+/*
+    key         value
+    互补数      互补数所在位置
+*/
+  class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        HashMap<Integer, Integer> map = new HashMap<>();
+        int[] res = new int[]{-1,-1};
+        for(int i = 0; i < nums.length; i++) {
+            if(map.containsKey(target - nums[i])){
+                res[0] = map.get(target - nums[i]);
+                res[1] = i;
+            }
+            map.put(nums[i],i);
+        }
+        return res;
+    }
+}
 
 public class Solution {
     public boolean existSum(int[] array, int target) {
@@ -37,3 +55,4 @@ public class Solution {
       return false;
     }
   }
+
