@@ -1,6 +1,7 @@
 /**
  * 
- * Find the pair of elements in a given array that sum to a value that is closest to the given target number. Return the values of the two numbers.
+ * Find the pair of elements in a given array that sum to a value that is closest to the given target number. 
+ * Return the values of the two numbers.
 
 Assumptions
 
@@ -10,8 +11,9 @@ Examples
 A = {1, 4, 7, 13}, target = 7, closest pair is 1 + 7 = 8, return [1, 7].
  */
 
- // ez O(nlogn)
+ // option 1: brute force 的话 n ^ 2
 
+ // option 2: ez O(nlogn)
 public class Solution {
     public List<Integer> closest(int[] array, int target) {
       // Write your solution here
@@ -27,7 +29,7 @@ public class Solution {
       int left = 0, right = array.length - 1;
       while(left < right){
         int sum = array[left] + array[right];
-        int tempDis = Math.abs(target - sum);
+        int tempDis = Math.abs(target - sum);             
         if(tempDis < dis){
           res = Arrays.asList(array[left], array[right]);
           dis = tempDis;

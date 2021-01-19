@@ -13,7 +13,7 @@ A = {1, 2, 2, 4}, target = 6, return [[1, 3], [2, 3]]
  */
 
  // hashmap key 是 complement value是一个list 存 下标
-
+ // 每次检测到 array当前的值 是一个 complement value的时候 把 当前对应的hashmap 中value 中的值取出来达成排列组合
 public class Solution {
     public List<List<Integer>> allPairs(int[] array, int target) {
       // Write your solution here

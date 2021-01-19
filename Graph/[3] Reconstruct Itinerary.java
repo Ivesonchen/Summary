@@ -21,14 +21,14 @@ Another possible reconstruction is ["JFK","SFO","ATL","JFK","ATL","SFO"]. But it
 https://github.com/grandyang/leetcode/issues/332
  */
 
- /**
-  * 每张机票都是有向图的一条边，我们需要找出一条经过所有边的路径，那么DFS不是我们的不二选择。
+/**
+* 每张机票都是有向图的一条边，我们需要找出一条经过所有边的路径，那么DFS不是我们的不二选择。
   先来看递归的结果，我们首先把图建立起来，通过邻接链表来建立。
   由于题目要求解法按字母顺序小的，那么我们考虑用multiset，可以自动排序。
   等我们图建立好了以后，从节点JFK开始遍历，只要当前节点映射的multiset里有节点，我们取出这个节点，将其在multiset里删掉，
   然后继续递归遍历这个节点，由于题目中限定了一定会有解，那么等图中所有的multiset中都没有节点的时候，我们把当前节点存入结果中，
   然后再一层层回溯回去，将当前节点都存入结果，
-  */
+*/
 
 //DFS
 public class Solution {
