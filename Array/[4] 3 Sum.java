@@ -30,6 +30,7 @@ public class Solution {
 			int k = array.length - 1;
 	
 			while(j < k){
+				int sum = array[i] + array[j] + array[k];
 				if(array[i] + array[j] + array[k] < target){
 					j++;
 					while(j < k && array[j] == array[j - 1]) j++;   // 注意这是用来跳过重复的元素

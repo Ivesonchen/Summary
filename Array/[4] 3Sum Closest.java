@@ -3,14 +3,13 @@
  * Return the difference  between the sum of the three integers and the given number. 
  * You may assume that each input would have exactly one solution.
 
-Example
+  Example
 
-           For example, given array S = {-1 2 1 -4}, and target = 1.
-
-          The sum that is closest to the target is 2. (-1 + 2 + 1 = 2) and the difference is 1.
+  For example, given array S = {-1 2 1 -4}, and target = 1.
+  The sum that is closest to the target is 2. (-1 + 2 + 1 = 2) and the difference is 1.
  */
 
-// 很简单的做一个 三指针的 遍历    然后mantain 一个 最小值value    O(n^2)
+// 先sort 然后 很简单的做一个 三指针的 遍历    然后mantain 一个 最小值value    O(n^2)
 
 // Tao-Lu
 public class Solution {
