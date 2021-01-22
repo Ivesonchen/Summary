@@ -1,9 +1,9 @@
 /**
  * Determine the number of bits that are different for two given integers.
 
-Examples
+  Examples
 
-5(“0101”) and 8(“1000”) has 3 different bits
+  5(“0101”) and 8(“1000”) has 3 different bits
  */
 
  /**

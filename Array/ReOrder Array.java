@@ -33,39 +33,39 @@ Examples
 
 public class Solution {
     public int[] reorder(int[] array) {
-          // Write your solution here
-          if (array.length % 2 == 1) {
-              reorder(array, 0, array.length - 2);
-          } else {
-              reorder(array, 0, array.length - 1);
-          }
-          return array;
-      }
+        // Write your solution here
+        if (array.length % 2 == 1) {
+            reorder(array, 0, array.length - 2);
+        } else {
+            reorder(array, 0, array.length - 1);
+        }
+        return array;
+    }
    
-      private void reorder(int[] array, int left, int right) {
-          int length = right - left + 1;
-          // Base case
-          if(length <= 2){
-              return;
-          }
-          int mid = left + length / 2;
-          int lmid = left + length / 4;
-          int rmid = left + length * 3 / 4;
-          reverse(array, lmid, mid - 1);
-          reverse(array, mid, rmid - 1);
-          reverse(array, lmid, rmid - 1);  // 这三个 reverse 就是 实现了 block 平移交换
+    private void reorder(int[] array, int left, int right) {
+        int length = right - left + 1;
+        // Base case
+        if(length <= 2){
+            return;
+        }
+        int mid = left + length / 2;
+        int lmid = left + length / 4;
+        int rmid = left + length * 3 / 4;
+        reverse(array, lmid, mid - 1);
+        reverse(array, mid, rmid - 1);
+        reverse(array, lmid, rmid - 1);  // 这三个 reverse 就是 实现了 block 平移交换
 
-          reorder(array, left, left + 2 * (lmid - left) - 1);   // 还是一分为二
-          reorder(array, left + 2 * (lmid - left), right);
-      }
-   
-      private void reverse(int[] array, int start, int end) {
-          while (start < end) {
-              int temp = array[end];
-              array[end] = array[start];
-              array[start] = temp;
-              start++;
-              end--;
-          }
+        reorder(array, left, left + 2 * (lmid - left) - 1);   // 还是一分为二
+        reorder(array, left + 2 * (lmid - left), right);
+    }
+
+    private void reverse(int[] array, int start, int end) {
+        while (start < end) {
+            int temp = array[end];
+            array[end] = array[start];
+            array[start] = temp;
+            start++;
+            end--;
+        }
     }
   }

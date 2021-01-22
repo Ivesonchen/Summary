@@ -1,14 +1,14 @@
 /**
  * Determine if the characters of a given string are all unique.
 
-Assumptions
+    Assumptions
 
-The only set of possible characters used in the string are 'a' - 'z', the 26 lower case letters.
-The given string is not null.
-Examples
+    The only set of possible characters used in the string are 'a' - 'z', the 26 lower case letters.
+    The given string is not null.
+    Examples
 
-the characters used in "abcd" are unique
-the characters used in "aba" are not unique
+    the characters used in "abcd" are unique
+    the characters used in "aba" are not unique
  */
 
 public class Solution {
