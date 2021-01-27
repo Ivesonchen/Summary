@@ -4,13 +4,9 @@
 Examples:
 
         5
-
       /    \
-
     3        8
-
   /   \        \
-
 1      4        11
 
 The height of above binary tree is 3.         
@@ -23,7 +19,7 @@ public class Solution {
   
       return 1 + Math.max(findHeight(root.left), findHeight(root.right));
     }
-  }
+}
 
   /** 
    * 经典 recursion

@@ -38,4 +38,4 @@ public class Solution {
   
       return fakeHeadSmall.next;
     }
-  }
+}

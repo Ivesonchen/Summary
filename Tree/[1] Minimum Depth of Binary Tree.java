@@ -5,14 +5,10 @@ Example:
 Given the below binary tree
 
              5
-
-          /       \
-
-        3         8
-
-           \
-
-               4
+          /    \
+        3        8
+          \
+            4
 
 minimum depth is 2,path is 5→8.
  */
@@ -50,7 +46,7 @@ public class Solution {
       if(leftDepth == 0 || rightDepth == 0) return leftDepth + rightDepth + 1;
       return Math.min(leftDepth, rightDepth) + 1;
     }
-  }
+}
 
   /**
    * 

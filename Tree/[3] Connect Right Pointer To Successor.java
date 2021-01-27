@@ -4,17 +4,11 @@
 Examples:
 
      11
-
     /  \
-
   2     29
-
  /  \  /  \
-
 1   7 15  40
-
           /
-
          35
 
 the added edges are:

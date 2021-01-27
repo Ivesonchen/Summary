@@ -1,5 +1,5 @@
 /**
- * Invert a binary tree.
+Invert a binary tree.
 
      4
    /   \

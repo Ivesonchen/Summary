@@ -20,7 +20,7 @@ class Solution {
         int start = intervals.get(0).start;
         int end = intervals.get(0).end;
         
-        //两个指针  
+        //两个指针
         List<Interval> res = new ArrayList<>();
         for(Interval interval : intervals) {
             if(interval.start <= end) {//这是有交叉的情况

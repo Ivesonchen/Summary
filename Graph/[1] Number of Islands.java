@@ -18,6 +18,8 @@ Example 2:
 00100
 00011
 Answer: 3
+
+类似例题 还有 695   Max Area of Island    维持一个global 的 count     然后不停的取最大
  */
 // 关键在于 将走过的‘1’ 和相邻的 ‘1’ 变成 ‘0’    然后就可以往下数剩下独立的‘1’    独立的‘1’ 就是 number of islands
 public class Solution {
@@ -42,6 +44,7 @@ public class Solution {
     public void helper(int i, int j, char[][] grid){
       if(i < 0 || i >= grid.length || j < 0 || j >= grid[0].length || grid[i][j] == '0') return;
       grid[i][j] = '0';
+
       helper(i + 1, j, grid);
       helper(i, j + 1, grid);
       helper(i - 1, j, grid);

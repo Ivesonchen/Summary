@@ -5,13 +5,9 @@
 Examples
 
   -15
-
-  /    \
-
+  /   \
 2      11
-
      /    \
-
     6     14
 The maximum path sum is 6 + 11 + 14 = 31.
 How is the binary tree represented?
@@ -19,17 +15,10 @@ We use the level order traversal sequence with a special symbol "#" denoting the
 For Example:
 The sequence [1, 2, 3, #, #, 4] represents the following binary tree:
     1
-
   /   \
-
  2     3
-
       /
-
     4
- */
-/**
- * 
  */
 
 public class Solution {

@@ -37,7 +37,7 @@ public class Solution {
 }
 
 // 比较 i 和 start - 1 的值   如果不等  说明此位置的值是可以的   count 是可以进入下一个位置的
-
+// start 就是下一个不同的数应该放的位置
 public static int removeDuplicates(int[] nums) {
   if (nums == null || nums.length == 0) return 0;
   int start = 1;
