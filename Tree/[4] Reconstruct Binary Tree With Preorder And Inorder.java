@@ -37,6 +37,7 @@ public class Solution {
   
       TreeNode root = new TreeNode(preorder[preStart]);
       int inIndex = 0;
+      // 在inorder 序列中找 新的root对应的位置在哪里
       for(int i = inStart; i <= inEnd; i++){
         if(inorder[i] == preorder[preStart]){
           inIndex = i;
@@ -44,7 +45,7 @@ public class Solution {
       }
       root.left = helper(preStart + 1, inStart, inIndex - 1, preorder, inorder);
       root.right = helper(preStart + inIndex - inStart + 1, inIndex + 1, inEnd, preorder, inorder);
-  
+                  //新的preStart是在之前基础上加上inOrder左边部分的长度
       return root;
     }
   }
