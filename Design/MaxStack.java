@@ -2,6 +2,8 @@
  * 双Stack：一个正常stack，另一个minStack存当下level最小值. 注意维护minStack的变化
 
 另外. 如果要maxStack，也是类似做法
+
+ *  两个stack 一同增长 一同减少 保持高度一致    
  */
 public class MaxStack{
     private Stack<Integer> stack;
@@ -26,7 +28,7 @@ public class MaxStack{
     }
 
     public int pop(){
-        maxstack.pop();
+        maxStack.pop();
         return stack.pop();
     }
 
