@@ -34,6 +34,18 @@ class Solution {
         return result;
     }
     
+    private void dfs(List<List<Integer>> result, List<Integer> levelList, int[][] nums, int index ) {
+        if (levelList.size() == nums.length) {
+            result.add(new ArrayList<>(levelList));
+            return;
+        }
+        for (int i = 0; i < nums[index].length; i++) {
+            levelList.add(nums[i]);
+            dfs(result, levelList, nums, indx+1);
+            levelList.remove(levelList.size() - 1);
+        }
+    }
+
     private void dfs(List<List<Integer>> result, List<Integer> levelList, int[] nums) {
         if (levelList.size() == nums.length) {
             result.add(new ArrayList<>(levelList));
@@ -52,3 +64,21 @@ class Solution {
  *               a          b             c
  *            a  b  c     a b c         a b c
  */
+
+ main(){
+    nums[][]
+    m, n
+ }
+
+dfs(nums, result, level, indexOfCurrRow){
+    // add to result
+    if(level.length === n) result.add(level)
+
+    for(int i = 0; i < n, i++){
+        level.add(nums[indexOfCurrRow][i]);
+        dfs(result, level, nums, indexOfCurrRow+1);
+        level.remove(levelList.size() - 1);
+    }
+}
+
+
