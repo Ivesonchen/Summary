@@ -41,3 +41,33 @@ public class Solution {
     }
   }
   
+public class Solution {
+  public List<String> validParentheses(int n) {
+    List<String> res = new ArrayList<>()
+
+    if(n == 0) return res;
+
+    dfs(res, new StringBuilder(), n, n);
+
+    return res;
+  }
+
+  public void dfs (List<String> res, StringBuilder sb, int left, int right){
+    if(left == 0 && right == 0) {
+      res.add(sb.toString());
+      return;
+    }
+
+    if(left > 0) {
+      sb.append("(")
+      dfs(res, sb, left - 1, right);
+      sb.deleteCharAt(sb.length() - 1);
+    }
+
+    if(right > 0 && left < right) {
+      sb.append(")");
+      dfs(res, sb, left, right - 1)
+      sb.deleteCharAt(sb.length() - 1);
+    }
+  }
+}
