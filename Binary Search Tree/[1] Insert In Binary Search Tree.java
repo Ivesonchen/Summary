@@ -7,37 +7,25 @@ If the key is already existed in the binary search tree, you do not need to do a
 Examples
 
         5
-
       /    \
-
     3        8
-
   /   \
-
  1     4
 
 insert 11, the tree becomes
 
         5
-
       /    \
-
     3        8
-
   /   \        \
-
  1     4       11
 
 insert 6, the tree becomes
 
         5
-
       /    \
-
     3        8
-
   /   \     /  \
-
  1     4   6    11
  */
 public class Solution {
