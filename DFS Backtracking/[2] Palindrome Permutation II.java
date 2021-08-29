@@ -1,5 +1,6 @@
 /**
- * Given a string s, return all the palindromic permutations (without duplicates) of it. Return an empty list if no palindromic permutation could be form.
+ * Given a string s, return all the palindromic permutations (without duplicates) of it. 
+ Return an empty list if no palindromic permutation could be form.
 
 Example 1:
 
@@ -71,6 +72,7 @@ class Solution {
             if (count[c] % 2 == 1) odd++;
             else odd--;
         }
+        // 计算字符频率 奇数频率
         List<String> ans = new ArrayList<>();
         if (odd > 1 || s.length() == 0) return ans;
         StringBuilder sb = new StringBuilder();

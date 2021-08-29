@@ -59,6 +59,8 @@ public class Solution {
     }
 }
 
+
+// 利用depth + 1  做成 不回头的选组合  所以不出现 [1, 3] 和 [3, 1] 这种重复的组合
 // 另一种 backtracking 的方法
 public void dfs(List<List<Integer>> res, List<Integer> list, int depth, int n, int k){
     if(list.size() == k){
@@ -68,9 +70,11 @@ public void dfs(List<List<Integer>> res, List<Integer> list, int depth, int n, i
 
     if(depth > n) return;// 在 depth 增加之前 给停掉 (不能提高到 check size 之前, 因为需要 check size 这个动作来作为 叶子节点 处理list结果)
 
+    // 选这个数字
     list.add(depth);
     dfs(res, list, depth + 1, n, k);
     list.remove(list.size() - 1);
 
+    // 不选这个数字
     dfs(res, list, depth + 1, n, k);
 }

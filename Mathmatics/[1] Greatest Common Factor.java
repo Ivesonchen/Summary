@@ -30,3 +30,11 @@ public class Solution {
     }
     return a;
 }
+
+/**
+      a     b
+      12    18
+      18    12
+      12    6
+      6     0
+ */

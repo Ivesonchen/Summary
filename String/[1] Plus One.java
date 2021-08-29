@@ -15,8 +15,9 @@ public class Solution {
   
         digits[i] = sum % 10;
         ext = sum / 10;
-      }
+      } //末位加一  ext 处理进位问题         到这里是结果长度和 原来的长度一样  （没有溢出进位）
   
+      // 如果还要往前再进位    ext 放新结果第一位   后面的直接拷贝
       if(ext != 0) {
         int[] newRes = new int[digits.length + 1];
   

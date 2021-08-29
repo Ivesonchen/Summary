@@ -65,7 +65,7 @@ public class Solution {
       if(cur == null) return;
       if(cur.left != null){
         // to ensure top down order, print the node 
-              // before calling itself for left subtree 
+        // before calling itself for left subtree 
         res.add(cur.key);
         printBoundaryLeft(cur.left);
       } else if(cur.right != null){
@@ -73,7 +73,7 @@ public class Solution {
         printBoundaryLeft(cur.right);
       }
       // do nothing if it is a leaf node, this way we avoid 
-          // duplicates in output 
+      // duplicates in output 
     }
   
     public void printBoundaryRight(TreeNode cur){
@@ -88,11 +88,12 @@ public class Solution {
         res.add(cur.key);
       }
       // do nothing if it is a leaf node, this way we avoid 
-          // duplicates in output 
+      // duplicates in output 
     }
   
     public void printLeaves(TreeNode cur){
       if(cur == null) return;
+      
       printLeaves(cur.left);
       if(cur.left == null && cur.right == null) res.add(cur.key);
       printLeaves(cur.right);

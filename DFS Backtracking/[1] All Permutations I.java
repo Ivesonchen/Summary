@@ -1,14 +1,13 @@
 /**
  * Given a string with no duplicate characters, return a list with all permutations of the characters.
-
 Assume that input string is not null.
 
 Examples
-
 Set = “abc”, all permutations are [“abc”, “acb”, “bac”, “bca”, “cab”, “cba”]
-
 Set = "", all permutations are [""]
  */
+
+ // O(n!)
 
 public class Solution {
     public List<String> permutations(String input) {
@@ -62,3 +61,37 @@ public List<List<Integer>> permute(int[] nums) {
        }
     }
  }
+
+
+
+class test {
+
+ public List<String> func (String str) {
+   List<String> res = new ArrayList<>();
+
+   if(str == null || str.length() == 0) {
+     res.add("");
+     return res;
+   }
+
+   dfs(res, new StringBuilder(), new boolean[str.length()], str);
+
+   return res;
+ }
+
+ public static void dfs(List<String> res, StringBuilder sb, boolean[] visited, String str) {
+   if(sb.length() === str.length()) {
+     res.add(sb.toString());
+     return;
+   }
+
+   for(int i = 0; i < str.length(); i ++){
+     if(visited[i]) continue;
+     visited[i] = true;
+     sb.append(str.charAt(i));
+     dfs(res, sb, visited, str);
+     sb.deleteCharAt(str.length() - 1);
+     visited[i] = false;
+   }
+ }
+}

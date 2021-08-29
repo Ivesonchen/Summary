@@ -28,7 +28,7 @@ public class Solution {
           start++;
           i++;
         } else {
-          if(charArray[i - 1] != ' '){
+          if(charArray[i - 1] != ' '){    // 遇到第一个空格
             charArray[start] = charArray[i];
             start++;
             i++;
@@ -38,7 +38,7 @@ public class Solution {
         }
       }
       
-      if(start > 1 && charArray[start - 1] == ' '){
+      if(start > 1 && charArray[start - 1] == ' '){    // 结尾是空格
         start --;
       }
   

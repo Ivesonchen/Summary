@@ -1,5 +1,6 @@
 /**
- * Remove given characters in input string, the relative order of other characters should be remained. Return the new string after deletion.
+ * Remove given characters in input string, the relative order of other characters should be remained. 
+ Return the new string after deletion.
 
 Assumptions
 
@@ -38,33 +39,33 @@ public class Solution {
 /**
  *      用来完全匹配 t 整个字符串
         public String remove(String input, String t) {
-        // Write your solution here
+          // Write your solution here
 
-        if(t.length() == 0) return input;
+          if(t.length() == 0) return input;
 
-        int start = 0;
-        int j = 0;
-        char[] arr = input.toCharArray();
-        int prev = 0;
+          int start = 0;
+          int j = 0;
+          char[] arr = input.toCharArray();
+          int prev = 0;
 
-        for(int i = 0; i < arr.length; i++){
-            arr[start] = arr[i];
-            start ++;
+          for(int i = 0; i < arr.length; i++){
+              arr[start] = arr[i];
+              start ++;
 
-            if(arr[i] == t.charAt(j)){
-            if(j == 0) prev = start - 1;
-            j++;
-            } else {
-            j = 0;
-            }
-        
-            if(j == t.length()) {
-            start = prev;
-            j = 0;
-            }
-        }
+              if(arr[i] == t.charAt(j)){
+              if(j == 0) prev = start - 1;
+                j++;
+              } else {
+                j = 0;
+              }
+          
+              if(j == t.length()) {
+                start = prev;
+                j = 0;
+              }
+          }
 
-        return new String(arr, 0, start);
+          return new String(arr, 0, start);
         }
  */
   

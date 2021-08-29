@@ -5,7 +5,8 @@ For example,
 "code" -> False, "aab" -> True, "carerac" -> True.
 https://leetcode.com/problems/palindrome-permutation/solution/
  */
-
+ 
+// 字符串里的所有字符出现的次数 只能有一个或者小于一个字符可以出现一次
 public class Solution {
     public boolean canPermutePalindrome(String input) {
       // Write your solution here

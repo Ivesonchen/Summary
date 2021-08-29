@@ -2,13 +2,13 @@
  * Given two binary strings, return their sum (also a binary string).
 
 Input: a = “11”
-
-           b = “1”
+        b = “1”
 
 Output: “100”
  */
 
- //Tao-Lu  注意这种双指针 while 循环的 合理使用     我们可以 "或" 这种条件 使用sum 来贯穿 数组a 和 b对应数值的加和    来减少代码的冗余
+// Tao-Lu  注意这种双指针 while 循环的 合理使用     
+// 我们可以 "或" 这种条件 使用sum 来贯穿 数组a 和 b对应数值的加和    来减少代码的冗余
 
 public class Solution {
     public String addBinary(String a, String b) {
