@@ -21,7 +21,7 @@ public class Solution {
         if(start == 0 && charArray[i] == ' '){
           i++;
           continue;
-        }
+        } // jump through leading space
   
         if(charArray[i] != ' '){
           charArray[start] = charArray[i];

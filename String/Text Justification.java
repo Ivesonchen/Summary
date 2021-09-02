@@ -1,16 +1,13 @@
 /**
- * Given an array of words and a length L, format the text such that each line has exactly L characters and is fully (left and right) justified. For the last line, it should be left justified and no extra space is inserted between words.
+ * Given an array of words and a length L, format the text such that each line has exactly L characters and is fully (left and right) justified. 
+ For the last line, it should be left justified and no extra space is inserted between words.
 
 Input: words: ["This", "is", "an", "example", "of", "text", "justification."]    L: 16.
 
 Output:[
-
           "This    is    an",
-
-            "example  of text",
-
-            "justification.  "
-
+          "example  of text",
+          "justification.  "
            ]
 
     
@@ -18,11 +15,8 @@ Output:[
 Input: words: [“This”, “is”, “my”]       L = 5
 
     Output: [
-
          “This ”,
-
-         “is my”    
-
+         “is my”
         ]    
  */
 

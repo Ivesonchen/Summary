@@ -15,28 +15,28 @@ Examples:
 // 要排除 一对多 和 多对一 的情况   f -> g   g -> h   h -> f  这种情况是可以的
 
 public class Solution {
-    public boolean isomorphic(String source, String target) {
-      // Write your solution here
-      if(source.length() != target.length()) return false;
-      Map<Character, Character> map = new HashMap<>();
-      Set<Character> set = new HashSet<>();
-  
-      int i = 0;
-  
-      while(i < source.length()){
-        char sourceChar = source.charAt(i);
-        char targetChar = target.charAt(i);
-  
-        if(map.get(sourceChar) != null && targetChar != map.get(sourceChar) || map.get(sourceChar) == null && set.contains(targetChar)){
-          return false;
-        }
-  
-        map.put(sourceChar, targetChar);
-        set.add(targetChar);
-        // map.put(targetChar, sourceChar);
-        i++;
+  public boolean isomorphic(String source, String target) {
+    // Write your solution here
+    if(source.length() != target.length()) return false;
+    Map<Character, Character> map = new HashMap<>();
+    Set<Character> set = new HashSet<>();
+
+    int i = 0;
+
+    while(i < source.length()){
+      char sourceChar = source.charAt(i);
+      char targetChar = target.charAt(i);
+
+      if(map.get(sourceChar) != null && targetChar != map.get(sourceChar) || map.get(sourceChar) == null && set.contains(targetChar)){
+        return false;
       }
-  
-      return true;
+
+      map.put(sourceChar, targetChar);
+      set.add(targetChar);
+      // map.put(targetChar, sourceChar);
+      i++;
     }
+
+    return true;
   }
+}

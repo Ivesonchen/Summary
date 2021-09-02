@@ -31,14 +31,17 @@ public class Solution {
         if(arr[fast] != ' '){
           fast ++;
         } else {
+          // 这里就是 找到 单个单词的 情况
           reverse(arr, slow, fast - 1);
   
           fast += 1;
           slow = fast;
         }
       }
+      // 翻转最后一个单词
       reverse(arr, slow, fast - 1);
   
+      // 翻转整个字符串
       reverse(arr, 0, len - 1);
   
       return new String(arr);
