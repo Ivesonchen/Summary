@@ -26,7 +26,7 @@ public class Solution {
       }
   
       for(int i = 0; i < target.length(); i++){
-        map.put(target.charAt(i), map.getOrDefault(target.charAt(i), 2) - 1);
+        map.put(target.charAt(i), map.getOrDefault(target.charAt(i), 2) - 1); // 给个双数2 
       }
   
       for(Map.Entry<Character, Integer> entry : map.entrySet()){

@@ -39,6 +39,7 @@ public class Solution {
             return false;
           }
         } else {
+          // 直接跳过 数字 代表的 位数
           int val = Integer.parseInt(String.valueOf(pattern.charAt(j)));
           num += val * Math.pow(10, pos);
           pos++;
