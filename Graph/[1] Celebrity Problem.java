@@ -42,12 +42,13 @@ public class Solution {
             break;
           }
         }
-        if(flag){
+        if(flag){  // i 这个人 不认识其他人
           row = i;
         }
       }
       if(row == -1) return -1;
   
+      // 查 其他所有人是不是认识 i 这个人
       for(int i = 0; i < rows; i++){
         if(i == row) continue;
         if(matrix[i][row] != 1) return -1;

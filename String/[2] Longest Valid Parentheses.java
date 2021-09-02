@@ -1,5 +1,6 @@
 /**
- * Given a string containing just the characters '(' and ')', find the length of the longest valid (well-formed) parentheses substring.  
+ * Given a string containing just the characters '(' and ')', 
+ find the length of the longest valid (well-formed) parentheses substring.  
 
 Example
 
@@ -20,6 +21,7 @@ public class Solution {
             stack.push(i);
             } else {
                 if(stack.isEmpty()){
+                    //  leading ')' 右括号
                     start = i;
                 } else {
                     stack.pop();

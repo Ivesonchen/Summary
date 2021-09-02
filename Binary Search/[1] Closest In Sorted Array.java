@@ -15,6 +15,9 @@ Corner Cases
 What if A is null or A is of zero length? We should return -1 in this case.
  */
 
+/**
+相当于是 左右两点相邻的时候 就要弹出循环
+ */
 
  // BS + post processing
 public class Solution {

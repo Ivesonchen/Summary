@@ -41,7 +41,7 @@ class Solution {
         }
         for (int i = 0; i < nums[index].length; i++) {
             levelList.add(nums[i]);
-            dfs(result, levelList, nums, indx+1);
+            dfs(result, levelList, nums, index+1);
             levelList.remove(levelList.size() - 1);
         }
     }

@@ -7,13 +7,9 @@ There are no duplicate keys in the binary search tree.
 Examples:
 
     5
-
   /    \
-
 2      11
-
      /    \
-
     6     14
 
 closest number to 4 is 5

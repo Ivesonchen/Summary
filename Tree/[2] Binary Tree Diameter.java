@@ -8,18 +8,12 @@ If there does not exist any such paths, return 0.
 Examples
 
     5
-
   /    \
-
 2      11
-
      /    \
-
     6     14
 
 The diameter of this tree is 4 (2 → 5 → 11 → 14)
-
-
  */
 // leaf node  到 leaf node
 public class Solution {
@@ -41,7 +35,7 @@ public class Solution {
       int right = helper(cur.right, res);
   
       if(left != 0 && right != 0) {                 // 一定要排除cur是叶子节点的情况
-        res[0] = Math.max(res[0], left + right + 1);
+        res[0] = Math.max(res[0], left + right + 1);   // 一直在每个有父节点的地方 比较左腿加右腿 + 1 的长度 
       }
       return Math.max(left, right)  + 1;
     }

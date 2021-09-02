@@ -1,5 +1,5 @@
 /**
- * Determine if a small string is a substring of another large string.
+Determine if a small string is a substring of another large string.
 
 Return the index of the first occurrence of the small string in the large string.
 

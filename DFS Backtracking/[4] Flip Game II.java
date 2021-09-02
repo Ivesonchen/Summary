@@ -9,18 +9,18 @@ For example, given s = "++++", return true. The starting player can guarantee a 
  */
 
 public class Solution {
-    public boolean canWin(String input) {
-      // Write your solution here
-      for(int i = 0; i < input.length() - 1; i++){
-        if(input.charAt(i) == '+' && input.charAt(i+1) == '+'){
-          String str = input.substring(0, i) + "--" + input.substring(i + 2, input.length());
-  
-          if(!canWin(str)){
-            return true;
-          }
+  public boolean canWin(String input) {
+    // Write your solution here
+    for(int i = 0; i < input.length() - 1; i++){
+      if(input.charAt(i) == '+' && input.charAt(i+1) == '+'){
+        String str = input.substring(0, i) + "--" + input.substring(i + 2, input.length());
+
+        if(!canWin(str)){
+          return true;
         }
       }
-      return false;
     }
+    return false;
   }
+}
   

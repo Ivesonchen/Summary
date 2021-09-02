@@ -26,6 +26,7 @@ public class Solution {
   
       while(left <= right){
         int mid = (left + right) / 2; // probably cause Integer overflow
+    //  int mid = left + (right - left) / 2
         if(array[mid] == target){
           return mid;
         } else if(array[mid] < target){
