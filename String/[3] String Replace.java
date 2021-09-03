@@ -1,5 +1,6 @@
 /**
- * Given an original string input, and two strings S and T, replace all occurrences of S in input with T.
+ * Given an original string input, and two strings S and T, 
+ replace all occurrences of S in input with T.
 
 Assumptions
 

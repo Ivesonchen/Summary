@@ -1,5 +1,6 @@
 /**
- * In URL encoding, whenever we see an space " ", we need to replace it with "20%". Provide a method that performs this encoding for a given string.
+ * In URL encoding, whenever we see an space " ", we need to replace it with "20%". 
+ Provide a method that performs this encoding for a given string.
 
 Examples
 

@@ -1,6 +1,10 @@
 /**
  * 
- * Two Strings are called isomorphic if the letters in one String can be remapped to get the second String. Remapping a letter means replacing all occurrences of it with another letter. The ordering of the letters remains unchanged. The mapping is two way and no two letters may map to the same letter, but a letter may map to itself. Determine if two given String are isomorphic.
+ * Two Strings are called isomorphic if the letters in one String can be remapped to get the second String. 
+ Remapping a letter means replacing all occurrences of it with another letter. 
+ The ordering of the letters remains unchanged. 
+ The mapping is two way and no two letters may map to the same letter, 
+ but a letter may map to itself. Determine if two given String are isomorphic.
 
 Assumptions:
 
@@ -19,7 +23,7 @@ public class Solution {
     // Write your solution here
     if(source.length() != target.length()) return false;
     Map<Character, Character> map = new HashMap<>();
-    Set<Character> set = new HashSet<>();
+    Set<Character> set = new HashSet<>();   // set 给 target char 去重
 
     int i = 0;
 
@@ -27,7 +31,8 @@ public class Solution {
       char sourceChar = source.charAt(i);
       char targetChar = target.charAt(i);
 
-      if(map.get(sourceChar) != null && targetChar != map.get(sourceChar) || map.get(sourceChar) == null && set.contains(targetChar)){
+      if(map.get(sourceChar) != null && targetChar != map.get(sourceChar)  //  source char 出现过  这次指向了不同的char
+        || map.get(sourceChar) == null && set.contains(targetChar)){       //  source char 没见过  这次指向了别人指过的target char
         return false;
       }
 
