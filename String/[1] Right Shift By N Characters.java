@@ -9,6 +9,14 @@ Examples
 
 "abc", 4 -> "cab"
  */
+
+
+ /**
+ 
+    a b c             c a b
+    0 1 2             
+ 
+  */
 // Tao-Lu
 public class Solution {
     public String rightShift(String input, int n) {

@@ -16,6 +16,15 @@ Examples
 "" is substring of "abc", return 0
  */
 
+ /**
+  bcabc
+  i
+
+  ab
+  j
+ 
+  */
+
 // O(m * n)  合适的移动指针就好
 public class Solution {
     public int strstr(String large, String small) {

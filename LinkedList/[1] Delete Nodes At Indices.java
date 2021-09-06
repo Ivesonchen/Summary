@@ -1,5 +1,6 @@
 /**
- * Given a linked list and an sorted array of integers as the indices in the list. Delete all the nodes at the indices in the original list.
+ * Given a linked list and an sorted array of integers as the indices in the list. 
+ Delete all the nodes at the indices in the original list.
 
 Examples
 
@@ -27,11 +28,12 @@ public class Solution {
       while(cur != null){
   
         if(j < indices.length && i == indices[j]){
-          pre.next = cur.next;
+          pre.next = cur.next; // 删除位置 i 上的一个节点
           cur = cur.next;
           i ++;
           j ++;
         } else {
+          // pre cur i 往后移一步
           pre = cur;
           cur = cur.next;
           i ++;

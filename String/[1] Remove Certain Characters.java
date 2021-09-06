@@ -34,7 +34,6 @@ public class Solution {
   
       return new String(arr, 0, start);
     }
-  
 }
 /**
  *      用来完全匹配 t 整个字符串

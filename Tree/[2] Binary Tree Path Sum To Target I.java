@@ -1,5 +1,6 @@
 /**
- * Given a binary tree and a target sum, determine if the tree has a root-to-leaf path such that adding up all the values along the path equals the given target.
+ * Given a binary tree and a target sum, 
+ determine if the tree has a root-to-leaf path such that adding up all the values along the path equals the given target.
 
 Example:
 Given the below binary tree and target = 16,

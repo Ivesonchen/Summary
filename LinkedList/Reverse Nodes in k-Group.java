@@ -1,5 +1,7 @@
 /**
- * Given a linked list, reverse the nodes of a linked list k at a time and return its modified list. If the number of nodes is not a multiple of k then left-out nodes in the end should remain as it is. You may not alter the values in the nodes, only nodes itself may be changed.
+ * Given a linked list, reverse the nodes of a linked list k at a time and return its modified list. 
+ If the number of nodes is not a multiple of k then left-out nodes in the end should remain as it is. 
+ You may not alter the values in the nodes, only nodes itself may be changed.
 
 Example
 

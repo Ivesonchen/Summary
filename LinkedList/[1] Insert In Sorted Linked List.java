@@ -27,6 +27,7 @@ public class Solution {
   
       ListNode cur = head;
       ListNode pre = dummy;
+      // pre cur 卡住应该插入位置的两边
   
       while(true){
         if(cur == null) break;
