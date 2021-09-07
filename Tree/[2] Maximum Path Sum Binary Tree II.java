@@ -6,13 +6,9 @@ Assumptions
 Examples
 
    -1
-
   /    \
-
 2      11
-
      /    \
-
     6    -14
 one example of paths could be -14 -> 11 -> -1 -> 2
 another example could be the node 11 itself
@@ -23,13 +19,9 @@ For Example:
 The sequence [1, 2, 3, #, #, 4] represents the following binary tree:
 
     1
-
   /   \
-
  2     3
-
       /
-
     4
  */
 public class Solution {
