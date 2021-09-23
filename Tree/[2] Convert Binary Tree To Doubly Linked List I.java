@@ -4,13 +4,9 @@ The values in the nodes of the doubly linked list should follow the in-order tra
 Examples:
 
     10
-
    /  \
-
   5    15
-
  /
-
 2
 Output:  2 <-> 5 <-> 10 <-> 15
  */
@@ -49,9 +45,7 @@ public class Solution {
         cur.right = right;
       }
       return cur;
-    }
-
-
+    } 
   }
 
 /**
