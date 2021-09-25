@@ -35,7 +35,7 @@ public class Solution {
       return result;
     }
   
-    // 找到一句话的右边界
+    // 找到一句话的右边界  返回值是 应该添加到第几个单词
     private int findRight(int left, String[] words, int maxWidth){
       int right = left;
       int sum = words[right++].length(); // init value
@@ -49,7 +49,7 @@ public class Solution {
   
     // 有了 左边界和右边界 需要调整一句话中的 空格
     private String justify(int left, int right, String[] words, int maxWidth){
-      if(right - left == 0) return padResult(words[left], maxWidth);
+      if(right - left == 0) return padResult(words[left], maxWidth); // 一行里面只有一个单词
   
       boolean isLastLine = right == words.length - 1;
       int numSpaces = right - left;
@@ -67,7 +67,8 @@ public class Solution {
   
       return padResult(result.toString().trim(), maxWidth);
     }
-  
+
+    // 指定句子中 单词的左右边界位置 计算所有单词的长度
     private int wordsLength(int left, int right, String[] words){
       int wordsLength = 0;
       for(int i = left; i <= right; i++){
@@ -75,11 +76,11 @@ public class Solution {
       }
       return wordsLength;
     }
-  
+    // 字符串后补全空白位置
     private String padResult(String result, int maxWidth){
       return result + blank(maxWidth - result.length());
     }
-  
+    // 创建指定长度的空白位置
     private String blank(int length){
       return new String(new char[length]).replace('\0', ' ');
     }

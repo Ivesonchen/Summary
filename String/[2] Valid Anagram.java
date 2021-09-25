@@ -26,7 +26,7 @@ public class Solution {
       }
   
       for(int i = 0; i < target.length(); i++){
-        map.put(target.charAt(i), map.getOrDefault(target.charAt(i), 2) - 1); // 给个双数2 
+        map.put(target.charAt(i), map.getOrDefault(target.charAt(i), 0) - 1); // 给个双数2 
       }
   
       for(Map.Entry<Character, Integer> entry : map.entrySet()){
@@ -35,6 +35,25 @@ public class Solution {
         }
       }
   
+      return true;
+    }
+
+    public boolean isAnagram (String source, String target) {
+      if(source.length() != target.length()) return false;
+
+      int map = new int[26];
+
+      for(int i = 0; i < source.length(); i++) {
+        int pos = source.charAt(i) - 'a';
+        map[pos] ++;
+      }
+
+      for(int i = 0; i < target.length(); i++) {
+        int pos = target.charAt(i) - 'a';
+        map[pos] --;
+        if(map[pos] < 0) return false;
+      }
+
       return true;
     }
   }

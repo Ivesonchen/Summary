@@ -13,6 +13,8 @@ Write the code that will take a string and make this conversion given a number o
 convert("PAYPALISHIRING", 3) should return "PAHNAPLSIIGYIR".   
  */
 
+// 初始化 n 个 横向的 string bucket
+
 public class Solution {
     public String convert(String input, int nRows) {
       // Write your solution here

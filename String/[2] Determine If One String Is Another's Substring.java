@@ -39,9 +39,11 @@ public class Solution {
       while (i < large.length()){
         if(large.charAt(i) != small.charAt(j)){
           if(j != 0){
+            // 小字符串 匹配一半
             i = start + 1;
             j = 0;
           } else {
+            // 小字符串 开头就不匹配
             i++;
             // j++;
           }

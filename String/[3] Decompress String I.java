@@ -16,6 +16,9 @@ Examples
 “acb2c4” → “acbbcccc”
  */
 
+ /**
+  * 从后往前跑  有数字的话从后往前比较方便计算
+  */
 public class Solution {
     public String decompress(String input) {
       // Write your solution here

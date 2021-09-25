@@ -18,6 +18,8 @@ Intuition
 Check all the substring one by one to see if it has no duplicate character.
 https://leetcode.com/problems/longest-substring-without-repeating-characters/solution/
   */
+
+  // 基本上就是举出来所有的组合
   public class Solution {
     public int lengthOfLongestSubstring(String s) {
         int n = s.length();
@@ -46,7 +48,7 @@ https://leetcode.com/problems/longest-substring-without-repeating-characters/sol
         return true;
     }
 }
-
+// left right 两个指针跑  每次动一个位置 就改变128数组中的 计数器
 // sliding window
 public class Solution {
   public int lengthOfLongestSubstring(String s) {

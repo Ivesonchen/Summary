@@ -11,7 +11,8 @@ Assumptions:
 The two given Strings are not null.
 Examples:
 
-"abca" and "xyzx" are isomorphic since the mapping is 'a' <-> 'x', 'b' <-> 'y', 'c' <-> 'z'.
+"abca" and "xyzx" are isomorphic since the mapping is 
+'a' <-> 'x', 'b' <-> 'y', 'c' <-> 'z'.
 
 "abba" and "cccc" are not isomorphic.
  */
@@ -31,8 +32,8 @@ public class Solution {
       char sourceChar = source.charAt(i);
       char targetChar = target.charAt(i);
 
-      if(map.get(sourceChar) != null && targetChar != map.get(sourceChar)  //  source char 出现过  这次指向了不同的char
-        || map.get(sourceChar) == null && set.contains(targetChar)){       //  source char 没见过  这次指向了别人指过的target char
+      if(map.get(sourceChar) != null && targetChar != map.get(sourceChar)//source char 出现过  这次指向了不同的char
+        || map.get(sourceChar) == null && set.contains(targetChar)){ //source char 没见过  这次指向了别人指过的target char
         return false;
       }
 

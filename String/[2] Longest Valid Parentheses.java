@@ -8,6 +8,8 @@ Example
  */
 
 //https://leetcode.com/problems/longest-valid-parentheses/solution/
+
+// start 用来处理 stack 为空时 左挡板的值
 public class Solution {
     public int longestValidParentheses(String input) {
       // Write your solution here
@@ -17,19 +19,19 @@ public class Solution {
       int maxLen = 0, start = -1;
   
         for(int i = 0; i < input.length(); i++){
-            if(input.charAt(i) == '('){
-            stack.push(i);
+            if (input.charAt(i) == '(') {
+                stack.push(i);
             } else {
-                if(stack.isEmpty()){
-                    //  leading ')' 右括号
+                if (stack.isEmpty()) {
+                    //  leading ')' 右括号  只有出现不匹配的右括号的时候 start 才更新
                     start = i;
                 } else {
                     stack.pop();
         
                     if(stack.isEmpty()){
-                    maxLen = Math.max(maxLen, i - start);
+                        maxLen = Math.max(maxLen, i - start);
                     } else {
-                    maxLen = Math.max(maxLen, i - stack.peek());
+                        maxLen = Math.max(maxLen, i - stack.peek());
                     }
                 }
             }
