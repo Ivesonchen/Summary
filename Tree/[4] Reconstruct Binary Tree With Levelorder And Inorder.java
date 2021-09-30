@@ -14,13 +14,9 @@ inorder traversal = {1, 3, 4, 5, 8, 11}
 the corresponding binary tree is
 
         5
-
       /    \
-
     3        8
-
   /   \        \
-
 1      4        11
 
 How is the binary tree represented?
@@ -32,13 +28,9 @@ For Example:
 The sequence [1, 2, 3, #, #, 4] represents the following binary tree:
 
     1
-
   /   \
-
  2     3
-
       /
-
     4
  */
 /**

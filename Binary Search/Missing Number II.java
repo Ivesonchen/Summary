@@ -1,5 +1,6 @@
 /**
- * Given an integer array of size N - 1 sorted by ascending order, containing all the numbers from 1 to N except one, find the missing number.
+ * Given an integer array of size N - 1 sorted by ascending order, 
+ * containing all the numbers from 1 to N except one, find the missing number.
 
 Assumptions
 

@@ -22,7 +22,8 @@ public class Solution {
       if(array == null || array.length == 0) return -1;
   
       int left = 0, right = array.length - 1;
-  
+      
+      // 左右相邻的时候就弹出
       while(left < right - 1){  // if left get right neighbors, then terminate
         int mid = (left + right) / 2;
         if(array[mid] == target){

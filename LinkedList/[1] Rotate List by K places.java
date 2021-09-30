@@ -24,7 +24,7 @@ public class Solution {
         tail = cur;
         cur = cur.next;
         counter ++;
-      }
+      } // 
   
       int move = n % counter;
       

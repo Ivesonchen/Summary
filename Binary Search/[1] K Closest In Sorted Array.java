@@ -1,5 +1,6 @@
 /**
- * Given a target integer T, a non-negative integer K and an integer array A sorted in ascending order, find the K closest numbers to T in A. 
+ * Given a target integer T, a non-negative integer K and an integer array A sorted in ascending order, 
+ * find the K closest numbers to T in A. 
  * If there is a tie, the smaller elements are always preferred.
 
 Assumptions
@@ -37,6 +38,9 @@ public class Solution {
           right = mid;
         }
       }
+      // 此时左右两个指针应该是相邻的
+
+      // 这个往外增长的逻辑 很有套路
       // Go to both directions from the "center"
       int i = 0;
       while (i < k && left >= 0 && right < n) {

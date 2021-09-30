@@ -25,12 +25,14 @@ public class Solution {
     while(start <= end){
       int mid = (start + end) / 2;
       if(array[mid] == target){
+        // 向左找
         while(mid >= 0 && array[mid] == target){
           mid --;
         }
         return mid + 1;
       }
       // right sorted || array[mid] < array[start]
+      // 
       if(array[start] == array[end]) {
         end--;
         continue;

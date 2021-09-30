@@ -1,5 +1,6 @@
 /**
- * Given a singly-linked list, where each node contains an integer value, sort it in ascending order. The merge sort algorithm should be used to solve this problem.
+ * Given a singly-linked list, where each node contains an integer value, sort it in ascending order. 
+ * The merge sort algorithm should be used to solve this problem.
 
 Examples
 

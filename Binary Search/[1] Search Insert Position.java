@@ -2,7 +2,8 @@
  * Given a sorted array and a target value, return the index where it would be if it were inserted in order. 
 
 Assumptions
-If there are multiple elements with value same as target, we should insert the target before the first existing element.
+If there are multiple elements with value same as target, 
+we should insert the target before the first existing element.
 
 Examples
 
@@ -45,15 +46,15 @@ public int searchInsert(int[] input, int target) {
     int right = input.length - 1;
 
     while(left < right - 1){
-    int mid = (left + right) / 2;
+        int mid = (left + right) / 2;
 
-    if(input[mid] == target){
-        right = mid;
-    } else if (input[mid] < target){
-        left = mid;
-    } else {
-        right = mid;
-    }
+        if(input[mid] == target){
+            right = mid;
+        } else if (input[mid] < target){
+            left = mid;
+        } else {
+            right = mid;
+        }
     }
     if(target <= input[left]) return left;
     if(input[right] < target) return right + 1;

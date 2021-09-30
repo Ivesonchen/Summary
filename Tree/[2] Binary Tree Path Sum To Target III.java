@@ -6,17 +6,11 @@
 Examples
 
     5
-
   /    \
-
 2      11
-
      /    \
-
     6     14
-
   /
-
  3
 
 If target = 17, There exists a path 11 + 6, the sum of the path is target.
@@ -36,13 +30,9 @@ For Example:
 The sequence [1, 2, 3, #, #, 4] represents the following binary tree:
 
     1
-
   /   \
-
  2     3
-
       /
-
     4
  */
 

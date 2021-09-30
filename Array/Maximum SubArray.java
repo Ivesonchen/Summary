@@ -37,6 +37,26 @@ class Solution {
         
         return max;
     }
+
+    maxSubArray() {
+        if (nums == null || nums.length == 0) {
+            return 0;
+        }
+        int n = nums.length;
+        // int[] dp = new int[n + 1];
+        // dp[0] = 0;
+        int temp = nums[0];
+
+        int max = Integer.MIN_VALUE;
+        for (int i = 1; i <= n; i++) {
+            
+            temp = Math.max(temp + nums[i], nums[i]); // contious, or start from nums[i-1]
+            max = Math.max(max, temp);
+        }
+        
+        return max;
+
+    }
 }
 
  /**

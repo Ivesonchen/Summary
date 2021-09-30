@@ -1,5 +1,6 @@
 /**
- * Given a target integer T and an integer array A sorted in ascending order, find the index of the last occurrence of T in A or return -1 if there is no such index.
+ * Given a target integer T and an integer array A sorted in ascending order, 
+ * find the index of the last occurrence of T in A or return -1 if there is no such index.
 
 Assumptions
 
@@ -25,7 +26,7 @@ public class Solution {
       while(left < right - 1){ // if right get left neighbors, then terminate 
         int mid = (left + right) / 2;
         if(array[mid] == target){
-          left = mid;
+          left = mid;               // 要往右找
         } else if(array[mid] < target){
           left = mid;
         } else {

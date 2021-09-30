@@ -10,13 +10,9 @@ There are no duplicate keys in the binary search tree.
 Examples
 
     5
-
   /    \
-
 2      11
-
      /    \
-
     6     14
 
 largest number smaller than 1 is Integer.MIN_VALUE(Java) or INT_MIN(c++)

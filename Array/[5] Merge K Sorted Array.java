@@ -19,9 +19,14 @@ public class Solution {
                   return Integer.valueOf(o1[map.get(o1)]).compareTo(Integer.valueOf(o2[map.get(o2)]));
               }
           });
+
+          PriorityQueue<int[]> pq = new PriorityQueue<>((int[] a, int[] b) -> return a[map.get(a)] - b[map.get(b)])
+          
   
           // PriorityQueue<int[]> pq = new PriorityQueue<>((int[] o1, int[] o2) -> Integer.valueOf(o1[map.get(o1)]).compareTo(Integer.valueOf(o2[map.get(o2)])));
   
+
+          // 计算了总长度   初始化了 map   pq进行排序
           int size = 0;
           for (int[] arr : arrayOfArrays) {
               size += arr.length;

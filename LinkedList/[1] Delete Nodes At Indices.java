@@ -24,10 +24,13 @@ public class Solution {
       ListNode cur = head;
   
       int i = 0, j = 0;
+      // cur 指 linkedlist 的 node 位置
+      // i 指 linkedlist 的 序列号位置
+      // j 指 indeces 数组 的 序列号位置
   
       while(cur != null){
   
-        if(j < indices.length && i == indices[j]){
+        if (j < indices.length && i == indices[j]){
           pre.next = cur.next; // 删除位置 i 上的一个节点
           cur = cur.next;
           i ++;

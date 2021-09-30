@@ -6,17 +6,13 @@
 Examples
 
 1  --   2
-
     /   
-
 3  --   4
 
 is bipartite (1, 3 in group 1 and 2, 4 in group 2).
 
 1  --   2
-
     /   |
-
 3  --   4
 
 is not bipartite.
