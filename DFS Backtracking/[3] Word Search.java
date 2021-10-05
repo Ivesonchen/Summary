@@ -50,7 +50,7 @@ public class Solution {
   
         board[x][y] = '#';
         for(int i = 0; i < 4; i++){
-          res = dfs(board, word, x + dx[i], y + dy[i], index + 1);
+          res = dfs(board, word, x + dx[i], y + dy[i], index + 1); // 但凡有一个方向能走下去 就返回true
           if(res) break;
         }
         board[x][y] = word.charAt(index);

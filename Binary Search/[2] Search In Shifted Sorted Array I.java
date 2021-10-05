@@ -16,7 +16,12 @@ A = {3, 5, 6, 1, 2}, T = 4, return -1
 Corner Cases
 
 What if A is null or A is of zero length? We should return -1 in this case.
+https://leetcode.com/problems/search-in-rotated-sorted-array/
 */
+/**
+ * 1. 先找到rotation 的位置  rot
+ * 2. 然后在再行一次binary search 用公式 realmid = (fakeMid + rot) % len
+ */
 
 public class Solution {
     public int search(int[] array, int target) {

@@ -1,5 +1,6 @@
 /**
- * Given an array of strings, and two different string s and t. We need to return the smallest indices difference between the two given strings.
+ * Given an array of strings, and two different string s and t. 
+ * We need to return the smallest indices difference between the two given strings.
 
 Return -1 if we can not find s or t in the array.
 

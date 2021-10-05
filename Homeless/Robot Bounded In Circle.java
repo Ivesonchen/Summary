@@ -24,7 +24,7 @@ When repeating these instructions, the robot remains in the circle of radius 2 c
 
 class Solution {
     public boolean isRobotBounded(String instructions) {
-        int[][] direction = {{0,1}, {1,0}, {0, -1}, {-1, 0}};  // 有技巧   向左或者向右的不能市dir 变成负值
+        int[][] direction = {{0,1}, {1,0}, {0, -1}, {-1, 0}};  // 有技巧   向左或者向右的不能使dir 变成负值
         
         int x = 0, y = 0;
         int dir = 0;
