@@ -48,3 +48,23 @@ public class Solution {
       return new String(Arrays.copyOfRange(arr, 0, start));
     }
   }
+
+  public int compress (char[] chars) {
+    int start = 0, index = 0;
+    while(index < chars.length) {
+        char c = chars[index];
+        int counter = 0;
+        while(index < chars.length && chars[index] == c) {
+            index++;
+            counter++;
+        }
+        
+        chars[start++] = c;
+        if(counter != 1) {
+            for(char cc : Integer.toString(counter).toCharArray())
+                chars[start++] = cc;
+        }
+        
+    }
+    return start;
+}

@@ -38,4 +38,17 @@ public class Solution {
     return res;
   }
 }
-  
+
+/**
+ *              [-1, 2, 1, -4]
+ */
+
+public int helper (int[] num, int target) {
+  for(int i = 0; i < num.length - 2; i++) {
+    for(int j = i + 1; j < num.length - 1; j++) {
+      for(int k = j + 1; k < num.length; k++) {
+
+      }
+    }
+  }
+}

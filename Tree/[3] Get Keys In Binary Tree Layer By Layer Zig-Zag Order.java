@@ -4,13 +4,9 @@
 Examples
 
         5
-
       /    \
-
     3        8
-
   /   \        \
-
  1     4        11
 
 the result is [5, 3, 8, 11, 4, 1]
@@ -27,13 +23,9 @@ For Example:
 The sequence [1, 2, 3, #, #, 4] represents the following binary tree:
 
     1
-
   /   \
-
  2     3
-
       /
-
     4
  */
 

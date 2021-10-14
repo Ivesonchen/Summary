@@ -35,3 +35,39 @@ class Solution {
         return res;
     }
 }
+
+class Solution {
+    public int[][] merge(int[][] intervals) {
+        List<int[]> res = new ArrayList<>();
+        Arrays.sort(intervals, (a,b) -> a[0] - b[0]);
+        
+        int start = intervals[0][0];
+        int end = intervals[0][1];
+        
+        for(int i = 1; i < intervals.length; i++) {
+            int newStart = intervals[i][0];
+            int newEnd = intervals[i][1];
+            
+            if(newStart <= end) {
+                // overlap
+                start = Math.min(start, newStart);
+                end = Math.max(end, newEnd);
+            } else {
+                res.add(new int[] {start, end});
+                
+                start = newStart;
+                end = newEnd;
+            }
+        }
+        
+        res.add(new int[]{start, end});
+        
+//         int[][] fResult = new int[res.size()][];
+        
+//         for(int i = 0; i < res.size(); i++) {
+//             fResult[i] = res.get(i);
+//         }
+        
+        return res.toArray(new int[res.size()][]);
+    }
+}

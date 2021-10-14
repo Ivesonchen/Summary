@@ -1,5 +1,6 @@
 /**
- * Given an integer array A, A is sorted in ascending order first then shifted by an arbitrary number of positions, For Example, A = {3, 4, 5, 1, 2} (shifted left by 2 positions). Find the index of the smallest number.
+ * Given an integer array A, A is sorted in ascending order first then shifted by an arbitrary number of positions, 
+ * For Example, A = {3, 4, 5, 1, 2} (shifted left by 2 positions). Find the index of the smallest number.
 
 Assumptions
 

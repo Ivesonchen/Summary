@@ -17,6 +17,10 @@ A = {3, 1, 3, 3, 3}, T = 1, return 1
 What if A is null or A is of zero length? We should return -1 in this case.
  */
 
+/**
+ * 
+ */
+
 public class Solution {
   public int search(int[] array, int target) {
     // Write your solution here
