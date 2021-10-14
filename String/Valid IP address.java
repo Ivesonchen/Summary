@@ -28,7 +28,9 @@ public class Solution {
       for(int i=0;i<4;i++){
           try{
               if(temp[i].startsWith("0")&&temp[i].length()>1) return false;
-              if(Integer.parseInt(temp[i])>255 || temp[i].charAt(0)=='-' || temp[i].charAt(0)=='+')return false;    
+              if(Integer.parseInt(temp[i])>255 || 
+              temp[i].charAt(0)=='-' || 
+              temp[i].charAt(0)=='+')return false;    
           }
           catch(NumberFormatException e){
               System.out.println("ERROR");
@@ -45,7 +47,9 @@ public class Solution {
       for(int i=0;i<8;i++){
           if(temp[i].length()>4||temp[i].length()==0)return false;
           for(int j=0;j<temp[i].length();j++){
-              if((temp[i].charAt(j)>='0' && temp[i].charAt(j)<='9') || (temp[i].charAt(j)>='a' && temp[i].charAt(j)<='f') || (temp[i].charAt(j)>='A' && temp[i].charAt(j)<='F')){}
+              if((temp[i].charAt(j)>='0' && temp[i].charAt(j)<='9') 
+              || (temp[i].charAt(j)>='a' && temp[i].charAt(j)<='f') 
+              || (temp[i].charAt(j)>='A' && temp[i].charAt(j)<='F')){}
               else return false;
           }
       }
