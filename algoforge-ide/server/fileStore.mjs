@@ -100,8 +100,37 @@ function buildTreeFromPaths(paths) {
       }
     }
   }
-  return toNodes(root);
+  return collapseProblems(toNodes(root));
 }
+
+/**
+ * Collapse each "problem folder" (a folder directly containing one or more
+ * `solution.<ext>` files) into a single `problem` node carrying the available
+ * languages. This makes each algorithm a single explorer entry with a language
+ * switcher instead of a folder of loose files.
+ */
+function collapseProblems(nodes) {
+  const out = [];
+  for (const node of nodes) {
+    if (node.type !== 'folder') {
+      out.push(node);
+      continue;
+    }
+    const solutionFiles = node.children.filter(
+      (c) => c.type === 'file' && path.basename(c.name, path.extname(c.name)).toLowerCase() === 'solution'
+    );
+    if (solutionFiles.length > 0) {
+      const languages = solutionFiles
+        .map((f) => ({ ext: f.ext, path: f.path }))
+        .sort((a, b) => a.ext.localeCompare(b.ext));
+      out.push({ type: 'problem', name: node.name, path: node.path, languages });
+    } else {
+      out.push({ ...node, children: collapseProblems(node.children) });
+    }
+  }
+  return out;
+}
+
 
 /** Base class: shares tree assembly; subclasses provide the raw data. */
 class FileStore {
@@ -200,6 +229,17 @@ class DiskFileStore extends FileStore {
     }
   }
 
+  async getMeta(folderPath) {
+    const absPath = path.resolve(this.root, folderPath, 'meta.json');
+    const rootWithSep = this.root.endsWith(path.sep) ? this.root : this.root + path.sep;
+    if (!absPath.startsWith(rootWithSep)) throw new FileError('Invalid path', 400);
+    try {
+      return JSON.parse(fs.readFileSync(absPath, 'utf8'));
+    } catch {
+      return {}; // missing/invalid meta -> no metadata
+    }
+  }
+
   rootName() {
     return path.basename(this.root);
   }
@@ -236,6 +276,16 @@ class BlobFileStore extends FileStore {
     } catch (err) {
       if (err.statusCode === 404) throw new FileError('Not found', 404);
       throw new FileError('Failed to read file', 500);
+    }
+  }
+
+  async getMeta(folderPath) {
+    const blobName = `${folderPath.replace(/\/$/, '')}/meta.json`;
+    try {
+      const buffer = await this.container.getBlobClient(blobName).downloadToBuffer();
+      return JSON.parse(buffer.toString('utf8'));
+    } catch {
+      return {}; // missing/invalid meta -> no metadata
     }
   }
 

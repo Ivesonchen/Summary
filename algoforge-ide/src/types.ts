@@ -14,7 +14,21 @@ export interface FolderNode {
   children: TreeNode[];
 }
 
-export type TreeNode = FolderNode | FileNode;
+/** One language variant of a problem (a `solution.<ext>` file). */
+export interface ProblemLanguage {
+  ext: string;
+  path: string;
+}
+
+/** An algorithm folder collapsed into a single problem with language variants. */
+export interface ProblemNode {
+  type: 'problem';
+  name: string;
+  path: string;
+  languages: ProblemLanguage[];
+}
+
+export type TreeNode = FolderNode | FileNode | ProblemNode;
 
 /** A top-level explorer section (Categories, Companies, Design, Random, …). */
 export interface Section {
@@ -31,6 +45,11 @@ export interface FileResponse {
   path: string;
   content: string;
   ext: string;
+}
+
+export interface ProblemResponse {
+  path: string;
+  meta: { group?: number };
 }
 
 export type Language = 'java' | 'python' | 'javascript' | 'typescript' | 'cpp' | 'c' | 'go' | 'unknown';

@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import Icon from '../Icon';
-import type { FileNode, FolderNode, Section, TreeNode } from '../../types';
+import type { FileNode, FolderNode, ProblemNode, Section, TreeNode } from '../../types';
 
 interface FileExplorerProps {
   sections: Section[];
   rootName: string;
   selectedPath: string | null;
   onSelect: (file: FileNode) => void;
+  onSelectProblem: (problem: ProblemNode) => void;
   loading: boolean;
   error: string | null;
 }
@@ -19,12 +20,59 @@ const SECTION_ICON: Record<string, string> = {
   Random: 'shuffle',
 };
 
+// Accent color per language extension (for the problem's language dots).
+const EXT_COLOR: Record<string, string> = {
+  java: 'text-error',
+  py: 'text-secondary',
+  js: 'text-tertiary',
+  ts: 'text-primary',
+  cpp: 'text-primary',
+  c: 'text-outline',
+  go: 'text-secondary-fixed-dim',
+};
+
 const DIFFICULTY_COLOR: Record<number, string> = {
   1: 'text-secondary',
   2: 'text-primary',
   3: 'text-tertiary',
   4: 'text-error',
 };
+
+function ProblemRow({
+  node,
+  depth,
+  selectedPath,
+  onSelectProblem,
+}: {
+  node: ProblemNode;
+  depth: number;
+  selectedPath: string | null;
+  onSelectProblem: (p: ProblemNode) => void;
+}) {
+  const selected = node.path === selectedPath;
+  return (
+    <div
+      onClick={() => onSelectProblem(node)}
+      style={{ paddingLeft: `${depth * 12 + 8}px` }}
+      className={`flex items-center gap-xs py-1 pr-sm cursor-pointer rounded font-code-sm text-code-sm truncate ${
+        selected
+          ? 'bg-surface-variant/40 text-secondary-fixed-dim border-l-2 border-secondary-fixed-dim'
+          : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/40'
+      }`}
+      title={`${node.name} — ${node.languages.map((l) => l.ext).join(', ')}`}
+    >
+      <Icon name="code" size={15} className="text-secondary shrink-0" />
+      <span className="truncate">{node.name}</span>
+      <span className="ml-auto flex items-center gap-[3px] shrink-0">
+        {node.languages.map((l) => (
+          <span key={l.ext} className={`text-[8px] font-bold uppercase ${EXT_COLOR[l.ext] ?? 'text-outline'}`}>
+            {l.ext}
+          </span>
+        ))}
+      </span>
+    </div>
+  );
+}
 
 function FileRow({
   node,
@@ -61,17 +109,20 @@ function FileRow({
   );
 }
 
+
 function FolderRow({
   node,
   depth,
   selectedPath,
   onSelect,
+  onSelectProblem,
   defaultOpen,
 }: {
   node: FolderNode;
   depth: number;
   selectedPath: string | null;
   onSelect: (f: FileNode) => void;
+  onSelectProblem: (p: ProblemNode) => void;
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(!!defaultOpen);
@@ -86,36 +137,58 @@ function FolderRow({
         <Icon name={open ? 'folder_open' : 'folder'} size={15} className="text-outline shrink-0" />
         <span className="truncate">{node.name}</span>
       </div>
-      {open && (
-        <div>
-          {node.children.map((child: TreeNode) =>
-            child.type === 'folder' ? (
-              <FolderRow
-                key={child.path}
-                node={child}
-                depth={depth + 1}
-                selectedPath={selectedPath}
-                onSelect={onSelect}
-              />
-            ) : (
-              <FileRow key={child.path} node={child} depth={depth + 1} selectedPath={selectedPath} onSelect={onSelect} />
-            )
-          )}
-        </div>
-      )}
+      {open && <div>{renderChildren(node.children, depth + 1, selectedPath, onSelect, onSelectProblem)}</div>}
     </div>
   );
+}
+
+/** Render a list of tree children (folders, problems, and loose files). */
+function renderChildren(
+  children: TreeNode[],
+  depth: number,
+  selectedPath: string | null,
+  onSelect: (f: FileNode) => void,
+  onSelectProblem: (p: ProblemNode) => void
+) {
+  return children.map((child) => {
+    if (child.type === 'folder') {
+      return (
+        <FolderRow
+          key={child.path}
+          node={child}
+          depth={depth}
+          selectedPath={selectedPath}
+          onSelect={onSelect}
+          onSelectProblem={onSelectProblem}
+        />
+      );
+    }
+    if (child.type === 'problem') {
+      return (
+        <ProblemRow
+          key={child.path}
+          node={child}
+          depth={depth}
+          selectedPath={selectedPath}
+          onSelectProblem={onSelectProblem}
+        />
+      );
+    }
+    return <FileRow key={child.path} node={child} depth={depth} selectedPath={selectedPath} onSelect={onSelect} />;
+  });
 }
 
 function SectionGroup({
   section,
   selectedPath,
   onSelect,
+  onSelectProblem,
   defaultOpen,
 }: {
   section: Section;
   selectedPath: string | null;
   onSelect: (f: FileNode) => void;
+  onSelectProblem: (p: ProblemNode) => void;
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(!!defaultOpen);
@@ -135,13 +208,7 @@ function SectionGroup({
           {section.children.length === 0 && (
             <div className="pl-8 py-1 text-outline font-code-sm text-code-sm italic">empty</div>
           )}
-          {section.children.map((child: TreeNode) =>
-            child.type === 'folder' ? (
-              <FolderRow key={child.path} node={child} depth={1} selectedPath={selectedPath} onSelect={onSelect} />
-            ) : (
-              <FileRow key={child.path} node={child} depth={1} selectedPath={selectedPath} onSelect={onSelect} />
-            )
-          )}
+          {renderChildren(section.children, 1, selectedPath, onSelect, onSelectProblem)}
         </div>
       )}
     </div>
@@ -153,6 +220,7 @@ export default function FileExplorer({
   rootName,
   selectedPath,
   onSelect,
+  onSelectProblem,
   loading,
   error,
 }: FileExplorerProps) {
@@ -181,6 +249,7 @@ export default function FileExplorer({
               section={section}
               selectedPath={selectedPath}
               onSelect={onSelect}
+              onSelectProblem={onSelectProblem}
               defaultOpen={i === 0}
             />
           ))}

@@ -65,6 +65,20 @@ app.get('/api/file', async (req, res) => {
   }
 });
 
+// GET /api/problem?path=<algorithm folder> -> { path, meta } (meta.json contents, e.g. { group }).
+app.get('/api/problem', async (req, res) => {
+  const relPath = String(req.query.path || '');
+  if (!relPath) return res.status(400).json({ error: 'Missing path' });
+  try {
+    const meta = await store.getMeta(relPath);
+    res.json({ path: relPath, meta });
+  } catch (err) {
+    if (err instanceof FileError) return res.status(err.status).json({ error: err.message });
+    console.error('problem error:', err);
+    res.status(500).json({ error: 'Failed to read problem metadata' });
+  }
+});
+
 // POST /api/run { source, language, stdin } -> executes in the Piston sandbox.
 app.post('/api/run', async (req, res) => {
   const { source, language, stdin } = req.body || {};

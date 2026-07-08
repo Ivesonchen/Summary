@@ -1,4 +1,4 @@
-import type { FileResponse, Language, RunResult, TreeResponse } from '../types';
+import type { FileResponse, Language, ProblemResponse, RunResult, TreeResponse } from '../types';
 
 // API origin. Empty in dev (Vite proxies /api to the local server); set to the
 // Container Apps URL at build time via VITE_API_BASE for the deployed frontend.
@@ -7,6 +7,13 @@ const API_BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/$/, '');
 export async function fetchTree(): Promise<TreeResponse> {
   const res = await fetch(`${API_BASE}/api/tree`);
   if (!res.ok) throw new Error(`Failed to load tree (${res.status})`);
+  return res.json();
+}
+
+/** Fetch a problem's metadata (e.g. group) from its algorithm folder path. */
+export async function fetchProblem(path: string): Promise<ProblemResponse> {
+  const res = await fetch(`${API_BASE}/api/problem?path=${encodeURIComponent(path)}`);
+  if (!res.ok) throw new Error(`Failed to load problem (${res.status})`);
   return res.json();
 }
 

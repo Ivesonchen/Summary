@@ -4,11 +4,13 @@ import FileExplorer from './components/Sidebar/FileExplorer';
 import SolutionPane from './components/Editor/SolutionPane';
 import PracticePane from './components/Editor/PracticePane';
 import BottomPanel from './components/BottomPanel/Console';
-import { extToLanguage, extToMonaco, fetchFile, fetchTree, runCode } from './lib/api';
+import { extToLanguage, extToMonaco, fetchFile, fetchProblem, fetchTree, runCode } from './lib/api';
 import { compareRuns } from './lib/compare';
 import type {
   FileNode,
   Language,
+  ProblemLanguage,
+  ProblemNode,
   RunResult,
   Section,
   TestOutcome,
@@ -34,9 +36,16 @@ export default function App() {
   const [treeLoading, setTreeLoading] = useState(true);
   const [treeError, setTreeError] = useState<string | null>(null);
 
-  const [selected, setSelected] = useState<FileNode | null>(null);
+  // Selection: either a standalone problem (algorithm folder) or a loose file.
+  const [selectedPath, setSelectedPath] = useState<string | null>(null);
+  const [title, setTitle] = useState<string | null>(null);
+  const [problemLangs, setProblemLangs] = useState<ProblemLanguage[]>([]);
+  const [activeExt, setActiveExt] = useState<string | null>(null);
+  const [group, setGroup] = useState<number | null>(null);
+
   const [solution, setSolution] = useState('');
   const [fileLoading, setFileLoading] = useState(false);
+  const [solutionName, setSolutionName] = useState<string | null>(null);
   const [monacoLang, setMonacoLang] = useState('plaintext');
   const [language, setLanguage] = useState<Language>('unknown');
 
@@ -58,18 +67,20 @@ export default function App() {
       .finally(() => setTreeLoading(false));
   }, []);
 
-  const handleSelect = useCallback(async (file: FileNode) => {
-    setSelected(file);
+  // Load a single solution.<ext> file into the editor and reset run state.
+  const loadSolution = useCallback(async (filePath: string, ext: string) => {
     setFileLoading(true);
     setPracticeResult(null);
     setTestOutcome(null);
     setStatus(null);
-    const lang = extToLanguage(file.ext);
+    const lang = extToLanguage(ext);
     setLanguage(lang);
-    setMonacoLang(extToMonaco(file.ext));
+    setActiveExt(ext);
+    setMonacoLang(extToMonaco(ext));
     setPractice(STARTER[lang]);
+    setSolutionName(filePath.split('/').pop() ?? null);
     try {
-      const res = await fetchFile(file.path);
+      const res = await fetchFile(filePath);
       setSolution(res.content);
     } catch (e) {
       setSolution(`// Failed to load file: ${(e as Error).message}`);
@@ -77,6 +88,44 @@ export default function App() {
       setFileLoading(false);
     }
   }, []);
+
+  // Selecting a problem: load its default language (prefer Java) and fetch group.
+  const handleSelectProblem = useCallback(
+    async (problem: ProblemNode) => {
+      setSelectedPath(problem.path);
+      setTitle(problem.name);
+      setProblemLangs(problem.languages);
+      setGroup(null);
+      const preferred =
+        problem.languages.find((l) => l.ext === 'java') ?? problem.languages[0];
+      if (preferred) await loadSolution(preferred.path, preferred.ext);
+      fetchProblem(problem.path)
+        .then((p) => setGroup(p.meta?.group ?? null))
+        .catch(() => setGroup(null));
+    },
+    [loadSolution]
+  );
+
+  // Switch language within the current problem.
+  const handleSwitchLanguage = useCallback(
+    (ext: string) => {
+      const lang = problemLangs.find((l) => l.ext === ext);
+      if (lang) loadSolution(lang.path, lang.ext);
+    },
+    [problemLangs, loadSolution]
+  );
+
+  // Selecting a loose (non-problem) file.
+  const handleSelect = useCallback(
+    async (file: FileNode) => {
+      setSelectedPath(file.path);
+      setTitle(file.display);
+      setProblemLangs([]);
+      setGroup(null);
+      await loadSolution(file.path, file.ext);
+    },
+    [loadSolution]
+  );
 
   const handleRun = useCallback(async () => {
     if (running) return;
@@ -115,8 +164,12 @@ export default function App() {
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <TopNavBar
-        fileName={selected?.display ?? null}
+        fileName={title}
         language={language}
+        languages={problemLangs}
+        activeExt={activeExt}
+        group={group}
+        onSwitchLanguage={handleSwitchLanguage}
         runnable={language !== 'unknown'}
         running={running}
         onRun={handleRun}
@@ -125,8 +178,9 @@ export default function App() {
         <FileExplorer
           sections={sections}
           rootName={rootName}
-          selectedPath={selected?.path ?? null}
+          selectedPath={selectedPath}
           onSelect={handleSelect}
+          onSelectProblem={handleSelectProblem}
           loading={treeLoading}
           error={treeError}
         />
@@ -135,7 +189,7 @@ export default function App() {
             <SolutionPane
               content={solution}
               monacoLang={monacoLang}
-              fileName={selected?.name ?? null}
+              fileName={solutionName}
               loading={fileLoading}
             />
             <PracticePane
