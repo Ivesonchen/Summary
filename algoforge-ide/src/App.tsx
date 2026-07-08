@@ -8,9 +8,9 @@ import { extToLanguage, extToMonaco, fetchFile, fetchTree, runCode } from './lib
 import { compareRuns } from './lib/compare';
 import type {
   FileNode,
-  FolderNode,
   Language,
   RunResult,
+  Section,
   TestOutcome,
 } from './types';
 
@@ -29,8 +29,7 @@ const STARTER: Record<Language, string> = {
 };
 
 export default function App() {
-  const [categories, setCategories] = useState<FolderNode[]>([]);
-  const [companies, setCompanies] = useState<FolderNode[]>([]);
+  const [sections, setSections] = useState<Section[]>([]);
   const [rootName, setRootName] = useState('');
   const [treeLoading, setTreeLoading] = useState(true);
   const [treeError, setTreeError] = useState<string | null>(null);
@@ -52,8 +51,7 @@ export default function App() {
   useEffect(() => {
     fetchTree()
       .then((t) => {
-        setCategories(t.categories);
-        setCompanies(t.companies);
+        setSections(t.sections);
         setRootName(t.root.toUpperCase());
       })
       .catch((e) => setTreeError(e.message))
@@ -125,8 +123,7 @@ export default function App() {
       />
       <main className="flex-1 flex overflow-hidden min-h-0">
         <FileExplorer
-          categories={categories}
-          companies={companies}
+          sections={sections}
           rootName={rootName}
           selectedPath={selected?.path ?? null}
           onSelect={handleSelect}

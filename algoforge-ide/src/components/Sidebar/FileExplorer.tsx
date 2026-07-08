@@ -1,16 +1,23 @@
 import { useState } from 'react';
 import Icon from '../Icon';
-import type { FileNode, FolderNode, TreeNode } from '../../types';
+import type { FileNode, FolderNode, Section, TreeNode } from '../../types';
 
 interface FileExplorerProps {
-  categories: FolderNode[];
-  companies: FolderNode[];
+  sections: Section[];
   rootName: string;
   selectedPath: string | null;
   onSelect: (file: FileNode) => void;
   loading: boolean;
   error: string | null;
 }
+
+// Icon per known top-level section; falls back to a folder icon.
+const SECTION_ICON: Record<string, string> = {
+  Categories: 'category',
+  Companies: 'business',
+  Design: 'dashboard',
+  Random: 'shuffle',
+};
 
 const DIFFICULTY_COLOR: Record<number, string> = {
   1: 'text-secondary',
@@ -100,18 +107,49 @@ function FolderRow({
   );
 }
 
-function Group({ label, icon }: { label: string; icon: string }) {
+function SectionGroup({
+  section,
+  selectedPath,
+  onSelect,
+  defaultOpen,
+}: {
+  section: Section;
+  selectedPath: string | null;
+  onSelect: (f: FileNode) => void;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(!!defaultOpen);
+  const icon = SECTION_ICON[section.name] ?? 'folder';
   return (
-    <div className="flex items-center gap-xs px-sm pt-md pb-1 text-on-surface-variant">
-      <Icon name={icon} size={15} className="text-secondary" />
-      <span className="font-label-caps text-label-caps uppercase tracking-wider">{label}</span>
+    <div className="pt-2">
+      <div
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center gap-xs px-sm py-1 cursor-pointer rounded hover:bg-surface-variant/40 text-on-surface"
+      >
+        <Icon name={open ? 'expand_more' : 'chevron_right'} size={16} className="text-outline shrink-0" />
+        <Icon name={icon} size={15} className="text-secondary shrink-0" />
+        <span className="font-label-caps text-label-caps uppercase tracking-wider">{section.name}</span>
+      </div>
+      {open && (
+        <div className="space-y-px mt-1">
+          {section.children.length === 0 && (
+            <div className="pl-8 py-1 text-outline font-code-sm text-code-sm italic">empty</div>
+          )}
+          {section.children.map((child: TreeNode) =>
+            child.type === 'folder' ? (
+              <FolderRow key={child.path} node={child} depth={1} selectedPath={selectedPath} onSelect={onSelect} />
+            ) : (
+              <FileRow key={child.path} node={child} depth={1} selectedPath={selectedPath} onSelect={onSelect} />
+            )
+          )}
+        </div>
+      )}
     </div>
   );
 }
 
 export default function FileExplorer({
-  categories,
-  companies,
+  sections,
   rootName,
   selectedPath,
   onSelect,
@@ -135,39 +173,17 @@ export default function FileExplorer({
         {loading && <div className="p-md text-outline font-code-sm text-code-sm">Loading files…</div>}
         {error && <div className="p-md text-error font-code-sm text-code-sm">{error}</div>}
 
-        {!loading && !error && (
-          <>
-            <Group label="Categories" icon="category" />
-            <div className="space-y-px">
-              {categories.map((folder) => (
-                <FolderRow
-                  key={folder.path}
-                  node={folder}
-                  depth={0}
-                  selectedPath={selectedPath}
-                  onSelect={onSelect}
-                />
-              ))}
-            </div>
-
-            {companies.length > 0 && (
-              <>
-                <Group label="Companies" icon="business" />
-                <div className="space-y-px">
-                  {companies.map((folder) => (
-                    <FolderRow
-                      key={folder.path}
-                      node={folder}
-                      depth={0}
-                      selectedPath={selectedPath}
-                      onSelect={onSelect}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
-          </>
-        )}
+        {!loading &&
+          !error &&
+          sections.map((section, i) => (
+            <SectionGroup
+              key={section.name}
+              section={section}
+              selectedPath={selectedPath}
+              onSelect={onSelect}
+              defaultOpen={i === 0}
+            />
+          ))}
       </div>
     </aside>
   );

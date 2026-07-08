@@ -26,13 +26,13 @@ const IGNORED = new Set([
   'algoforge-ide', // don't list the IDE itself
 ]);
 
-// Top-level folders shown under "Companies" instead of "Categories".
-const COMPANY_FOLDERS = new Set(
-  (process.env.COMPANY_FOLDERS || 'Amazon')
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean)
-);
+// Top-level sections shown in the explorer, in display order. Each section is a
+// top-level folder in the repo (Categories, Companies, Design, Random). Sections
+// that currently hold no source files (e.g. an empty Random) are still displayed.
+const SECTIONS = (process.env.SECTIONS || 'Categories,Companies,Design,Random')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 /** Error carrying an HTTP status for the route layer to surface. */
 export class FileError extends Error {
@@ -118,26 +118,29 @@ class FileStore {
   async getTree() {
     const paths = await this.listSourcePaths();
     const top = buildTreeFromPaths(paths);
-    const categories = [];
-    const companies = [];
-    const seenCompanies = new Set();
+
+    // Index the top-level section folders that actually contain source files.
+    const byName = new Map();
     for (const node of top) {
-      if (node.type !== 'folder') continue;
-      if (COMPANY_FOLDERS.has(node.name)) {
-        companies.push(node);
-        seenCompanies.add(node.name);
-      } else {
-        categories.push(node);
+      if (node.type === 'folder') byName.set(node.name, node);
+    }
+
+    const sections = [];
+    const seen = new Set();
+    // Emit the known sections first, in configured order (empty ones included).
+    for (const name of SECTIONS) {
+      const node = byName.get(name);
+      sections.push({ name, children: node ? node.children : [] });
+      seen.add(name);
+    }
+    // Append any other top-level folders not covered by the known sections.
+    for (const node of top) {
+      if (node.type === 'folder' && !seen.has(node.name)) {
+        sections.push({ name: node.name, children: node.children });
       }
     }
-    // Always surface configured company folders, even if they hold no source files yet.
-    for (const name of COMPANY_FOLDERS) {
-      if (!seenCompanies.has(name)) {
-        companies.push({ type: 'folder', name, path: name, children: [] });
-      }
-    }
-    companies.sort(byName);
-    return { categories, companies, root: this.rootName() };
+
+    return { sections, root: this.rootName() };
   }
 }
 

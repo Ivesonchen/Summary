@@ -16,9 +16,14 @@ export interface FolderNode {
 
 export type TreeNode = FolderNode | FileNode;
 
+/** A top-level explorer section (Categories, Companies, Design, Random, …). */
+export interface Section {
+  name: string;
+  children: TreeNode[];
+}
+
 export interface TreeResponse {
-  categories: FolderNode[];
-  companies: FolderNode[];
+  sections: Section[];
   root: string;
 }
 
