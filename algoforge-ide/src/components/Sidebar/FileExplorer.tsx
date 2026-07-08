@@ -8,6 +8,7 @@ interface FileExplorerProps {
   selectedPath: string | null;
   onSelect: (file: FileNode) => void;
   onSelectProblem: (problem: ProblemNode) => void;
+  onCreate: () => void;
   loading: boolean;
   error: string | null;
 }
@@ -150,6 +151,9 @@ function renderChildren(
   onSelect: (f: FileNode) => void,
   onSelectProblem: (p: ProblemNode) => void
 ) {
+  const hasProblems = children.some((c) => c.type === 'problem');
+  let lastGroup: number | null | undefined = undefined;
+
   return children.map((child) => {
     if (child.type === 'folder') {
       return (
@@ -164,14 +168,30 @@ function renderChildren(
       );
     }
     if (child.type === 'problem') {
+      // Insert a small group divider whenever the group changes within this list.
+      const g = child.group ?? null;
+      const showDivider = hasProblems && g !== lastGroup;
+      lastGroup = g;
       return (
-        <ProblemRow
-          key={child.path}
-          node={child}
-          depth={depth}
-          selectedPath={selectedPath}
-          onSelectProblem={onSelectProblem}
-        />
+        <div key={child.path}>
+          {showDivider && (
+            <div
+              style={{ paddingLeft: `${depth * 12 + 8}px` }}
+              className="flex items-center gap-xs pt-1.5 pb-0.5 text-outline"
+            >
+              <span className="font-label-caps text-[9px] uppercase tracking-wider">
+                {g == null ? 'Ungrouped' : `Group ${g}`}
+              </span>
+              <span className="flex-1 h-px bg-outline-variant/40" />
+            </div>
+          )}
+          <ProblemRow
+            node={child}
+            depth={depth}
+            selectedPath={selectedPath}
+            onSelectProblem={onSelectProblem}
+          />
+        </div>
       );
     }
     return <FileRow key={child.path} node={child} depth={depth} selectedPath={selectedPath} onSelect={onSelect} />;
@@ -221,6 +241,7 @@ export default function FileExplorer({
   selectedPath,
   onSelect,
   onSelectProblem,
+  onCreate,
   loading,
   error,
 }: FileExplorerProps) {
@@ -253,6 +274,16 @@ export default function FileExplorer({
               defaultOpen={i === 0}
             />
           ))}
+      </div>
+
+      <div className="p-sm border-t border-outline-variant">
+        <button
+          onClick={onCreate}
+          className="w-full bg-surface-variant text-on-surface-variant px-md py-2 rounded font-code-sm text-code-sm hover:text-primary transition-colors flex items-center justify-center gap-xs"
+        >
+          <Icon name="add_circle" size={18} />
+          Create
+        </button>
       </div>
     </aside>
   );

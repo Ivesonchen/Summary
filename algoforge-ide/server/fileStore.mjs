@@ -42,6 +42,35 @@ export class FileError extends Error {
   }
 }
 
+// Allowed solution extensions and minimal starter content per language.
+const EXT_STARTERS = {
+  java: 'import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // your solution here\n    }\n}\n',
+  py: 'import sys\n\ndef main():\n    data = sys.stdin.read().split()\n    # your solution here\n\nmain()\n',
+  js: "const input = require('fs').readFileSync(0, 'utf8').trim();\n// your solution here\n",
+  ts: "const input: string = require('fs').readFileSync(0, 'utf8').trim();\n// your solution here\n",
+  cpp: '#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    // your solution here\n    return 0;\n}\n',
+  c: '#include <stdio.h>\n\nint main() {\n    // your solution here\n    return 0;\n}\n',
+  go: 'package main\n\nimport (\n    "bufio"\n    "fmt"\n    "os"\n)\n\nfunc main() {\n    reader := bufio.NewReader(os.Stdin)\n    _ = reader\n    _ = fmt.Sprint\n}\n',
+};
+
+/** Validate a single path segment (folder or problem name). */
+function safeSegment(name) {
+  const s = String(name || '').trim();
+  if (!s || s === '.' || s === '..') return null;
+  if (/[\\/]/.test(s) || s.startsWith('.')) return null;
+  if (s.length > 120) return null;
+  return s;
+}
+
+/** Validate that a relative folder path stays within the allowed section tree. */
+function safeParentPath(parentPath) {
+  const rel = String(parentPath || '').replace(/\\/g, '/').replace(/\/+$/,'').trim();
+  if (!rel) return null;
+  const segs = rel.split('/');
+  if (segs.some((s) => !safeSegment(s))) return null;
+  return segs.join('/');
+}
+
 /** Parse a "[3] Foo.java" prefix -> { difficulty: 3, display: "Foo.java" }. */
 function parseName(fileName) {
   const m = fileName.match(/^\[(\d+)\]\s*(.+)$/);
@@ -134,6 +163,12 @@ function collapseProblems(nodes) {
 
 /** Base class: shares tree assembly; subclasses provide the raw data. */
 class FileStore {
+  constructor() {
+    this._treeCache = null;
+    this._treeCacheAt = 0;
+    this._treeTtlMs = 30000;
+  }
+
   async listSourcePaths() {
     throw new Error('not implemented');
   }
@@ -144,9 +179,84 @@ class FileStore {
     return 'Algorithms';
   }
 
+  /** Invalidate the cached tree (call after any write). */
+  invalidateTree() {
+    this._treeCache = null;
+  }
+
+  // --- writes (implemented by subclasses) ---
+  async writeFile() {
+    throw new Error('not implemented');
+  }
+  async exists() {
+    throw new Error('not implemented');
+  }
+
+  /**
+   * Create a new problem folder under `parentPath` with a starter solution and
+   * meta.json. Returns { problemPath, solutionPath }.
+   */
+  async createProblem({ parentPath, name, group, ext }) {
+    const parent = safeParentPath(parentPath);
+    if (!parent) throw new FileError('Invalid parent folder', 400);
+    if (!SECTIONS.includes(parent.split('/')[0])) throw new FileError('Parent must be within a known section', 400);
+    const problemName = safeSegment(name);
+    if (!problemName) throw new FileError('Invalid problem name', 400);
+    if (!EXT_STARTERS[ext]) throw new FileError(`Unsupported language: ${ext}`, 400);
+
+    const problemPath = `${parent}/${problemName}`;
+    const solutionPath = `${problemPath}/solution.${ext}`;
+    if (await this.exists(solutionPath)) throw new FileError('A problem with that name already exists', 409);
+
+    await this.writeFile(solutionPath, EXT_STARTERS[ext]);
+    const meta = Number.isFinite(Number(group)) ? { group: Number(group) } : {};
+    await this.writeFile(`${problemPath}/meta.json`, JSON.stringify(meta, null, 2) + '\n');
+    this.invalidateTree();
+    return { problemPath, solutionPath };
+  }
+
+  /** Add a `solution.<ext>` to an existing problem folder. Returns { solutionPath }. */
+  async createSolution({ problemPath, ext }) {
+    const prob = safeParentPath(problemPath);
+    if (!prob) throw new FileError('Invalid problem path', 400);
+    if (!SECTIONS.includes(prob.split('/')[0])) throw new FileError('Path must be within a known section', 400);
+    if (!EXT_STARTERS[ext]) throw new FileError(`Unsupported language: ${ext}`, 400);
+
+    const solutionPath = `${prob}/solution.${ext}`;
+    if (await this.exists(solutionPath)) throw new FileError('That language already exists for this problem', 409);
+    await this.writeFile(solutionPath, EXT_STARTERS[ext]);
+    this.invalidateTree();
+    return { solutionPath };
+  }
+
+  /** Read the numeric `group` for each problem folder path (batched). */
+  async getGroupsForProblems(problemPaths) {
+    const groups = new Map();
+    const batchSize = 25;
+    for (let i = 0; i < problemPaths.length; i += batchSize) {
+      const batch = problemPaths.slice(i, i + batchSize);
+      const metas = await Promise.all(batch.map((p) => this.getMeta(p).catch(() => ({}))));
+      batch.forEach((p, idx) => {
+        const g = metas[idx] ? metas[idx].group : undefined;
+        groups.set(p, typeof g === 'number' ? g : null);
+      });
+    }
+    return groups;
+  }
+
   async getTree() {
+    if (this._treeCache && Date.now() - this._treeCacheAt < this._treeTtlMs) {
+      return this._treeCache;
+    }
+
     const paths = await this.listSourcePaths();
     const top = buildTreeFromPaths(paths);
+
+    // Attach the group from meta.json to each problem, then sort by (group, name).
+    const problemPaths = [];
+    collectProblemPaths(top, problemPaths);
+    const groups = await this.getGroupsForProblems(problemPaths);
+    finalizeOrder(top, groups);
 
     // Index the top-level section folders that actually contain source files.
     const byName = new Map();
@@ -169,8 +279,43 @@ class FileStore {
       }
     }
 
-    return { sections, root: this.rootName() };
+    const result = { sections, root: this.rootName() };
+    this._treeCache = result;
+    this._treeCacheAt = Date.now();
+    return result;
   }
+}
+
+/** Collect the paths of all problem nodes in a (possibly nested) node list. */
+function collectProblemPaths(nodes, out) {
+  for (const node of nodes) {
+    if (node.type === 'problem') out.push(node.path);
+    else if (node.type === 'folder') collectProblemPaths(node.children, out);
+  }
+}
+
+/** Attach group to problems and sort each sibling list by (folders first, group, name). */
+function finalizeOrder(nodes, groups) {
+  for (const node of nodes) {
+    if (node.type === 'problem') {
+      node.group = groups.get(node.path) ?? null;
+    } else if (node.type === 'folder') {
+      finalizeOrder(node.children, groups);
+    }
+  }
+  nodes.sort(compareTreeNodes);
+  return nodes;
+}
+
+function compareTreeNodes(a, b) {
+  const rank = (n) => (n.type === 'folder' ? 0 : 1); // folders before problems/files
+  if (rank(a) !== rank(b)) return rank(a) - rank(b);
+  if (a.type === 'problem' && b.type === 'problem') {
+    const ga = a.group == null ? Infinity : a.group;
+    const gb = b.group == null ? Infinity : b.group;
+    if (ga !== gb) return ga - gb;
+  }
+  return a.name.localeCompare(b.name, undefined, { numeric: true });
 }
 
 /** Reads the algorithm files from the local filesystem. */
@@ -240,6 +385,23 @@ class DiskFileStore extends FileStore {
     }
   }
 
+  _resolveInside(relPath) {
+    const absPath = path.resolve(this.root, relPath);
+    const rootWithSep = this.root.endsWith(path.sep) ? this.root : this.root + path.sep;
+    if (!absPath.startsWith(rootWithSep)) throw new FileError('Invalid path', 400);
+    return absPath;
+  }
+
+  async exists(relPath) {
+    return fs.existsSync(this._resolveInside(relPath));
+  }
+
+  async writeFile(relPath, content) {
+    const absPath = this._resolveInside(relPath);
+    fs.mkdirSync(path.dirname(absPath), { recursive: true });
+    fs.writeFileSync(absPath, content, 'utf8');
+  }
+
   rootName() {
     return path.basename(this.root);
   }
@@ -287,6 +449,22 @@ class BlobFileStore extends FileStore {
     } catch {
       return {}; // missing/invalid meta -> no metadata
     }
+  }
+
+  async exists(relPath) {
+    try {
+      return await this.container.getBlobClient(relPath).exists();
+    } catch {
+      return false;
+    }
+  }
+
+  async writeFile(relPath, content) {
+    const ext = path.extname(relPath).toLowerCase();
+    const contentType = ext === '.json' ? 'application/json' : 'text/plain';
+    const client = this.container.getBlockBlobClient(relPath);
+    const data = Buffer.from(content, 'utf8');
+    await client.uploadData(data, { blobHTTPHeaders: { blobContentType: contentType } });
   }
 
   rootName() {

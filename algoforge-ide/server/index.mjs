@@ -79,6 +79,32 @@ app.get('/api/problem', async (req, res) => {
   }
 });
 
+// POST /api/problem { parentPath, name, group?, ext } -> create a new problem folder.
+app.post('/api/problem', async (req, res) => {
+  const { parentPath, name, group, ext } = req.body || {};
+  try {
+    const result = await store.createProblem({ parentPath, name, group, ext });
+    res.status(201).json(result);
+  } catch (err) {
+    if (err instanceof FileError) return res.status(err.status).json({ error: err.message });
+    console.error('create problem error:', err);
+    res.status(500).json({ error: 'Failed to create problem' });
+  }
+});
+
+// POST /api/solution { problemPath, ext } -> add a language to an existing problem.
+app.post('/api/solution', async (req, res) => {
+  const { problemPath, ext } = req.body || {};
+  try {
+    const result = await store.createSolution({ problemPath, ext });
+    res.status(201).json(result);
+  } catch (err) {
+    if (err instanceof FileError) return res.status(err.status).json({ error: err.message });
+    console.error('create solution error:', err);
+    res.status(500).json({ error: 'Failed to create solution' });
+  }
+});
+
 // POST /api/run { source, language, stdin } -> executes in the Piston sandbox.
 app.post('/api/run', async (req, res) => {
   const { source, language, stdin } = req.body || {};

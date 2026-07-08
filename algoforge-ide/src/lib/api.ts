@@ -17,6 +17,38 @@ export async function fetchProblem(path: string): Promise<ProblemResponse> {
   return res.json();
 }
 
+/** Create a new problem folder (starter solution.<ext> + meta.json). */
+export async function createProblem(input: {
+  parentPath: string;
+  name: string;
+  group?: number | null;
+  ext: string;
+}): Promise<{ problemPath: string; solutionPath: string }> {
+  const res = await fetch(`${API_BASE}/api/problem`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Failed to create problem (${res.status})`);
+  return data;
+}
+
+/** Add a solution.<ext> (new language) to an existing problem. */
+export async function createSolution(input: {
+  problemPath: string;
+  ext: string;
+}): Promise<{ solutionPath: string }> {
+  const res = await fetch(`${API_BASE}/api/solution`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Failed to create solution (${res.status})`);
+  return data;
+}
+
 export async function fetchFile(path: string): Promise<FileResponse> {
   const res = await fetch(`${API_BASE}/api/file?path=${encodeURIComponent(path)}`);
   if (!res.ok) {

@@ -26,6 +26,7 @@ export interface ProblemNode {
   name: string;
   path: string;
   languages: ProblemLanguage[];
+  group?: number | null;
 }
 
 export type TreeNode = FolderNode | FileNode | ProblemNode;

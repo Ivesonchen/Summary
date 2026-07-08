@@ -4,6 +4,7 @@ import FileExplorer from './components/Sidebar/FileExplorer';
 import SolutionPane from './components/Editor/SolutionPane';
 import PracticePane from './components/Editor/PracticePane';
 import BottomPanel from './components/BottomPanel/Console';
+import CreateDialog from './components/CreateDialog';
 import { extToLanguage, extToMonaco, fetchFile, fetchProblem, fetchTree, runCode } from './lib/api';
 import { compareRuns } from './lib/compare';
 import type {
@@ -14,6 +15,7 @@ import type {
   RunResult,
   Section,
   TestOutcome,
+  TreeNode,
 } from './types';
 
 // Complete, runnable starter programs (stdin -> stdout model, like an online judge).
@@ -29,6 +31,25 @@ const STARTER: Record<Language, string> = {
   go: 'package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello from Go")\n}\n',
   unknown: '// This file type cannot be executed. Study the standard solution on the left.\n',
 };
+
+/** Find a problem node by its path anywhere in the sections tree. */
+function findProblem(sections: Section[], targetPath: string): ProblemNode | null {
+  const walk = (nodes: TreeNode[]): ProblemNode | null => {
+    for (const node of nodes) {
+      if (node.type === 'problem' && node.path === targetPath) return node;
+      if (node.type === 'folder') {
+        const hit = walk(node.children);
+        if (hit) return hit;
+      }
+    }
+    return null;
+  };
+  for (const s of sections) {
+    const hit = walk(s.children);
+    if (hit) return hit;
+  }
+  return null;
+}
 
 export default function App() {
   const [sections, setSections] = useState<Section[]>([]);
@@ -57,15 +78,21 @@ export default function App() {
   const [practiceResult, setPracticeResult] = useState<RunResult | null>(null);
   const [testOutcome, setTestOutcome] = useState<TestOutcome | null>(null);
 
+  const [activeProblem, setActiveProblem] = useState<ProblemNode | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+
+  const refreshTree = useCallback(async (): Promise<Section[]> => {
+    const t = await fetchTree();
+    setSections(t.sections);
+    setRootName(t.root.toUpperCase());
+    return t.sections;
+  }, []);
+
   useEffect(() => {
-    fetchTree()
-      .then((t) => {
-        setSections(t.sections);
-        setRootName(t.root.toUpperCase());
-      })
+    refreshTree()
       .catch((e) => setTreeError(e.message))
       .finally(() => setTreeLoading(false));
-  }, []);
+  }, [refreshTree]);
 
   // Load a single solution.<ext> file into the editor and reset run state.
   const loadSolution = useCallback(async (filePath: string, ext: string) => {
@@ -95,13 +122,14 @@ export default function App() {
       setSelectedPath(problem.path);
       setTitle(problem.name);
       setProblemLangs(problem.languages);
-      setGroup(null);
+      setActiveProblem(problem);
+      setGroup(problem.group ?? null);
       const preferred =
         problem.languages.find((l) => l.ext === 'java') ?? problem.languages[0];
       if (preferred) await loadSolution(preferred.path, preferred.ext);
       fetchProblem(problem.path)
         .then((p) => setGroup(p.meta?.group ?? null))
-        .catch(() => setGroup(null));
+        .catch(() => {});
     },
     [loadSolution]
   );
@@ -121,10 +149,22 @@ export default function App() {
       setSelectedPath(file.path);
       setTitle(file.display);
       setProblemLangs([]);
+      setActiveProblem(null);
       setGroup(null);
       await loadSolution(file.path, file.ext);
     },
     [loadSolution]
+  );
+
+  // After creating a problem or solution: refresh the tree and select the result.
+  const handleCreated = useCallback(
+    async (createdPath: string, kind: 'problem' | 'solution') => {
+      const problemPath = kind === 'problem' ? createdPath : createdPath;
+      const next = await refreshTree();
+      const found = findProblem(next, problemPath);
+      if (found) await handleSelectProblem(found);
+    },
+    [refreshTree, handleSelectProblem]
   );
 
   const handleRun = useCallback(async () => {
@@ -181,6 +221,7 @@ export default function App() {
           selectedPath={selectedPath}
           onSelect={handleSelect}
           onSelectProblem={handleSelectProblem}
+          onCreate={() => setCreateOpen(true)}
           loading={treeLoading}
           error={treeError}
         />
@@ -210,6 +251,14 @@ export default function App() {
           />
         </div>
       </main>
+      {createOpen && (
+        <CreateDialog
+          sections={sections}
+          activeProblem={activeProblem}
+          onClose={() => setCreateOpen(false)}
+          onCreated={handleCreated}
+        />
+      )}
     </div>
   );
 }

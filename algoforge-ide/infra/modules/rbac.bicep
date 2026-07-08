@@ -1,5 +1,5 @@
 // Grants the API's managed identity least-privilege access:
-//   - Storage Blob Data Reader on the storage account (read algorithm files)
+//   - Storage Blob Data Contributor on the storage account (read + create files)
 //   - AcrPull on the container registry (pull the API image)
 //   - Key Vault Secrets User on the vault (read secrets)
 //
@@ -18,7 +18,8 @@ param acrName string
 param keyVaultName string
 
 // Built-in role definition IDs.
-var storageBlobDataReader = '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1'
+// Blob Data Contributor (not just Reader) so the API can create problems/solutions.
+var storageBlobDataContributor = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
 var acrPull = '7f951dda-4ed3-4680-a7ca-43fe172d538d'
 var keyVaultSecretsUser = '4633458b-17de-408a-b874-0445c86b69e6'
 
@@ -35,12 +36,12 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
 }
 
 resource blobReaderAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(storage.id, principalId, storageBlobDataReader)
+  name: guid(storage.id, principalId, storageBlobDataContributor)
   scope: storage
   properties: {
     principalId: principalId
     principalType: 'ServicePrincipal'
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataReader)
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataContributor)
   }
 }
 
