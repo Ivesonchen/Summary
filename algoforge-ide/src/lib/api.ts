@@ -101,6 +101,7 @@ export async function fetchGitHubConfig(): Promise<GitHubConfig> {
 export async function saveGitHubConfig(input: {
   repo?: string;
   branch?: string;
+  syncBranch?: string;
   token?: string;
 }): Promise<GitHubConfig> {
   const res = await fetch(`${API_BASE}/api/github/config`, {

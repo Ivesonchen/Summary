@@ -56,6 +56,7 @@ export interface ProblemResponse {
 export interface GitHubConfig {
   repo: string;
   branch: string;
+  syncBranch: string;
   hasToken: boolean;
 }
 

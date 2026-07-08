@@ -106,15 +106,15 @@ app.post('/api/solution', async (req, res) => {
   }
 });
 
-// GET /api/github/config -> { repo, branch, hasToken } (never returns the token).
+// GET /api/github/config -> { repo, branch, syncBranch, hasToken } (never returns the token).
 app.get('/api/github/config', (_req, res) => {
   res.json(getGitHubConfig());
 });
 
-// POST /api/github/config { repo?, branch?, token? } -> update GitHub sync config.
+// POST /api/github/config { repo?, branch?, syncBranch?, token? } -> update GitHub sync config.
 app.post('/api/github/config', (req, res) => {
-  const { repo, branch, token } = req.body || {};
-  res.json(setGitHubConfig({ repo, branch, token }));
+  const { repo, branch, syncBranch, token } = req.body || {};
+  res.json(setGitHubConfig({ repo, branch, syncBranch, token }));
 });
 
 // POST /api/sync -> commit store files missing from the repo, as one commit.

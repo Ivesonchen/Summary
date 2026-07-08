@@ -16,6 +16,7 @@ export default function GitHubDialog({ onClose }: GitHubDialogProps) {
   const [config, setConfig] = useState<GitHubConfig | null>(null);
   const [repo, setRepo] = useState('');
   const [branch, setBranch] = useState('master');
+  const [syncBranch, setSyncBranch] = useState('algoforge-sync');
   const [token, setToken] = useState('');
   const [saving, setSaving] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -28,6 +29,7 @@ export default function GitHubDialog({ onClose }: GitHubDialogProps) {
         setConfig(c);
         setRepo(c.repo);
         setBranch(c.branch || 'master');
+        setSyncBranch(c.syncBranch || 'algoforge-sync');
       })
       .catch((e) => setError((e as Error).message));
   }, []);
@@ -36,7 +38,7 @@ export default function GitHubDialog({ onClose }: GitHubDialogProps) {
     setSaving(true);
     setError(null);
     try {
-      const c = await saveGitHubConfig({ repo, branch, token: token || undefined });
+      const c = await saveGitHubConfig({ repo, branch, syncBranch, token: token || undefined });
       setConfig(c);
       setToken(''); // clear the secret from the field once stored server-side
     } catch (e) {
@@ -52,11 +54,11 @@ export default function GitHubDialog({ onClose }: GitHubDialogProps) {
     setResult(null);
     try {
       // Persist any pending config edits first.
-      await saveGitHubConfig({ repo, branch, token: token || undefined });
+      await saveGitHubConfig({ repo, branch, syncBranch, token: token || undefined });
       setToken('');
       const r = await syncToRepo();
       setResult(r);
-      setConfig((c) => (c ? { ...c, repo, branch, hasToken: true } : c));
+      setConfig((c) => (c ? { ...c, repo, branch, syncBranch, hasToken: true } : c));
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -83,10 +85,13 @@ export default function GitHubDialog({ onClose }: GitHubDialogProps) {
         </div>
 
         <p className="font-code-sm text-code-sm text-on-surface-variant mb-md">
-          Commit problems/solutions created in the app back into the repository. Files present in
-          storage but missing from the repo are pushed to a new branch and opened as a{' '}
-          <span className="text-primary">pull request</span> for you to review and merge (nothing is
-          pushed directly, overwritten, or deleted).
+          Commit problems/solutions created in the app back into the repository. New files are added
+          to a dedicated{' '}
+          <span className="text-primary">{syncBranch || 'algoforge-sync'}</span> branch and kept in a
+          single standing{' '}
+          <span className="text-primary">pull request</span> into{' '}
+          <span className="text-primary">{branch || 'master'}</span> — review and merge it manually
+          when ready (nothing is pushed to {branch || 'master'} directly, overwritten, or deleted).
         </p>
 
         <div className="space-y-sm">
@@ -100,11 +105,20 @@ export default function GitHubDialog({ onClose }: GitHubDialogProps) {
             />
           </label>
           <label className="block">
-            <span className="font-label-caps text-label-caps uppercase text-outline">Branch</span>
+            <span className="font-label-caps text-label-caps uppercase text-outline">Production branch (PR base)</span>
             <input
               value={branch}
               onChange={(e) => setBranch(e.target.value)}
               placeholder="master"
+              className="w-full mt-1 bg-surface-container-high border border-outline-variant rounded px-2 py-1.5 font-code-sm text-code-sm text-on-surface focus:border-primary focus:outline-none"
+            />
+          </label>
+          <label className="block">
+            <span className="font-label-caps text-label-caps uppercase text-outline">Sync branch (PR head)</span>
+            <input
+              value={syncBranch}
+              onChange={(e) => setSyncBranch(e.target.value)}
+              placeholder="algoforge-sync"
               className="w-full mt-1 bg-surface-container-high border border-outline-variant rounded px-2 py-1.5 font-code-sm text-code-sm text-on-surface focus:border-primary focus:outline-none"
             />
           </label>

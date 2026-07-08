@@ -45,6 +45,9 @@ param githubRepo string = ''
 @description('GitHub branch for sync.')
 param githubBranch string = 'master'
 
+@description('Dedicated integration branch that sync commits land on (PR head).')
+param githubSyncBranch string = 'algoforge-sync'
+
 @description('GitHub token for sync. Stored in Key Vault and injected as a Container App secret. Leave empty to configure at runtime instead.')
 @secure()
 param githubToken string = ''
@@ -156,6 +159,7 @@ module containerApp 'modules/containerapp.bicep' = if (deployApi) {
     allowedOrigins: allowedOrigins
     githubRepo: githubRepo
     githubBranch: githubBranch
+    githubSyncBranch: githubSyncBranch
     githubTokenSecretUri: hasGithubToken ? keyVault.outputs.githubTokenSecretUri : ''
     appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
   }

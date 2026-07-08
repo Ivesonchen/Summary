@@ -50,6 +50,9 @@ param githubRepo string = ''
 @description('GitHub branch for sync.')
 param githubBranch string = 'master'
 
+@description('Dedicated integration branch that sync commits land on (PR head).')
+param githubSyncBranch string = 'algoforge-sync'
+
 @description('Key Vault secret URI holding the GitHub token. Empty to skip wiring the token.')
 param githubTokenSecretUri string = ''
 
@@ -73,6 +76,7 @@ var baseEnv = [
   { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: appInsightsConnectionString }
   { name: 'GITHUB_REPO', value: githubRepo }
   { name: 'GITHUB_BRANCH', value: githubBranch }
+  { name: 'GITHUB_SYNC_BRANCH', value: githubSyncBranch }
 ]
 var githubTokenEnv = useGithubToken ? [{ name: 'GITHUB_TOKEN', secretRef: 'github-token' }] : []
 var appEnv = concat(baseEnv, githubTokenEnv)
