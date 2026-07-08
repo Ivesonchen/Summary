@@ -72,6 +72,8 @@ async function main() {
   const container = getServiceClient().getContainerClient(CONTAINER);
   await container.createIfNotExists();
 
+  const localSet = new Set(files);
+
   let uploaded = 0;
   for (const rel of files) {
     const absPath = path.join(REPO_ROOT, rel);
@@ -84,7 +86,19 @@ async function main() {
     uploaded++;
     if (uploaded % 50 === 0) console.log(`  uploaded ${uploaded}/${files.length}…`);
   }
-  console.log(`Done. Uploaded ${uploaded} files to container "${CONTAINER}".`);
+  console.log(`Uploaded ${uploaded} files.`);
+
+  // Sync: delete blobs that no longer exist locally (handles renames/removals,
+  // e.g. the flat "Array/[4] 2 Sum.java" after restructuring to "Array/2 Sum/solution.java").
+  let deleted = 0;
+  for await (const blob of container.listBlobsFlat()) {
+    if (!localSet.has(blob.name)) {
+      await container.deleteBlob(blob.name);
+      deleted++;
+    }
+  }
+  console.log(`Deleted ${deleted} stale blob(s).`);
+  console.log(`Done. Container "${CONTAINER}" now mirrors ${files.length} local files.`);
 }
 
 main().catch((err) => {
