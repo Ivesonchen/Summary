@@ -350,6 +350,37 @@ class DiskFileStore extends FileStore {
     return out;
   }
 
+  /** All syncable files (source solutions + meta.json), for GitHub sync. */
+  async listAllPaths() {
+    const out = [];
+    const walk = (absDir, relDir) => {
+      let entries;
+      try {
+        entries = fs.readdirSync(absDir, { withFileTypes: true });
+      } catch {
+        return;
+      }
+      for (const entry of entries) {
+        if (entry.name.startsWith('.')) continue;
+        if (IGNORED.has(entry.name)) continue;
+        const rel = relDir ? `${relDir}/${entry.name}` : entry.name;
+        if (entry.isDirectory()) {
+          walk(path.join(absDir, entry.name), rel);
+        } else if (entry.isFile()) {
+          const ext = path.extname(entry.name).toLowerCase();
+          if (SOURCE_EXT.has(ext) || entry.name === 'meta.json') out.push(rel);
+        }
+      }
+    };
+    walk(this.root, '');
+    return out;
+  }
+
+  /** Read raw bytes of any file inside the root (for sync). */
+  async readRawBytes(relPath) {
+    return fs.readFileSync(this._resolveInside(relPath));
+  }
+
   async getFile(relPath) {
     // Resolve and ensure the result stays inside root (path-traversal guard).
     const absPath = path.resolve(this.root, relPath);
@@ -426,6 +457,24 @@ class BlobFileStore extends FileStore {
       out.push(name);
     }
     return out;
+  }
+
+  /** All syncable files (source solutions + meta.json), for GitHub sync. */
+  async listAllPaths() {
+    const out = [];
+    for await (const blob of this.container.listBlobsFlat()) {
+      const name = blob.name;
+      const top = name.split('/')[0];
+      if (IGNORED.has(top)) continue;
+      const ext = path.extname(name).toLowerCase();
+      if (SOURCE_EXT.has(ext) || path.basename(name) === 'meta.json') out.push(name);
+    }
+    return out;
+  }
+
+  /** Read raw bytes of a blob (for sync). */
+  async readRawBytes(relPath) {
+    return this.container.getBlobClient(relPath).downloadToBuffer();
   }
 
   async getFile(relPath) {

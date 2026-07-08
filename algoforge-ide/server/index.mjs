@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createFileStore, FileError } from './fileStore.mjs';
+import { getGitHubConfig, setGitHubConfig, syncToGitHub } from './github.mjs';
 import { isSupportedLanguage, runInSandbox } from './piston.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -102,6 +103,29 @@ app.post('/api/solution', async (req, res) => {
     if (err instanceof FileError) return res.status(err.status).json({ error: err.message });
     console.error('create solution error:', err);
     res.status(500).json({ error: 'Failed to create solution' });
+  }
+});
+
+// GET /api/github/config -> { repo, branch, hasToken } (never returns the token).
+app.get('/api/github/config', (_req, res) => {
+  res.json(getGitHubConfig());
+});
+
+// POST /api/github/config { repo?, branch?, token? } -> update GitHub sync config.
+app.post('/api/github/config', (req, res) => {
+  const { repo, branch, token } = req.body || {};
+  res.json(setGitHubConfig({ repo, branch, token }));
+});
+
+// POST /api/sync -> commit store files missing from the repo, as one commit.
+app.post('/api/sync', async (_req, res) => {
+  try {
+    const result = await syncToGitHub(store);
+    res.json(result);
+  } catch (err) {
+    if (err instanceof FileError) return res.status(err.status).json({ error: err.message });
+    console.error('sync error:', err);
+    res.status(502).json({ error: 'Sync failed' });
   }
 });
 

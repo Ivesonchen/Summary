@@ -1,4 +1,12 @@
-import type { FileResponse, Language, ProblemResponse, RunResult, TreeResponse } from '../types';
+import type {
+  FileResponse,
+  GitHubConfig,
+  Language,
+  ProblemResponse,
+  RunResult,
+  SyncResult,
+  TreeResponse,
+} from '../types';
 
 // API origin. Empty in dev (Vite proxies /api to the local server); set to the
 // Container Apps URL at build time via VITE_API_BASE for the deployed frontend.
@@ -80,6 +88,37 @@ export async function runCode(source: string, language: Language, stdin: string)
     };
   }
   return data as RunResult;
+}
+
+/** Fetch the current GitHub sync config (token is never returned, only hasToken). */
+export async function fetchGitHubConfig(): Promise<GitHubConfig> {
+  const res = await fetch(`${API_BASE}/api/github/config`);
+  if (!res.ok) throw new Error(`Failed to load GitHub config (${res.status})`);
+  return res.json();
+}
+
+/** Update GitHub sync config. Only include token when the user provides one. */
+export async function saveGitHubConfig(input: {
+  repo?: string;
+  branch?: string;
+  token?: string;
+}): Promise<GitHubConfig> {
+  const res = await fetch(`${API_BASE}/api/github/config`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Failed to save config (${res.status})`);
+  return data;
+}
+
+/** Commit store files that are missing from the repo (Blob -> git). */
+export async function syncToRepo(): Promise<SyncResult> {
+  const res = await fetch(`${API_BASE}/api/sync`, { method: 'POST' });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Sync failed (${res.status})`);
+  return data as SyncResult;
 }
 
 /** Map a file extension to the language executed by the sandbox. */

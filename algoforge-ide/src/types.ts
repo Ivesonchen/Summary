@@ -53,6 +53,19 @@ export interface ProblemResponse {
   meta: { group?: number };
 }
 
+export interface GitHubConfig {
+  repo: string;
+  branch: string;
+  hasToken: boolean;
+}
+
+export interface SyncResult {
+  committed: string[];
+  count: number;
+  commitUrl?: string;
+  message: string;
+}
+
 export type Language = 'java' | 'python' | 'javascript' | 'typescript' | 'cpp' | 'c' | 'go' | 'unknown';
 
 /** Normalized result returned by the /api/run endpoint (Judge0-backed). */

@@ -9,6 +9,7 @@ interface FileExplorerProps {
   onSelect: (file: FileNode) => void;
   onSelectProblem: (problem: ProblemNode) => void;
   onCreate: () => void;
+  onSync: () => void;
   loading: boolean;
   error: string | null;
 }
@@ -242,6 +243,7 @@ export default function FileExplorer({
   onSelect,
   onSelectProblem,
   onCreate,
+  onSync,
   loading,
   error,
 }: FileExplorerProps) {
@@ -276,13 +278,21 @@ export default function FileExplorer({
           ))}
       </div>
 
-      <div className="p-sm border-t border-outline-variant">
+      <div className="p-sm border-t border-outline-variant space-y-1">
         <button
           onClick={onCreate}
           className="w-full bg-surface-variant text-on-surface-variant px-md py-2 rounded font-code-sm text-code-sm hover:text-primary transition-colors flex items-center justify-center gap-xs"
         >
           <Icon name="add_circle" size={18} />
           Create
+        </button>
+        <button
+          onClick={onSync}
+          title="Commit app-created problems back to the repository"
+          className="w-full bg-surface-variant text-on-surface-variant px-md py-2 rounded font-code-sm text-code-sm hover:text-primary transition-colors flex items-center justify-center gap-xs"
+        >
+          <Icon name="cloud_sync" size={18} />
+          Sync to GitHub
         </button>
       </div>
     </aside>

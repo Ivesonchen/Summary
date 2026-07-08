@@ -5,6 +5,7 @@ import SolutionPane from './components/Editor/SolutionPane';
 import PracticePane from './components/Editor/PracticePane';
 import BottomPanel from './components/BottomPanel/Console';
 import CreateDialog from './components/CreateDialog';
+import GitHubDialog from './components/GitHubDialog';
 import { extToLanguage, extToMonaco, fetchFile, fetchProblem, fetchTree, runCode } from './lib/api';
 import { compareRuns } from './lib/compare';
 import type {
@@ -80,6 +81,7 @@ export default function App() {
 
   const [activeProblem, setActiveProblem] = useState<ProblemNode | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const [githubOpen, setGithubOpen] = useState(false);
 
   const refreshTree = useCallback(async (): Promise<Section[]> => {
     const t = await fetchTree();
@@ -222,6 +224,7 @@ export default function App() {
           onSelect={handleSelect}
           onSelectProblem={handleSelectProblem}
           onCreate={() => setCreateOpen(true)}
+          onSync={() => setGithubOpen(true)}
           loading={treeLoading}
           error={treeError}
         />
@@ -259,6 +262,7 @@ export default function App() {
           onCreated={handleCreated}
         />
       )}
+      {githubOpen && <GitHubDialog onClose={() => setGithubOpen(false)} />}
     </div>
   );
 }
