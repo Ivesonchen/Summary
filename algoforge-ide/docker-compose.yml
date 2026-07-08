@@ -1,0 +1,65 @@
+# Full backend stack: the AlgoForge API + the Piston execution sandbox.
+#
+# Workflows:
+#   Local dev (hot-reload UI + server on host):
+#       docker compose up -d piston      # just the sandbox
+#       npm run dev                      # API on :3001, Vite UI on :5173
+#
+#   Full containerized backend (API image + sandbox):
+#       docker compose up -d             # API on :3001 (also serves built UI), Piston on :2000
+#
+# Piston (https://github.com/engineer-man/piston) isolates code with Linux
+# namespaces + prlimit and runs on cgroup v2, so it works on modern kernels
+# without Judge0's cgroup-v1 requirement.
+#
+# LOCAL DEVELOPMENT ONLY. In Azure, these run as managed services / a locked-down
+# VM inside a private VNet (see infra/ Bicep, added in a later phase).
+
+services:
+  piston:
+    image: ghcr.io/engineer-man/piston
+    container_name: algoforge-piston
+    restart: always
+    privileged: true
+    ports:
+      - '2000:2000'
+    environment:
+      # Raise the ceilings the API enforces on per-request limits.
+      # (Defaults: run 3000ms, compile 10000ms.) Our /api/run sends up to these.
+      - PISTON_RUN_TIMEOUT=10000
+      - PISTON_COMPILE_TIMEOUT=20000
+      - PISTON_RUN_CPU_TIME=10000
+      - PISTON_COMPILE_CPU_TIME=20000
+      # Cap stdout/stderr so runaway output can't exhaust memory (bytes).
+      - PISTON_OUTPUT_MAX_SIZE=1048576
+    volumes:
+      - piston-packages:/piston/packages
+    tmpfs:
+      - /tmp:exec
+
+  api:
+    build: .
+    container_name: algoforge-api
+    restart: always
+    ports:
+      - '3001:3001'
+    environment:
+      - PORT=3001
+      - PISTON_URL=http://piston:2000
+      # Default to disk-backed files, reading the repo mounted at /repo.
+      # Switch to blob by setting FILE_SOURCE=blob and the AZURE_STORAGE_* vars.
+      - FILE_SOURCE=${FILE_SOURCE:-disk}
+      - LOCAL_REPO_ROOT=/repo
+      - AZURE_STORAGE_CONNECTION_STRING=${AZURE_STORAGE_CONNECTION_STRING:-}
+      - AZURE_STORAGE_ACCOUNT_URL=${AZURE_STORAGE_ACCOUNT_URL:-}
+      - AZURE_STORAGE_CONTAINER=${AZURE_STORAGE_CONTAINER:-algorithms}
+      - FILE_ROOT_NAME=${FILE_ROOT_NAME:-Summary}
+      - COMPANY_FOLDERS=${COMPANY_FOLDERS:-Amazon}
+    volumes:
+      # Mount the repo (one level up from algoforge-ide/) read-only for disk mode.
+      - ..:/repo:ro
+    depends_on:
+      - piston
+
+volumes:
+  piston-packages:

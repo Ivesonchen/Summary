@@ -1,0 +1,123 @@
+# Continuous deployment: build & push the API image to ACR, roll it out to the
+# Container App, sync algorithm files to Blob, and deploy the frontend to Static
+# Web Apps. Runs on push to master (app changes) or manual dispatch.
+#
+# Auth uses OIDC federated credentials (no stored cloud secrets). Configure once:
+#   az ad app federated-credential + role assignment, then set the repo VARIABLES
+#   and SECRETS listed under `env:` below. See infra/README-cicd notes in README.
+
+name: Deploy
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'algoforge-ide/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  id-token: write # required for azure/login OIDC
+  contents: read
+
+env:
+  RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}
+  ACR_NAME: ${{ vars.ACR_NAME }}
+  ACR_LOGIN_SERVER: ${{ vars.ACR_LOGIN_SERVER }}
+  CONTAINER_APP: ${{ vars.CONTAINER_APP_NAME }}
+  STATIC_WEB_APP: ${{ vars.STATIC_WEB_APP_NAME }}
+  STORAGE_ACCOUNT_URL: ${{ vars.AZURE_STORAGE_ACCOUNT_URL }}
+  API_URL: ${{ vars.API_URL }}
+  IMAGE_TAG: ${{ github.sha }}
+
+defaults:
+  run:
+    working-directory: algoforge-ide
+
+jobs:
+  api:
+    name: Build & deploy API
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Resolve image reference
+        id: meta
+        run: echo "image=${ACR_LOGIN_SERVER}/algoforge-api:${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Build & push image (ACR Tasks)
+        run: |
+          az acr build \
+            --registry "$ACR_NAME" \
+            --image "algoforge-api:${IMAGE_TAG}" \
+            --image "algoforge-api:latest" \
+            --file Dockerfile .
+
+      - name: Update Container App image
+        run: |
+          az containerapp update \
+            --name "$CONTAINER_APP" \
+            --resource-group "$RESOURCE_GROUP" \
+            --image "${{ steps.meta.outputs.image }}"
+
+  files:
+    name: Sync algorithm files to Blob
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: algoforge-ide/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Upload files to Blob (managed identity via OIDC)
+        env:
+          AZURE_STORAGE_ACCOUNT_URL: ${{ env.STORAGE_ACCOUNT_URL }}
+          LOCAL_REPO_ROOT: ${{ github.workspace }}
+        run: npm run upload:blob
+
+  web:
+    name: Build & deploy frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: algoforge-ide/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Build frontend (points at API origin)
+        env:
+          VITE_API_BASE: ${{ env.API_URL }}
+        run: npm run build
+      - name: Deploy to Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: upload
+          app_location: algoforge-ide/dist
+          skip_app_build: true
+          skip_api_build: true

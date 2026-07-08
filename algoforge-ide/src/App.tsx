@@ -1,0 +1,164 @@
+import { useCallback, useEffect, useState } from 'react';
+import TopNavBar from './components/TopNavBar';
+import FileExplorer from './components/Sidebar/FileExplorer';
+import SolutionPane from './components/Editor/SolutionPane';
+import PracticePane from './components/Editor/PracticePane';
+import BottomPanel from './components/BottomPanel/Console';
+import { extToLanguage, extToMonaco, fetchFile, fetchTree, runCode } from './lib/api';
+import { compareRuns } from './lib/compare';
+import type {
+  FileNode,
+  FolderNode,
+  Language,
+  RunResult,
+  TestOutcome,
+} from './types';
+
+// Complete, runnable starter programs (stdin -> stdout model, like an online judge).
+const STARTER: Record<Language, string> = {
+  java: 'import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        // Read input from stdin and print your answer.\n        Scanner sc = new Scanner(System.in);\n        System.out.println("Hello from Java");\n    }\n}\n',
+  python: 'import sys\n\ndef main():\n    data = sys.stdin.read().split()\n    print("Hello from Python")\n\nmain()\n',
+  javascript:
+    "const lines = require('fs').readFileSync(0, 'utf8').split('\\n');\nconsole.log('Hello from JavaScript');\n",
+  typescript:
+    "const input: string = require('fs').readFileSync(0, 'utf8');\nconsole.log('Hello from TypeScript');\n",
+  cpp: '#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    // Read from cin, write to cout.\n    cout << "Hello from C++" << endl;\n    return 0;\n}\n',
+  c: '#include <stdio.h>\n\nint main() {\n    printf("Hello from C\\n");\n    return 0;\n}\n',
+  go: 'package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello from Go")\n}\n',
+  unknown: '// This file type cannot be executed. Study the standard solution on the left.\n',
+};
+
+export default function App() {
+  const [categories, setCategories] = useState<FolderNode[]>([]);
+  const [companies, setCompanies] = useState<FolderNode[]>([]);
+  const [rootName, setRootName] = useState('');
+  const [treeLoading, setTreeLoading] = useState(true);
+  const [treeError, setTreeError] = useState<string | null>(null);
+
+  const [selected, setSelected] = useState<FileNode | null>(null);
+  const [solution, setSolution] = useState('');
+  const [fileLoading, setFileLoading] = useState(false);
+  const [monacoLang, setMonacoLang] = useState('plaintext');
+  const [language, setLanguage] = useState<Language>('unknown');
+
+  const [practice, setPractice] = useState(STARTER.unknown);
+  const [stdin, setStdin] = useState('');
+
+  const [running, setRunning] = useState(false);
+  const [status, setStatus] = useState<string | null>(null);
+  const [practiceResult, setPracticeResult] = useState<RunResult | null>(null);
+  const [testOutcome, setTestOutcome] = useState<TestOutcome | null>(null);
+
+  useEffect(() => {
+    fetchTree()
+      .then((t) => {
+        setCategories(t.categories);
+        setCompanies(t.companies);
+        setRootName(t.root.toUpperCase());
+      })
+      .catch((e) => setTreeError(e.message))
+      .finally(() => setTreeLoading(false));
+  }, []);
+
+  const handleSelect = useCallback(async (file: FileNode) => {
+    setSelected(file);
+    setFileLoading(true);
+    setPracticeResult(null);
+    setTestOutcome(null);
+    setStatus(null);
+    const lang = extToLanguage(file.ext);
+    setLanguage(lang);
+    setMonacoLang(extToMonaco(file.ext));
+    setPractice(STARTER[lang]);
+    try {
+      const res = await fetchFile(file.path);
+      setSolution(res.content);
+    } catch (e) {
+      setSolution(`// Failed to load file: ${(e as Error).message}`);
+    } finally {
+      setFileLoading(false);
+    }
+  }, []);
+
+  const handleRun = useCallback(async () => {
+    if (running) return;
+    if (language === 'unknown') {
+      setStatus('This file type cannot be executed by the sandbox.');
+      return;
+    }
+
+    setRunning(true);
+    setStatus('Submitting to sandbox…');
+
+    const pRes = await runCode(practice, language, stdin);
+    setPracticeResult(pRes);
+
+    // Auto-compare against the standard solution when it is a complete, runnable program.
+    setStatus('Comparing against standard solution…');
+    const refRes = await runCode(solution, language, stdin);
+    setTestOutcome(compareRuns(pRes, refRes));
+
+    setStatus(pRes.ok ? `${pRes.statusText} · ${pRes.timeMs ?? '?'}ms` : pRes.statusText || 'Error');
+    setRunning(false);
+  }, [running, language, practice, stdin, solution]);
+
+  // Global Ctrl/Cmd+R shortcut.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'r') {
+        e.preventDefault();
+        handleRun();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [handleRun]);
+
+  return (
+    <div className="h-screen flex flex-col overflow-hidden">
+      <TopNavBar
+        fileName={selected?.display ?? null}
+        language={language}
+        runnable={language !== 'unknown'}
+        running={running}
+        onRun={handleRun}
+      />
+      <main className="flex-1 flex overflow-hidden min-h-0">
+        <FileExplorer
+          categories={categories}
+          companies={companies}
+          rootName={rootName}
+          selectedPath={selected?.path ?? null}
+          onSelect={handleSelect}
+          loading={treeLoading}
+          error={treeError}
+        />
+        <div className="flex-1 flex flex-col min-w-0">
+          <div className="flex-1 flex overflow-hidden gap-panel-gap bg-outline-variant/30 min-h-0">
+            <SolutionPane
+              content={solution}
+              monacoLang={monacoLang}
+              fileName={selected?.name ?? null}
+              loading={fileLoading}
+            />
+            <PracticePane
+              value={practice}
+              monacoLang={monacoLang}
+              onChange={setPractice}
+              onReset={() => setPractice(STARTER[language])}
+              onRun={handleRun}
+            />
+          </div>
+          <BottomPanel
+            stdin={stdin}
+            onStdinChange={setStdin}
+            practiceResult={practiceResult}
+            testOutcome={testOutcome}
+            status={status}
+            running={running}
+          />
+        </div>
+      </main>
+    </div>
+  );
+}

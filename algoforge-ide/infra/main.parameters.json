@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "namePrefix": {
+      "value": "algoforge"
+    },
+    "location": {
+      "value": "eastus2"
+    },
+    "staticWebAppLocation": {
+      "value": "eastus2"
+    },
+    "pistonAdminUsername": {
+      "value": "azureuser"
+    },
+    "pistonSshPublicKey": {
+      "value": "ssh-ed25519 AAAA... replace-with-your-public-key"
+    },
+    "pistonVmSize": {
+      "value": "Standard_B2s"
+    },
+    "companyFolders": {
+      "value": "Amazon"
+    },
+    "allowedOrigins": {
+      "value": "https://gentle-bush-0e37b3e0f.7.azurestaticapps.net"
+    }
+  }
+}

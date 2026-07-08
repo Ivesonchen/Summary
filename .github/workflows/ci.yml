@@ -1,0 +1,65 @@
+# Continuous integration: build the frontend, type-check, and validate the Bicep
+# infrastructure on every push/PR that touches the app.
+
+name: CI
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'algoforge-ide/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    paths:
+      - 'algoforge-ide/**'
+      - '.github/workflows/ci.yml'
+
+defaults:
+  run:
+    working-directory: algoforge-ide
+
+jobs:
+  build:
+    name: Build & type-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: algoforge-ide/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (tsc + vite)
+        run: npm run build
+
+      - name: Upload frontend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: algoforge-ide/dist
+          retention-days: 7
+
+  docker:
+    name: Validate Docker build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build API image (no push)
+        run: docker build -t algoforge-api:ci .
+        working-directory: algoforge-ide
+
+  bicep:
+    name: Validate Bicep
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Bicep CLI
+        run: az bicep install
+      - name: bicep build (lint + compile)
+        run: az bicep build --file infra/main.bicep --stdout > /dev/null
+        working-directory: algoforge-ide
