@@ -1,6 +1,7 @@
 // GitHub sync: commits Blob-created algorithm files back into the repository via
-// the GitHub Git Data API, so problems/solutions created in the deployed app
-// become versioned in git (and flow through CI/CD).
+// the GitHub Git Data API, opening a pull request for review (never pushing to
+// the target branch directly), so problems/solutions created in the deployed app
+// become versioned in git after you approve + merge.
 //
 // Security: the token is held server-side only. It is NEVER returned to the
 // browser (config responses expose only `hasToken`). Defaults come from env
@@ -60,7 +61,8 @@ async function gh(pathname, method = 'GET', body) {
 
 /**
  * Sync: add any file present in the store (Blob/disk) that is missing from the
- * repo, as a single commit. Never overwrites or deletes existing repo files.
+ * repo. Instead of pushing to the target branch directly, it commits to a new
+ * branch and opens a pull request for review. Never overwrites or deletes files.
  */
 export async function syncToGitHub(store) {
   const { owner, name } = parseRepo();
@@ -68,7 +70,7 @@ export async function syncToGitHub(store) {
   if (!config.token) throw new FileError('GitHub token not configured', 400);
   const branch = config.branch;
 
-  // 1. Resolve branch -> latest commit -> base tree.
+  // 1. Resolve target branch -> latest commit -> base tree.
   const ref = await gh(`/repos/${owner}/${name}/git/ref/heads/${encodeURIComponent(branch)}`);
   const baseCommitSha = ref.object.sha;
   const baseCommit = await gh(`/repos/${owner}/${name}/git/commits/${baseCommitSha}`);
@@ -98,7 +100,7 @@ export async function syncToGitHub(store) {
     treeItems.push({ path: p, mode: '100644', type: 'blob', sha: blob.sha });
   }
 
-  // 6. New tree -> commit -> move the branch ref.
+  // 6. New tree -> commit (parented on the target branch tip).
   const newTree = await gh(`/repos/${owner}/${name}/git/trees`, 'POST', {
     base_tree: baseTreeSha,
     tree: treeItems,
@@ -108,14 +110,30 @@ export async function syncToGitHub(store) {
     tree: newTree.sha,
     parents: [baseCommitSha],
   });
-  await gh(`/repos/${owner}/${name}/git/refs/heads/${encodeURIComponent(branch)}`, 'PATCH', {
+
+  // 7. Create a new branch pointing at that commit (does NOT touch the target branch).
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').slice(0, 19);
+  const headBranch = `algoforge-sync/${stamp}`;
+  await gh(`/repos/${owner}/${name}/git/refs`, 'POST', {
+    ref: `refs/heads/${headBranch}`,
     sha: commit.sha,
+  });
+
+  // 8. Open a pull request from the new branch into the target branch.
+  const fileList = toAdd.map((p) => `- \`${p}\``).join('\n');
+  const pr = await gh(`/repos/${owner}/${name}/pulls`, 'POST', {
+    title: `AlgoForge sync: add ${toAdd.length} file(s)`,
+    head: headBranch,
+    base: branch,
+    body: `Automated sync of problems/solutions created in AlgoForge IDE.\n\nAdds ${toAdd.length} file(s):\n\n${fileList}\n\nReview and merge to include them in \`${branch}\`.`,
   });
 
   return {
     committed: toAdd,
     count: toAdd.length,
-    commitUrl: commit.html_url,
-    message: `Committed ${toAdd.length} file(s) to ${owner}/${name}@${branch}.`,
+    prNumber: pr.number,
+    prUrl: pr.html_url,
+    branch: headBranch,
+    message: `Opened PR #${pr.number} into ${branch} with ${toAdd.length} file(s). Review and approve to merge.`,
   };
 }

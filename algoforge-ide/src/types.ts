@@ -62,7 +62,9 @@ export interface GitHubConfig {
 export interface SyncResult {
   committed: string[];
   count: number;
-  commitUrl?: string;
+  prNumber?: number;
+  prUrl?: string;
+  branch?: string;
   message: string;
 }
 

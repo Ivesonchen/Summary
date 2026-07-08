@@ -84,8 +84,9 @@ export default function GitHubDialog({ onClose }: GitHubDialogProps) {
 
         <p className="font-code-sm text-code-sm text-on-surface-variant mb-md">
           Commit problems/solutions created in the app back into the repository. Files present in
-          storage but missing from the repo are added as a single commit (nothing is overwritten or
-          deleted).
+          storage but missing from the repo are pushed to a new branch and opened as a{' '}
+          <span className="text-primary">pull request</span> for you to review and merge (nothing is
+          pushed directly, overwritten, or deleted).
         </p>
 
         <div className="space-y-sm">
@@ -130,14 +131,14 @@ export default function GitHubDialog({ onClose }: GitHubDialogProps) {
         {result && (
           <div className="mt-sm font-code-sm text-code-sm">
             <span className={result.count > 0 ? 'text-secondary' : 'text-on-surface-variant'}>{result.message}</span>
-            {result.commitUrl && (
+            {result.prUrl && (
               <a
-                href={result.commitUrl}
+                href={result.prUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="ml-1 text-primary underline"
               >
-                view commit
+                view pull request
               </a>
             )}
           </div>
