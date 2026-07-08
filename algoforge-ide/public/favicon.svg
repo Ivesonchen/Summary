@@ -1,0 +1,13 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad-modern" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#22d3ee;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Main Hexagonal Forge Shape -->
+  <path d="M100 25 L165 62.5 V137.5 L100 175 L35 137.5 V62.5 Z" fill="none" stroke="url(#grad-modern)" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Central Minimalist "Logic" Core -->
+  <path d="M75 80 L100 105 L125 80" fill="none" stroke="url(#grad-modern)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M100 105 V140" fill="none" stroke="url(#grad-modern)" stroke-width="12" stroke-linecap="round"/>
+</svg>
