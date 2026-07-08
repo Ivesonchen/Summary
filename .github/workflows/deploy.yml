@@ -14,6 +14,9 @@ on:
     paths:
       - 'algoforge-ide/**'
       - '.github/workflows/deploy.yml'
+      # Algorithm content lives outside algoforge-ide/; re-sync Blob when it changes.
+      - '**/solution.*'
+      - '**/meta.json'
   workflow_dispatch:
 
 concurrency:
