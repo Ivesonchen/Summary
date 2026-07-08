@@ -44,11 +44,42 @@ param allowedOrigins string = ''
 @description('Application Insights connection string.')
 param appInsightsConnectionString string = ''
 
+@description('GitHub repo (owner/name) for the sync feature. Empty to leave unset.')
+param githubRepo string = ''
+
+@description('GitHub branch for sync.')
+param githubBranch string = 'master'
+
+@description('Key Vault secret URI holding the GitHub token. Empty to skip wiring the token.')
+param githubTokenSecretUri string = ''
+
 @description('Container port the API listens on.')
 param targetPort int = 3001
 
 var envName = '${namePrefix}-cae'
 var appName = '${namePrefix}-api'
+var useGithubToken = !empty(githubTokenSecretUri)
+
+// Base env vars, plus GitHub sync vars (token via Key Vault secret ref when present).
+var baseEnv = [
+  { name: 'PORT', value: string(targetPort) }
+  { name: 'PISTON_URL', value: pistonUrl }
+  { name: 'FILE_SOURCE', value: 'blob' }
+  { name: 'AZURE_STORAGE_ACCOUNT_URL', value: storageAccountUrl }
+  { name: 'AZURE_STORAGE_CONTAINER', value: storageContainer }
+  { name: 'COMPANY_FOLDERS', value: companyFolders }
+  { name: 'ALLOWED_ORIGINS', value: allowedOrigins }
+  { name: 'AZURE_CLIENT_ID', value: userAssignedClientId }
+  { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: appInsightsConnectionString }
+  { name: 'GITHUB_REPO', value: githubRepo }
+  { name: 'GITHUB_BRANCH', value: githubBranch }
+]
+var githubTokenEnv = useGithubToken ? [{ name: 'GITHUB_TOKEN', secretRef: 'github-token' }] : []
+var appEnv = concat(baseEnv, githubTokenEnv)
+var appSecrets = useGithubToken
+  ? [{ name: 'github-token', keyVaultUrl: githubTokenSecretUri, identity: userAssignedIdentityId }]
+  : []
+
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
   name: last(split(logAnalyticsWorkspaceId, '/'))
@@ -97,6 +128,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
         transport: 'auto'
         allowInsecure: false
       }
+      secrets: appSecrets
       registries: [
         {
           server: acrLoginServer
@@ -113,17 +145,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
             cpu: json('0.5')
             memory: '1Gi'
           }
-          env: [
-            { name: 'PORT', value: string(targetPort) }
-            { name: 'PISTON_URL', value: pistonUrl }
-            { name: 'FILE_SOURCE', value: 'blob' }
-            { name: 'AZURE_STORAGE_ACCOUNT_URL', value: storageAccountUrl }
-            { name: 'AZURE_STORAGE_CONTAINER', value: storageContainer }
-            { name: 'COMPANY_FOLDERS', value: companyFolders }
-            { name: 'ALLOWED_ORIGINS', value: allowedOrigins }
-            { name: 'AZURE_CLIENT_ID', value: userAssignedClientId }
-            { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: appInsightsConnectionString }
-          ]
+          env: appEnv
         }
       ]
       scale: {

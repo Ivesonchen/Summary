@@ -10,6 +10,10 @@ param namePrefix string
 @description('Tenant ID for the vault.')
 param tenantId string = subscription().tenantId
 
+@description('Optional GitHub token to store as a secret (leave empty to skip).')
+@secure()
+param githubToken string = ''
+
 var kvName = take(toLower(replace('${namePrefix}kv${uniqueString(resourceGroup().id)}', '-', '')), 24)
 
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
@@ -28,6 +32,18 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   }
 }
 
+// Store the GitHub token as a secret only when one is supplied.
+resource githubTokenSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = if (!empty(githubToken)) {
+  parent: keyVault
+  name: 'github-token'
+  properties: {
+    value: githubToken
+  }
+}
+
 output keyVaultName string = keyVault.name
 output keyVaultId string = keyVault.id
 output keyVaultUri string = keyVault.properties.vaultUri
+// Stable, version-less secret URI the Container App references (only valid when a token was stored).
+output githubTokenSecretUri string = '${keyVault.properties.vaultUri}secrets/github-token'
+

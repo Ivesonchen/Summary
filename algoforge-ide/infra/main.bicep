@@ -39,6 +39,16 @@ param companyFolders string = 'Amazon'
 @description('Comma-separated allowed CORS origins (the deployed frontend URL). "*" allows any.')
 param allowedOrigins string = ''
 
+@description('GitHub repo (owner/name) for the sync feature. Empty leaves it configurable at runtime.')
+param githubRepo string = ''
+
+@description('GitHub branch for sync.')
+param githubBranch string = 'master'
+
+@description('GitHub token for sync. Stored in Key Vault and injected as a Container App secret. Leave empty to configure at runtime instead.')
+@secure()
+param githubToken string = ''
+
 @description('Deploy the API Container App. Set false for the first pass (before the image exists), true once the real image is in ACR.')
 param deployApi bool = false
 
@@ -46,6 +56,7 @@ param deployApi bool = false
 param apiImage string = ''
 
 var pistonPort = 2000
+var hasGithubToken = !empty(githubToken)
 
 module network 'modules/network.bicep' = {
   name: 'network'
@@ -85,6 +96,7 @@ module keyVault 'modules/keyvault.bicep' = {
   params: {
     location: location
     namePrefix: namePrefix
+    githubToken: githubToken
   }
 }
 
@@ -142,6 +154,9 @@ module containerApp 'modules/containerapp.bicep' = if (deployApi) {
     storageContainer: storage.outputs.containerName
     companyFolders: companyFolders
     allowedOrigins: allowedOrigins
+    githubRepo: githubRepo
+    githubBranch: githubBranch
+    githubTokenSecretUri: hasGithubToken ? keyVault.outputs.githubTokenSecretUri : ''
     appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
   }
 }

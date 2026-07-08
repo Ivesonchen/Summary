@@ -25,6 +25,12 @@
     },
     "allowedOrigins": {
       "value": "https://gentle-bush-0e37b3e0f.7.azurestaticapps.net"
+    },
+    "githubRepo": {
+      "value": "Ivesonchen/Summary"
+    },
+    "githubBranch": {
+      "value": "master"
     }
   }
 }
