@@ -67,7 +67,7 @@ jobs:
             --registry "$ACR_NAME" \
             --image "algoforge-api:${IMAGE_TAG}" \
             --image "algoforge-api:latest" \
-            --no-cache \
+            --build-arg CACHEBUST="${IMAGE_TAG}" \
             --file Dockerfile .
 
       - name: Update Container App image

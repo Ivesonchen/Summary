@@ -10,6 +10,10 @@ FROM node:20-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
+# CACHEBUST (set per-commit in CI) forces the source COPY layer to rebuild so a
+# stale ACR Tasks layer cache can never serve old code.
+ARG CACHEBUST=dev
+RUN echo "cachebust=$CACHEBUST"
 COPY . .
 RUN npm run build
 
