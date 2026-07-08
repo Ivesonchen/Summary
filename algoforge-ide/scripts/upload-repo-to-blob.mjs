@@ -35,7 +35,15 @@ const CONTENT_TYPES = {
   '.cpp': 'text/x-c',
   '.c': 'text/x-c',
   '.go': 'text/plain',
+  '.json': 'application/json',
 };
+
+// Extra non-source files to include (e.g. per-problem metadata).
+const EXTRA_FILES = new Set(['meta.json']);
+
+function isIncluded(name) {
+  return SOURCE_EXT.has(path.extname(name).toLowerCase()) || EXTRA_FILES.has(name);
+}
 
 function collect(absDir, relDir, out) {
   let entries;
@@ -50,7 +58,7 @@ function collect(absDir, relDir, out) {
     const rel = relDir ? `${relDir}/${entry.name}` : entry.name;
     if (entry.isDirectory()) {
       collect(path.join(absDir, entry.name), rel, out);
-    } else if (entry.isFile() && SOURCE_EXT.has(path.extname(entry.name).toLowerCase())) {
+    } else if (entry.isFile() && isIncluded(entry.name)) {
       out.push(rel);
     }
   }
