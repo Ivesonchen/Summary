@@ -57,6 +57,38 @@ export async function createSolution(input: {
   return data;
 }
 
+/** Overwrite an existing solution file with edited content (left pane save). */
+export async function saveSolution(input: {
+  path: string;
+  content: string;
+}): Promise<{ path: string }> {
+  const res = await fetch(`${API_BASE}/api/solution`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Failed to save solution (${res.status})`);
+  return data;
+}
+
+/** Save playground code as a new named-variant solution (right pane save). */
+export async function saveVariantSolution(input: {
+  problemPath: string;
+  ext: string;
+  variant: string;
+  content: string;
+}): Promise<{ solutionPath: string; variant: string }> {
+  const res = await fetch(`${API_BASE}/api/solution/variant`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Failed to save solution (${res.status})`);
+  return data;
+}
+
 export async function fetchFile(path: string): Promise<FileResponse> {
   const res = await fetch(`${API_BASE}/api/file?path=${encodeURIComponent(path)}`);
   if (!res.ok) {

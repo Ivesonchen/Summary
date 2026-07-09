@@ -106,6 +106,32 @@ app.post('/api/solution', async (req, res) => {
   }
 });
 
+// PUT /api/solution { path, content } -> overwrite an existing solution file (editable left pane).
+app.put('/api/solution', async (req, res) => {
+  const { path: filePath, content } = req.body || {};
+  try {
+    const result = await store.saveSolution({ path: filePath, content });
+    res.json(result);
+  } catch (err) {
+    if (err instanceof FileError) return res.status(err.status).json({ error: err.message });
+    console.error('save solution error:', err);
+    res.status(500).json({ error: 'Failed to save solution' });
+  }
+});
+
+// POST /api/solution/variant { problemPath, ext, variant, content } -> save playground as a named variant.
+app.post('/api/solution/variant', async (req, res) => {
+  const { problemPath, ext, variant, content } = req.body || {};
+  try {
+    const result = await store.saveVariantSolution({ problemPath, ext, variant, content });
+    res.status(201).json(result);
+  } catch (err) {
+    if (err instanceof FileError) return res.status(err.status).json({ error: err.message });
+    console.error('save variant error:', err);
+    res.status(500).json({ error: 'Failed to save solution variant' });
+  }
+});
+
 // GET /api/github/config -> { repo, branch, syncBranch, hasToken } (never returns the token).
 app.get('/api/github/config', (_req, res) => {
   res.json(getGitHubConfig());

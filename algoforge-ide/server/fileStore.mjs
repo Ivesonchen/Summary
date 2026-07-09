@@ -47,7 +47,7 @@ const EXT_STARTERS = {
   java: 'import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        // your solution here\n    }\n}\n',
   py: 'import sys\n\ndef main():\n    data = sys.stdin.read().split()\n    # your solution here\n\nmain()\n',
   js: "const input = require('fs').readFileSync(0, 'utf8').trim();\n// your solution here\n",
-  ts: "const input: string = require('fs').readFileSync(0, 'utf8').trim();\n// your solution here\n",
+  ts: "declare function require(name: string): any;\n\nconst input: string = require('fs').readFileSync(0, 'utf8').trim();\n// your solution here\n",
   cpp: '#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    // your solution here\n    return 0;\n}\n',
   c: '#include <stdio.h>\n\nint main() {\n    // your solution here\n    return 0;\n}\n',
   go: 'package main\n\nimport (\n    "bufio"\n    "fmt"\n    "os"\n)\n\nfunc main() {\n    reader := bufio.NewReader(os.Stdin)\n    _ = reader\n    _ = fmt.Sprint\n}\n',
@@ -76,6 +76,22 @@ function parseName(fileName) {
   const m = fileName.match(/^\[(\d+)\]\s*(.+)$/);
   if (m) return { difficulty: Number(m[1]), display: m[2] };
   return { difficulty: null, display: fileName };
+}
+
+/**
+ * Recognize solution files. Matches the canonical `solution.<ext>` as well as
+ * named variants `solution.<variant>.<ext>` (e.g. `solution.optimized.py`),
+ * which lets a problem hold multiple solutions per language.
+ * Returns { ext, variant } or null when the file is not a solution.
+ */
+function parseSolutionFile(fileName) {
+  const ext = path.extname(fileName).toLowerCase().slice(1);
+  if (!ext) return null;
+  const base = fileName.slice(0, -(ext.length + 1)); // strip ".<ext>"
+  const lower = base.toLowerCase();
+  if (lower === 'solution') return { ext, variant: null };
+  if (lower.startsWith('solution.')) return { ext, variant: base.slice('solution.'.length) };
+  return null;
 }
 
 const byName = (a, b) => a.name.localeCompare(b.name, undefined, { numeric: true });
@@ -146,12 +162,21 @@ function collapseProblems(nodes) {
       continue;
     }
     const solutionFiles = node.children.filter(
-      (c) => c.type === 'file' && path.basename(c.name, path.extname(c.name)).toLowerCase() === 'solution'
+      (c) => c.type === 'file' && parseSolutionFile(c.name)
     );
     if (solutionFiles.length > 0) {
       const languages = solutionFiles
-        .map((f) => ({ ext: f.ext, path: f.path }))
-        .sort((a, b) => a.ext.localeCompare(b.ext));
+        .map((f) => {
+          const { ext, variant } = parseSolutionFile(f.name);
+          return { ext, path: f.path, variant, name: f.name };
+        })
+        .sort((a, b) => {
+          // Canonical solutions first, then variants; ties broken by ext then variant.
+          if (!a.variant && b.variant) return -1;
+          if (a.variant && !b.variant) return 1;
+          if (a.ext !== b.ext) return a.ext.localeCompare(b.ext);
+          return (a.variant || '').localeCompare(b.variant || '');
+        });
       out.push({ type: 'problem', name: node.name, path: node.path, languages });
     } else {
       out.push({ ...node, children: collapseProblems(node.children) });
@@ -227,6 +252,46 @@ class FileStore {
     await this.writeFile(solutionPath, EXT_STARTERS[ext]);
     this.invalidateTree();
     return { solutionPath };
+  }
+
+  /**
+   * Overwrite an existing solution file with new content (the editable left
+   * pane). Only paths that resolve to a `solution.<ext>`/`solution.<variant>.<ext>`
+   * file inside a known section are accepted. Returns { path }.
+   */
+  async saveSolution({ path: relPath, content }) {
+    const clean = safeParentPath(relPath);
+    if (!clean) throw new FileError('Invalid path', 400);
+    if (!SECTIONS.includes(clean.split('/')[0])) throw new FileError('Path must be within a known section', 400);
+    const sol = parseSolutionFile(clean.split('/').pop());
+    if (!sol) throw new FileError('Only solution files can be saved here', 400);
+    if (!EXT_STARTERS[sol.ext]) throw new FileError(`Unsupported language: ${sol.ext}`, 400);
+    if (typeof content !== 'string') throw new FileError('Missing content', 400);
+    await this.writeFile(clean, content);
+    this.invalidateTree();
+    return { path: clean };
+  }
+
+  /**
+   * Save the playground code as a new named-variant solution
+   * (`solution.<variant>.<ext>`) in an existing problem folder, allowing
+   * multiple solutions per language. Fails with 409 if that variant exists.
+   * Returns { solutionPath, variant }.
+   */
+  async saveVariantSolution({ problemPath, ext, variant, content }) {
+    const prob = safeParentPath(problemPath);
+    if (!prob) throw new FileError('Invalid problem path', 400);
+    if (!SECTIONS.includes(prob.split('/')[0])) throw new FileError('Path must be within a known section', 400);
+    if (!EXT_STARTERS[ext]) throw new FileError(`Unsupported language: ${ext}`, 400);
+    const v = String(variant || '').trim().toLowerCase();
+    if (!/^[a-z0-9][a-z0-9-]{0,59}$/.test(v)) {
+      throw new FileError('Invalid name (use letters, numbers and dashes)', 400);
+    }
+    const solutionPath = `${prob}/solution.${v}.${ext}`;
+    if (await this.exists(solutionPath)) throw new FileError('A solution with that name already exists', 409);
+    await this.writeFile(solutionPath, typeof content === 'string' ? content : EXT_STARTERS[ext]);
+    this.invalidateTree();
+    return { solutionPath, variant: v };
   }
 
   /** Read the numeric `group` for each problem folder path (batched). */

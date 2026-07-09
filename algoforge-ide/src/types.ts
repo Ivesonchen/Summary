@@ -14,10 +14,12 @@ export interface FolderNode {
   children: TreeNode[];
 }
 
-/** One language variant of a problem (a `solution.<ext>` file). */
+/** One solution file of a problem (`solution.<ext>` or `solution.<variant>.<ext>`). */
 export interface ProblemLanguage {
   ext: string;
   path: string;
+  variant?: string | null;
+  name?: string;
 }
 
 /** An algorithm folder collapsed into a single problem with language variants. */

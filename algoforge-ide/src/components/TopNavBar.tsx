@@ -1,47 +1,16 @@
 import Icon from './Icon';
-import type { Language, ProblemLanguage } from '../types';
 
 interface TopNavBarProps {
   fileName: string | null;
-  language: Language;
-  languages: ProblemLanguage[];
-  activeExt: string | null;
   group: number | null;
-  onSwitchLanguage: (ext: string) => void;
   runnable: boolean;
   running: boolean;
   onRun: () => void;
 }
 
-const LANG_LABEL: Record<Language, string> = {
-  java: 'Java',
-  python: 'Python 3',
-  javascript: 'JavaScript',
-  typescript: 'TypeScript',
-  cpp: 'C++',
-  c: 'C',
-  go: 'Go',
-  unknown: 'View only',
-};
-
-// Short label per extension for the language switcher tabs.
-const EXT_LABEL: Record<string, string> = {
-  java: 'Java',
-  py: 'Python',
-  js: 'JS',
-  ts: 'TS',
-  cpp: 'C++',
-  c: 'C',
-  go: 'Go',
-};
-
 export default function TopNavBar({
   fileName,
-  language,
-  languages,
-  activeExt,
   group,
-  onSwitchLanguage,
   runnable,
   running,
   onRun,
@@ -71,33 +40,6 @@ export default function TopNavBar({
         </nav>
       </div>
       <div className="flex items-center gap-md">
-        {/* Language switcher across the problem's available solution.<ext> files */}
-        {languages.length > 0 ? (
-          <div className="flex items-center gap-px bg-surface-container rounded border border-outline-variant overflow-hidden">
-            {languages.map((l) => {
-              const active = l.ext === activeExt;
-              return (
-                <button
-                  key={l.ext}
-                  onClick={() => onSwitchLanguage(l.ext)}
-                  className={`px-sm py-1 font-body-sm text-body-sm transition-colors ${
-                    active
-                      ? 'bg-primary-container text-on-primary-container font-bold'
-                      : 'text-on-surface-variant hover:text-primary'
-                  }`}
-                >
-                  {EXT_LABEL[l.ext] ?? l.ext.toUpperCase()}
-                </button>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="flex items-center bg-surface-container px-sm py-1 rounded border border-outline-variant">
-            <span className="font-body-sm text-body-sm text-on-surface-variant">
-              Language: {LANG_LABEL[language]}
-            </span>
-          </div>
-        )}
         <button
           onClick={onRun}
           disabled={!runnable || running}

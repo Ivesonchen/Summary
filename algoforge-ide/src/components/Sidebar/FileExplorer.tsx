@@ -66,9 +66,9 @@ function ProblemRow({
       <Icon name="code" size={15} className="text-secondary shrink-0" />
       <span className="truncate">{node.name}</span>
       <span className="ml-auto flex items-center gap-[3px] shrink-0">
-        {node.languages.map((l) => (
-          <span key={l.ext} className={`text-[8px] font-bold uppercase ${EXT_COLOR[l.ext] ?? 'text-outline'}`}>
-            {l.ext}
+        {[...new Set(node.languages.map((l) => l.ext))].map((ext) => (
+          <span key={ext} className={`text-[8px] font-bold uppercase ${EXT_COLOR[ext] ?? 'text-outline'}`}>
+            {ext}
           </span>
         ))}
       </span>
