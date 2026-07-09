@@ -40,7 +40,7 @@ export default function PracticePane({
   saving,
 }: PracticePaneProps) {
   return (
-    <section className="flex-1 min-w-0 bg-surface flex flex-col overflow-hidden border-l border-outline-variant">
+    <section className="flex-1 min-w-0 min-h-[60vh] md:min-h-0 bg-surface flex flex-col overflow-hidden border-t md:border-t-0 md:border-l border-outline-variant">
       <div className="h-9 px-md flex justify-between items-center bg-surface-container border-b border-outline-variant shrink-0">
         <span className="font-label-caps text-label-caps text-secondary uppercase tracking-wider flex items-center gap-xs">
           <Icon name="science" size={14} />

@@ -27,7 +27,7 @@ export default function SolutionPane({
   saving,
 }: SolutionPaneProps) {
   return (
-    <section className="flex-1 min-w-0 bg-surface-container-low flex flex-col overflow-hidden">
+    <section className="flex-1 min-w-0 min-h-[60vh] md:min-h-0 bg-surface-container-low flex flex-col overflow-hidden">
       <div className="h-9 px-md flex items-center gap-sm bg-surface-container border-b border-outline-variant shrink-0">
         <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider flex items-center gap-xs">
           <Icon name="edit_document" size={14} className="text-primary" />

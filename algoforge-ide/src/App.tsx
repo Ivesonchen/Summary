@@ -91,6 +91,7 @@ export default function App() {
   const [activeProblem, setActiveProblem] = useState<ProblemNode | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [githubOpen, setGithubOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false); // mobile sidebar drawer
 
   const refreshTree = useCallback(async (): Promise<Section[]> => {
     const t = await fetchTree();
@@ -284,15 +285,16 @@ export default function App() {
   }, [handleRun]);
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className="h-[100dvh] flex flex-col overflow-hidden">
       <TopNavBar
         fileName={title}
         group={group}
         runnable={practiceLang !== 'unknown'}
         running={running}
         onRun={handleRun}
+        onToggleNav={() => setNavOpen((v) => !v)}
       />
-      <main className="flex-1 flex overflow-hidden min-h-0">
+      <main className="flex-1 flex overflow-hidden min-h-0 relative">
         <FileExplorer
           sections={sections}
           rootName={rootName}
@@ -303,9 +305,11 @@ export default function App() {
           onSync={() => setGithubOpen(true)}
           loading={treeLoading}
           error={treeError}
+          open={navOpen}
+          onClose={() => setNavOpen(false)}
         />
         <div className="flex-1 flex flex-col min-w-0">
-          <div className="flex-1 flex overflow-hidden gap-panel-gap bg-outline-variant/30 min-h-0">
+          <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden gap-panel-gap bg-outline-variant/30 min-h-0">
             <SolutionPane
               content={solution}
               monacoLang={monacoLang}

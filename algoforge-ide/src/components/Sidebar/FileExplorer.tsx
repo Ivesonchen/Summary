@@ -12,6 +12,8 @@ interface FileExplorerProps {
   onSync: () => void;
   loading: boolean;
   error: string | null;
+  open?: boolean;
+  onClose?: () => void;
 }
 
 // Icon per known top-level section; falls back to a folder icon.
@@ -246,55 +248,87 @@ export default function FileExplorer({
   onSync,
   loading,
   error,
+  open = false,
+  onClose,
 }: FileExplorerProps) {
+  // On mobile, selecting an item should also dismiss the drawer.
+  const selectAndClose = (file: FileNode) => {
+    onSelect(file);
+    onClose?.();
+  };
+  const selectProblemAndClose = (problem: ProblemNode) => {
+    onSelectProblem(problem);
+    onClose?.();
+  };
   return (
-    <aside className="flex flex-col h-full overflow-hidden bg-surface-container-low border-r border-outline-variant w-64 shrink-0">
-      <div className="p-md border-b border-outline-variant">
-        <div className="flex justify-between items-center mb-sm">
-          <span className="font-headline-sm text-headline-sm text-on-surface truncate">{rootName || 'ALGORITHMS'}</span>
-          <Icon name="unfold_more" size={18} className="text-outline" />
+    <>
+      {/* Mobile backdrop */}
+      <div
+        onClick={onClose}
+        aria-hidden="true"
+        className={`fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-200 ${
+          open ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+      />
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] md:static md:z-auto md:w-64 md:max-w-none flex flex-col h-full overflow-hidden bg-surface-container-low border-r border-outline-variant shrink-0 safe-top safe-left transition-transform duration-200 ${
+          open ? 'translate-x-0' : '-translate-x-full'
+        } md:translate-x-0`}
+      >
+        <div className="p-md border-b border-outline-variant">
+          <div className="flex justify-between items-center mb-sm">
+            <span className="font-headline-sm text-headline-sm text-on-surface truncate">{rootName || 'ALGORITHMS'}</span>
+            <button
+              onClick={onClose}
+              aria-label="Close file explorer"
+              className="md:hidden text-outline hover:text-on-surface"
+            >
+              <Icon name="close" size={20} />
+            </button>
+            <Icon name="unfold_more" size={18} className="text-outline hidden md:inline-block" />
+          </div>
+          <div className="flex items-center gap-xs text-on-surface-variant font-code-sm text-code-sm">
+            <Icon name="account_tree" size={14} />
+            <span>main branch</span>
+          </div>
         </div>
-        <div className="flex items-center gap-xs text-on-surface-variant font-code-sm text-code-sm">
-          <Icon name="account_tree" size={14} />
-          <span>main branch</span>
+
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-sm">
+          {loading && <div className="p-md text-outline font-code-sm text-code-sm">Loading files…</div>}
+          {error && <div className="p-md text-error font-code-sm text-code-sm">{error}</div>}
+
+          {!loading &&
+            !error &&
+            sections.map((section, i) => (
+              <SectionGroup
+                key={section.name}
+                section={section}
+                selectedPath={selectedPath}
+                onSelect={selectAndClose}
+                onSelectProblem={selectProblemAndClose}
+                defaultOpen={i === 0}
+              />
+            ))}
         </div>
-      </div>
 
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-sm">
-        {loading && <div className="p-md text-outline font-code-sm text-code-sm">Loading files…</div>}
-        {error && <div className="p-md text-error font-code-sm text-code-sm">{error}</div>}
-
-        {!loading &&
-          !error &&
-          sections.map((section, i) => (
-            <SectionGroup
-              key={section.name}
-              section={section}
-              selectedPath={selectedPath}
-              onSelect={onSelect}
-              onSelectProblem={onSelectProblem}
-              defaultOpen={i === 0}
-            />
-          ))}
-      </div>
-
-      <div className="p-sm border-t border-outline-variant space-y-1">
-        <button
-          onClick={onCreate}
-          className="w-full bg-surface-variant text-on-surface-variant px-md py-2 rounded font-code-sm text-code-sm hover:text-primary transition-colors flex items-center justify-center gap-xs"
-        >
-          <Icon name="add_circle" size={18} />
-          Create
-        </button>
-        <button
-          onClick={onSync}
-          title="Commit app-created problems back to the repository"
-          className="w-full bg-surface-variant text-on-surface-variant px-md py-2 rounded font-code-sm text-code-sm hover:text-primary transition-colors flex items-center justify-center gap-xs"
-        >
-          <Icon name="cloud_sync" size={18} />
-          Sync to GitHub
-        </button>
-      </div>
-    </aside>
+        <div className="p-sm border-t border-outline-variant space-y-1 safe-bottom">
+          <button
+            onClick={onCreate}
+            className="w-full bg-surface-variant text-on-surface-variant px-md py-2 rounded font-code-sm text-code-sm hover:text-primary transition-colors flex items-center justify-center gap-xs"
+          >
+            <Icon name="add_circle" size={18} />
+            Create
+          </button>
+          <button
+            onClick={onSync}
+            title="Commit app-created problems back to the repository"
+            className="w-full bg-surface-variant text-on-surface-variant px-md py-2 rounded font-code-sm text-code-sm hover:text-primary transition-colors flex items-center justify-center gap-xs"
+          >
+            <Icon name="cloud_sync" size={18} />
+            Sync to GitHub
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }

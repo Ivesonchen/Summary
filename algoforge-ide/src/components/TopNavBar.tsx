@@ -6,6 +6,7 @@ interface TopNavBarProps {
   runnable: boolean;
   running: boolean;
   onRun: () => void;
+  onToggleNav: () => void;
 }
 
 export default function TopNavBar({
@@ -14,11 +15,19 @@ export default function TopNavBar({
   runnable,
   running,
   onRun,
+  onToggleNav,
 }: TopNavBarProps) {
   return (
-    <header className="flex justify-between items-center w-full px-md h-12 z-50 bg-background border-b border-outline-variant shrink-0">
-      <div className="flex items-center gap-lg">
-        <span className="font-headline-md text-headline-md font-bold text-primary tracking-tight">
+    <header className="flex justify-between items-center w-full px-md h-12 z-50 bg-background border-b border-outline-variant shrink-0 safe-top safe-left safe-right">
+      <div className="flex items-center gap-sm md:gap-lg min-w-0">
+        <button
+          onClick={onToggleNav}
+          aria-label="Toggle file explorer"
+          className="md:hidden text-on-surface-variant hover:text-primary shrink-0 -ml-1 p-1"
+        >
+          <Icon name="menu" size={22} />
+        </button>
+        <span className="font-headline-md text-headline-md font-bold text-primary tracking-tight shrink-0">
           AlgoForge IDE
         </span>
         <nav className="hidden md:flex gap-md items-center">

@@ -57,7 +57,7 @@ export default function BottomPanel({
   );
 
   return (
-    <footer className="h-56 bg-surface-container-high border-t border-outline-variant flex flex-col z-40 shrink-0">
+    <footer className="h-44 md:h-56 bg-surface-container-high border-t border-outline-variant flex flex-col z-40 shrink-0 safe-bottom safe-left safe-right">
       {/* Tab row */}
       <div className="flex items-center gap-md px-md pt-2 border-b border-outline-variant/30 h-9 shrink-0">
         {tabBtn('console', 'terminal', 'Console')}

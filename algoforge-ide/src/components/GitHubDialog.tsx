@@ -71,7 +71,7 @@ export default function GitHubDialog({ onClose }: GitHubDialogProps) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50" onClick={onClose}>
       <div
-        className="w-[460px] bg-surface-container border border-outline-variant rounded-xl shadow-xl p-md"
+        className="w-[92vw] max-w-[460px] max-h-[90dvh] overflow-y-auto bg-surface-container border border-outline-variant rounded-xl shadow-xl p-md"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-md">
