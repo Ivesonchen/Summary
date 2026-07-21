@@ -18,6 +18,10 @@ param githubToken string = ''
 @secure()
 param githubModelsToken string = ''
 
+@description('Optional Copilot auth token (COPILOT_GITHUB_TOKEN) to store as a secret (leave empty to skip).')
+@secure()
+param copilotGithubToken string = ''
+
 var kvName = take(toLower(replace('${namePrefix}kv${uniqueString(resourceGroup().id)}', '-', '')), 24)
 
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
@@ -54,6 +58,15 @@ resource githubModelsTokenSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' 
   }
 }
 
+// Store the Copilot auth token (COPILOT_GITHUB_TOKEN) only when supplied.
+resource copilotGithubTokenSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = if (!empty(copilotGithubToken)) {
+  parent: keyVault
+  name: 'copilot-github-token'
+  properties: {
+    value: copilotGithubToken
+  }
+}
+
 output keyVaultName string = keyVault.name
 output keyVaultId string = keyVault.id
 output keyVaultUri string = keyVault.properties.vaultUri
@@ -61,4 +74,6 @@ output keyVaultUri string = keyVault.properties.vaultUri
 output githubTokenSecretUri string = '${keyVault.properties.vaultUri}secrets/github-token'
 // Stable, version-less secret URI for the GitHub Models token (only valid when stored).
 output githubModelsTokenSecretUri string = '${keyVault.properties.vaultUri}secrets/github-models-token'
+// Stable, version-less secret URI for the Copilot auth token (only valid when stored).
+output copilotGithubTokenSecretUri string = '${keyVault.properties.vaultUri}secrets/copilot-github-token'
 

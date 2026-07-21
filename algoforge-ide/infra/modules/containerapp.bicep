@@ -68,6 +68,9 @@ param aiProvider string = 'github-models'
 @description('Copilot model id (used when aiProvider=copilot), e.g. claude-opus-4.8.')
 param copilotModel string = ''
 
+@description('Key Vault secret URI holding the Copilot auth token (COPILOT_GITHUB_TOKEN). Empty to skip.')
+param copilotGithubTokenSecretUri string = ''
+
 @description('Storage account name (for the Copilot session Azure Files share).')
 param storageAccountName string = ''
 
@@ -79,9 +82,13 @@ param targetPort int = 3001
 
 var envName = '${namePrefix}-cae'
 var appName = '${namePrefix}-api'
-// The copilot provider needs a persistent home volume + an always-on replica so
-// the signed-in session (and any in-flight device-flow login) survive.
 var copilotEnabled = toLower(aiProvider) == 'copilot'
+// Token auth (COPILOT_GITHUB_TOKEN via Key Vault) is headless and stateless:
+// no keyring, no persistent home volume, and no always-on replica required.
+var useCopilotToken = copilotEnabled && !empty(copilotGithubTokenSecretUri)
+// A persistent home volume + always-on replica are only needed for interactive
+// device-flow sign-in (to keep the CLI's keyring/session alive between calls).
+var copilotNeedsVolume = copilotEnabled && !useCopilotToken
 var useGithubToken = !empty(githubTokenSecretUri)
 var useGithubModelsToken = !empty(githubModelsTokenSecretUri)
 var useGithubModelsModel = !empty(githubModelsModel)
@@ -106,13 +113,17 @@ var githubModelsTokenEnv = useGithubModelsToken ? [{ name: 'GITHUB_MODELS_TOKEN'
 var githubModelsModelEnv = useGithubModelsModel ? [{ name: 'GITHUB_MODELS_MODEL', value: githubModelsModel }] : []
 var aiProviderEnv = [{ name: 'AI_PROVIDER', value: aiProvider }]
 var copilotModelEnv = (copilotEnabled && !empty(copilotModel)) ? [{ name: 'COPILOT_MODEL', value: copilotModel }] : []
-var appEnv = concat(baseEnv, githubTokenEnv, githubModelsTokenEnv, githubModelsModelEnv, aiProviderEnv, copilotModelEnv)
+var copilotTokenEnv = useCopilotToken ? [{ name: 'COPILOT_GITHUB_TOKEN', secretRef: 'copilot-github-token' }] : []
+var appEnv = concat(baseEnv, githubTokenEnv, githubModelsTokenEnv, githubModelsModelEnv, aiProviderEnv, copilotModelEnv, copilotTokenEnv)
 var appSecrets = concat(
   useGithubToken
     ? [{ name: 'github-token', keyVaultUrl: githubTokenSecretUri, identity: userAssignedIdentityId }]
     : [],
   useGithubModelsToken
     ? [{ name: 'github-models-token', keyVaultUrl: githubModelsTokenSecretUri, identity: userAssignedIdentityId }]
+    : [],
+  useCopilotToken
+    ? [{ name: 'copilot-github-token', keyVaultUrl: copilotGithubTokenSecretUri, identity: userAssignedIdentityId }]
     : []
 )
 
@@ -122,7 +133,7 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' exis
 }
 
 // Existing storage account — used to key the Copilot session Azure Files mount.
-resource storageAcct 'Microsoft.Storage/storageAccounts@2023-05-01' existing = if (copilotEnabled) {
+resource storageAcct 'Microsoft.Storage/storageAccounts@2023-05-01' existing = if (copilotNeedsVolume) {
   name: storageAccountName
 }
 
@@ -150,8 +161,9 @@ resource env 'Microsoft.App/managedEnvironments@2024-03-01' = {
 }
 
 // Azure Files storage registered on the environment, mounted by the app to
-// persist the Copilot CLI session (~/.copilot) across restarts.
-resource copilotEnvStorage 'Microsoft.App/managedEnvironments/storages@2024-03-01' = if (copilotEnabled) {
+// persist the Copilot CLI session (~/.copilot) across restarts. Only needed for
+// interactive device-flow sign-in; token auth (COPILOT_GITHUB_TOKEN) is stateless.
+resource copilotEnvStorage 'Microsoft.App/managedEnvironments/storages@2024-03-01' = if (copilotNeedsVolume) {
   parent: env
   name: 'copilot-home'
   properties: {
@@ -164,17 +176,17 @@ resource copilotEnvStorage 'Microsoft.App/managedEnvironments/storages@2024-03-0
   }
 }
 
-var copilotVolumes = copilotEnabled
+var copilotVolumes = copilotNeedsVolume
   ? [{ name: 'copilot-home', storageType: 'AzureFile', storageName: 'copilot-home' }]
   : []
-var copilotVolumeMounts = copilotEnabled
+var copilotVolumeMounts = copilotNeedsVolume
   ? [{ volumeName: 'copilot-home', mountPath: '/home/node/.copilot' }]
   : []
 
 resource api 'Microsoft.App/containerApps@2024-03-01' = {
   name: appName
   location: location
-  dependsOn: copilotEnabled ? [copilotEnvStorage] : []
+  dependsOn: copilotNeedsVolume ? [copilotEnvStorage] : []
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
@@ -215,10 +227,10 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
       ]
       volumes: copilotVolumes
       scale: {
-        // Copilot needs a single always-on replica so the signed-in session and
-        // any in-flight device-flow login stay on one instance.
-        minReplicas: copilotEnabled ? 1 : 0
-        maxReplicas: copilotEnabled ? 1 : 3
+        // Interactive device-flow sign-in needs a single always-on replica so the
+        // signed-in CLI session survives. Token auth is stateless -> allow scale-to-zero.
+        minReplicas: copilotNeedsVolume ? 1 : 0
+        maxReplicas: copilotNeedsVolume ? 1 : 3
       }
     }
   }

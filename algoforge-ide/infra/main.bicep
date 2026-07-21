@@ -65,6 +65,10 @@ param aiProvider string = 'github-models'
 @description('Copilot model id (used when aiProvider=copilot), e.g. claude-opus-4.8.')
 param copilotModel string = ''
 
+@description('Copilot auth token (COPILOT_GITHUB_TOKEN). Stored in Key Vault and injected as a Container App secret. Enables headless Copilot auth (no device flow).')
+@secure()
+param copilotGithubToken string = ''
+
 @description('Deploy the API Container App. Set false for the first pass (before the image exists), true once the real image is in ACR.')
 param deployApi bool = false
 
@@ -77,6 +81,7 @@ param apiImage string = ''
 var pistonPort = 2000
 var hasGithubToken = !empty(githubToken)
 var hasGithubModelsToken = !empty(githubModelsToken)
+var hasCopilotGithubToken = !empty(copilotGithubToken)
 
 module network 'modules/network.bicep' = {
   name: 'network'
@@ -118,6 +123,7 @@ module keyVault 'modules/keyvault.bicep' = {
     namePrefix: namePrefix
     githubToken: githubToken
     githubModelsToken: githubModelsToken
+    copilotGithubToken: copilotGithubToken
   }
 }
 
@@ -184,6 +190,7 @@ module containerApp 'modules/containerapp.bicep' = if (deployApi) {
     githubModelsModel: githubModelsModel
     aiProvider: aiProvider
     copilotModel: copilotModel
+    copilotGithubTokenSecretUri: hasCopilotGithubToken ? keyVault.outputs.copilotGithubTokenSecretUri : ''
     storageAccountName: storage.outputs.storageAccountName
     copilotShareName: storage.outputs.copilotShareName
     appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
