@@ -31,6 +31,12 @@
     },
     "githubBranch": {
       "value": "master"
+    },
+    "aiProvider": {
+      "value": "copilot"
+    },
+    "copilotModel": {
+      "value": "claude-opus-4.8"
     }
   }
 }

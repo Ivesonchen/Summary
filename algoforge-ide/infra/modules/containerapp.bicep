@@ -62,11 +62,26 @@ param githubModelsTokenSecretUri string = ''
 @description('GitHub Models model id for the AI chat (empty uses the server default).')
 param githubModelsModel string = ''
 
+@description('AI provider for the chat tab: "github-models" (default) or "copilot".')
+param aiProvider string = 'github-models'
+
+@description('Copilot model id (used when aiProvider=copilot), e.g. claude-opus-4.8.')
+param copilotModel string = ''
+
+@description('Storage account name (for the Copilot session Azure Files share).')
+param storageAccountName string = ''
+
+@description('Azure Files share name that persists the Copilot session (~/.copilot).')
+param copilotShareName string = 'copilot-home'
+
 @description('Container port the API listens on.')
 param targetPort int = 3001
 
 var envName = '${namePrefix}-cae'
 var appName = '${namePrefix}-api'
+// The copilot provider needs a persistent home volume + an always-on replica so
+// the signed-in session (and any in-flight device-flow login) survive.
+var copilotEnabled = toLower(aiProvider) == 'copilot'
 var useGithubToken = !empty(githubTokenSecretUri)
 var useGithubModelsToken = !empty(githubModelsTokenSecretUri)
 var useGithubModelsModel = !empty(githubModelsModel)
@@ -89,7 +104,9 @@ var baseEnv = [
 var githubTokenEnv = useGithubToken ? [{ name: 'GITHUB_TOKEN', secretRef: 'github-token' }] : []
 var githubModelsTokenEnv = useGithubModelsToken ? [{ name: 'GITHUB_MODELS_TOKEN', secretRef: 'github-models-token' }] : []
 var githubModelsModelEnv = useGithubModelsModel ? [{ name: 'GITHUB_MODELS_MODEL', value: githubModelsModel }] : []
-var appEnv = concat(baseEnv, githubTokenEnv, githubModelsTokenEnv, githubModelsModelEnv)
+var aiProviderEnv = [{ name: 'AI_PROVIDER', value: aiProvider }]
+var copilotModelEnv = (copilotEnabled && !empty(copilotModel)) ? [{ name: 'COPILOT_MODEL', value: copilotModel }] : []
+var appEnv = concat(baseEnv, githubTokenEnv, githubModelsTokenEnv, githubModelsModelEnv, aiProviderEnv, copilotModelEnv)
 var appSecrets = concat(
   useGithubToken
     ? [{ name: 'github-token', keyVaultUrl: githubTokenSecretUri, identity: userAssignedIdentityId }]
@@ -102,6 +119,11 @@ var appSecrets = concat(
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
   name: last(split(logAnalyticsWorkspaceId, '/'))
+}
+
+// Existing storage account — used to key the Copilot session Azure Files mount.
+resource storageAcct 'Microsoft.Storage/storageAccounts@2023-05-01' existing = if (copilotEnabled) {
+  name: storageAccountName
 }
 
 resource env 'Microsoft.App/managedEnvironments@2024-03-01' = {
@@ -127,9 +149,32 @@ resource env 'Microsoft.App/managedEnvironments@2024-03-01' = {
   }
 }
 
+// Azure Files storage registered on the environment, mounted by the app to
+// persist the Copilot CLI session (~/.copilot) across restarts.
+resource copilotEnvStorage 'Microsoft.App/managedEnvironments/storages@2024-03-01' = if (copilotEnabled) {
+  parent: env
+  name: 'copilot-home'
+  properties: {
+    azureFile: {
+      accountName: storageAccountName
+      accountKey: storageAcct.listKeys().keys[0].value
+      shareName: copilotShareName
+      accessMode: 'ReadWrite'
+    }
+  }
+}
+
+var copilotVolumes = copilotEnabled
+  ? [{ name: 'copilot-home', storageType: 'AzureFile', storageName: 'copilot-home' }]
+  : []
+var copilotVolumeMounts = copilotEnabled
+  ? [{ volumeName: 'copilot-home', mountPath: '/home/node/.copilot' }]
+  : []
+
 resource api 'Microsoft.App/containerApps@2024-03-01' = {
   name: appName
   location: location
+  dependsOn: copilotEnabled ? [copilotEnvStorage] : []
   identity: {
     type: 'UserAssigned'
     userAssignedIdentities: {
@@ -165,11 +210,15 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
             memory: '1Gi'
           }
           env: appEnv
+          volumeMounts: copilotVolumeMounts
         }
       ]
+      volumes: copilotVolumes
       scale: {
-        minReplicas: 0
-        maxReplicas: 3
+        // Copilot needs a single always-on replica so the signed-in session and
+        // any in-flight device-flow login stay on one instance.
+        minReplicas: copilotEnabled ? 1 : 0
+        maxReplicas: copilotEnabled ? 1 : 3
       }
     }
   }

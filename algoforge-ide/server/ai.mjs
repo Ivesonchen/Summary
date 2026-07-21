@@ -12,9 +12,19 @@
 //   GITHUB_MODELS_MODEL (default openai/gpt-4o-mini)
 
 import { FileError } from './fileStore.mjs';
+import { copilotChat, getCopilotStatus, isCopilotAvailable } from './copilot.mjs';
 
 const DEFAULT_URL = 'https://models.github.ai/inference/chat/completions';
 const DEFAULT_MODEL = 'openai/gpt-4o-mini';
+
+// Which backend serves AI chat: 'copilot' (GitHub Copilot SDK, single-account
+// sign-in) or 'github-models' (GitHub Models inference API). Default keeps the
+// existing behavior.
+function getProvider() {
+  return (process.env.AI_PROVIDER || 'github-models').toLowerCase() === 'copilot'
+    ? 'copilot'
+    : 'github-models';
+}
 
 // Roles the API accepts; anything else is rejected before we call upstream.
 const VALID_ROLES = new Set(['system', 'user', 'assistant']);
@@ -27,32 +37,40 @@ function getToken() {
   return process.env.GITHUB_MODELS_TOKEN || process.env.GITHUB_TOKEN || '';
 }
 
-export function getAIConfig() {
+export async function getAIConfig() {
+  const provider = getProvider();
+  const base = {
+    provider,
+    model: provider === 'copilot' ? process.env.COPILOT_MODEL || 'copilot' : process.env.GITHUB_MODELS_MODEL || DEFAULT_MODEL,
+  };
+  if (provider === 'copilot') {
+    const available = isCopilotAvailable();
+    const status = available ? await getCopilotStatus() : { authenticated: false };
+    return {
+      ...base,
+      available,
+      authenticated: Boolean(status.authenticated),
+      username: status.username,
+      // Copilot manages its own token; "hasToken" mirrors auth for UI parity.
+      hasToken: Boolean(status.authenticated),
+    };
+  }
   return {
-    model: process.env.GITHUB_MODELS_MODEL || DEFAULT_MODEL,
+    ...base,
+    available: true,
+    authenticated: Boolean(getToken()),
     hasToken: Boolean(getToken()),
   };
 }
 
-/**
- * Send a chat conversation to the GitHub Models API and return the assistant's
- * reply text. `messages` is an array of { role, content } items.
- */
-export async function chatCompletion(messages) {
-  const token = getToken();
-  if (!token) {
-    throw new FileError(
-      'AI is not configured. Set GITHUB_MODELS_TOKEN (a GitHub PAT with the Models permission) on the server.',
-      400
-    );
-  }
+// Validate + normalize the incoming messages array (shared by both providers).
+function normalizeMessages(messages) {
   if (!Array.isArray(messages) || messages.length === 0) {
     throw new FileError('No messages provided', 400);
   }
   if (messages.length > MAX_MESSAGES) {
     throw new FileError('Conversation too long', 413);
   }
-
   const clean = [];
   for (const m of messages) {
     const role = m && typeof m.role === 'string' ? m.role : '';
@@ -60,6 +78,30 @@ export async function chatCompletion(messages) {
     if (!VALID_ROLES.has(role)) throw new FileError(`Invalid message role: ${role}`, 400);
     if (content.length > MAX_CONTENT_CHARS) throw new FileError('Message content too large', 413);
     clean.push({ role, content });
+  }
+  return clean;
+}
+
+/**
+ * Send a chat conversation to the active provider and return the assistant's
+ * reply text. `messages` is an array of { role, content } items.
+ */
+export async function chatCompletion(messages) {
+  const clean = normalizeMessages(messages);
+  if (getProvider() === 'copilot') {
+    return copilotChat(clean);
+  }
+  return githubModelsCompletion(clean);
+}
+
+// ── GitHub Models provider ──────────────────────────────────────────────────
+async function githubModelsCompletion(clean) {
+  const token = getToken();
+  if (!token) {
+    throw new FileError(
+      'AI is not configured. Set GITHUB_MODELS_TOKEN (a GitHub PAT with the Models permission) on the server.',
+      400
+    );
   }
 
   const url = process.env.GITHUB_MODELS_URL || DEFAULT_URL;

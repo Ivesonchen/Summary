@@ -42,6 +42,24 @@ resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@20
   }
 }
 
+// File share used to persist the GitHub Copilot CLI session (~/.copilot) across
+// Container App restarts when AI_PROVIDER=copilot. Small quota — it only holds a
+// token + config. Harmless when the copilot provider is not used.
+resource fileService 'Microsoft.Storage/storageAccounts/fileServices@2023-05-01' = {
+  parent: storage
+  name: 'default'
+}
+
+resource copilotShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-05-01' = {
+  parent: fileService
+  name: 'copilot-home'
+  properties: {
+    shareQuota: 1
+    enabledProtocols: 'SMB'
+  }
+}
+
 output storageAccountName string = storage.name
 output blobEndpoint string = storage.properties.primaryEndpoints.blob
 output containerName string = containerName
+output copilotShareName string = copilotShare.name

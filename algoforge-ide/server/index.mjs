@@ -7,6 +7,7 @@ import { createFileStore, FileError } from './fileStore.mjs';
 import { getGitHubConfig, setGitHubConfig, syncToGitHub } from './github.mjs';
 import { isSupportedLanguage, runInSandbox } from './piston.mjs';
 import { chatCompletion, getAIConfig } from './ai.mjs';
+import { copilotLogout, getCopilotStatus, startCopilotLogin } from './copilot.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -185,9 +186,42 @@ app.post('/api/run', async (req, res) => {
   }
 });
 
-// GET /api/ai/config -> { model, hasToken } (never returns the token).
-app.get('/api/ai/config', (_req, res) => {
-  res.json(getAIConfig());
+// GET /api/ai/config -> { provider, model, available, authenticated, ... }.
+app.get('/api/ai/config', async (_req, res) => {
+  try {
+    res.json(await getAIConfig());
+  } catch (err) {
+    console.error('ai config error:', err);
+    res.status(500).json({ error: 'Failed to load AI config' });
+  }
+});
+
+// POST /api/ai/login -> start GitHub Copilot device-flow sign-in.
+// Returns { userCode, verificationUri } or { alreadySignedIn: true }.
+app.post('/api/ai/login', async (_req, res) => {
+  try {
+    res.json(await startCopilotLogin());
+  } catch (err) {
+    if (err instanceof FileError) return res.status(err.status).json({ error: err.message });
+    console.error('copilot login error:', err);
+    res.status(502).json({ error: 'Copilot sign-in failed' });
+  }
+});
+
+// GET /api/ai/status -> { authenticated, username? } for the Copilot provider.
+app.get('/api/ai/status', async (_req, res) => {
+  res.json(await getCopilotStatus());
+});
+
+// POST /api/ai/logout -> sign out of GitHub Copilot.
+app.post('/api/ai/logout', async (_req, res) => {
+  try {
+    await copilotLogout();
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('copilot logout error:', err);
+    res.status(502).json({ error: 'Copilot sign-out failed' });
+  }
 });
 
 // POST /api/chat { messages:[{ role, content }] } -> { content, model }.

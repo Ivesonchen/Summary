@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import Icon from '../Icon';
-import { sendChat } from '../../lib/api';
+import { fetchAIConfig, fetchCopilotStatus, sendChat, startCopilotLogin, type AIConfig } from '../../lib/api';
 import type { ChatMessage } from '../../types';
 
 // Context about what the user is currently viewing, folded into the system prompt
@@ -146,6 +146,58 @@ export default function ChatPanel({ context }: ChatPanelProps) {
   const [summaryLoading, setSummaryLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // AI provider config + Copilot sign-in state.
+  const [config, setConfig] = useState<AIConfig | null>(null);
+  const [signInInfo, setSignInInfo] = useState<{ userCode: string; verificationUri: string } | null>(null);
+  const [signingIn, setSigningIn] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  const loadConfig = () => {
+    fetchAIConfig()
+      .then(setConfig)
+      .catch(() => setConfig(null));
+  };
+  useEffect(loadConfig, []);
+
+  // While a Copilot sign-in is in progress, poll status until authenticated.
+  useEffect(() => {
+    if (!signingIn) return;
+    const id = setInterval(async () => {
+      try {
+        const s = await fetchCopilotStatus();
+        if (s.authenticated) {
+          setSigningIn(false);
+          setSignInInfo(null);
+          loadConfig();
+        }
+      } catch {
+        /* keep polling */
+      }
+    }, 3000);
+    return () => clearInterval(id);
+  }, [signingIn]);
+
+  const beginSignIn = async () => {
+    setAuthError(null);
+    try {
+      const r = await startCopilotLogin();
+      if (r.alreadySignedIn) {
+        loadConfig();
+        return;
+      }
+      if (r.userCode && r.verificationUri) {
+        setSignInInfo({ userCode: r.userCode, verificationUri: r.verificationUri });
+        setSigningIn(true);
+        window.open(r.verificationUri, '_blank', 'noopener');
+      }
+    } catch (e) {
+      setAuthError((e as Error).message);
+    }
+  };
+
+  // The Copilot provider requires an operator sign-in before chat works.
+  const needsSignIn = config?.provider === 'copilot' && config.available && !config.authenticated;
+
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, loading]);
@@ -156,6 +208,7 @@ export default function ChatPanel({ context }: ChatPanelProps) {
   // request key guards against React StrictMode's double-invoke and re-renders.
   const requestedKeyRef = useRef<string | null>(null);
   useEffect(() => {
+    if (needsSignIn) return; // don't summarize until the provider is ready
     if (!context.solution.trim()) {
       requestedKeyRef.current = null;
       setSummary(null);
@@ -196,7 +249,7 @@ export default function ChatPanel({ context }: ChatPanelProps) {
       .finally(() => {
         if (requestedKeyRef.current === key) setSummaryLoading(false);
       });
-  }, [context.title, context.solution, context.language]);
+  }, [context.title, context.solution, context.language, needsSignIn]);
 
   const submit = async (text: string) => {
     const trimmed = text.trim();
@@ -229,6 +282,67 @@ export default function ChatPanel({ context }: ChatPanelProps) {
 
   return (
     <div className="flex flex-col h-full min-h-0">
+      {needsSignIn ? (
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-md flex flex-col items-center justify-center text-center gap-3">
+          <Icon name="lock" size={32} className="text-outline" />
+          <div className="space-y-1">
+            <div className="font-label-caps uppercase tracking-wider text-label-caps text-on-surface-variant">
+              GitHub Copilot sign-in required
+            </div>
+            <p className="font-code-sm text-code-sm text-outline max-w-xs">
+              This assistant uses GitHub Copilot. Sign in once with your GitHub account to enable it.
+            </p>
+          </div>
+
+          {signInInfo ? (
+            <div className="w-full max-w-xs space-y-2 rounded-lg border border-outline-variant/50 bg-surface-container/60 p-3">
+              <p className="font-code-sm text-code-sm text-on-surface-variant">
+                1. Open{' '}
+                <a
+                  href={signInInfo.verificationUri}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary underline"
+                >
+                  {signInInfo.verificationUri.replace('https://', '')}
+                </a>
+              </p>
+              <p className="font-code-sm text-code-sm text-on-surface-variant">2. Enter this code:</p>
+              <div className="flex items-center justify-center gap-xs">
+                <code className="px-2 py-1 rounded bg-surface-container-high border border-outline-variant text-tertiary-fixed font-bold tracking-widest">
+                  {signInInfo.userCode}
+                </code>
+                <button
+                  onClick={() => navigator.clipboard?.writeText(signInInfo.userCode)}
+                  title="Copy code"
+                  className="text-outline hover:text-primary"
+                >
+                  <Icon name="content_copy" size={14} />
+                </button>
+              </div>
+              <div className="flex items-center justify-center gap-xs text-outline font-code-sm text-code-sm pt-1">
+                <Icon name="progress_activity" size={14} className="animate-spin text-primary" />
+                Waiting for authorization…
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={beginSignIn}
+              className="flex items-center gap-xs px-md py-2 rounded bg-primary-container text-on-primary-container hover:bg-primary transition-colors font-body-sm text-body-sm"
+            >
+              <Icon name="login" size={16} />
+              Sign in with GitHub
+            </button>
+          )}
+
+          {authError && (
+            <div className="rounded-lg px-2.5 py-1.5 bg-error-container/40 border border-error/40 text-error font-code-sm text-code-sm max-w-xs">
+              {authError}
+            </div>
+          )}
+        </div>
+      ) : (
+        <>
       {/* Message list */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar p-sm space-y-3">
         {messages.length === 0 && !loading && (
@@ -344,6 +458,8 @@ export default function ChatPanel({ context }: ChatPanelProps) {
           </button>
         )}
       </div>
+        </>
+      )}
     </div>
   );
 }

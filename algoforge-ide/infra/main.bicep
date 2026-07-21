@@ -59,8 +59,17 @@ param githubModelsToken string = ''
 @description('GitHub Models model id for the AI chat (empty uses the server default openai/gpt-4o-mini).')
 param githubModelsModel string = ''
 
+@description('AI provider for the chat tab: "github-models" (default) or "copilot".')
+param aiProvider string = 'github-models'
+
+@description('Copilot model id (used when aiProvider=copilot), e.g. claude-opus-4.8.')
+param copilotModel string = ''
+
 @description('Deploy the API Container App. Set false for the first pass (before the image exists), true once the real image is in ACR.')
 param deployApi bool = false
+
+@description('Create the RBAC role assignments. Set false on redeploys where the roles already exist (avoids RoleAssignmentExists).')
+param deployRbac bool = true
 
 @description('Full API image reference to run when deployApi is true (e.g. myacr.azurecr.io/algoforge-api:latest).')
 param apiImage string = ''
@@ -137,7 +146,8 @@ module identity 'modules/identity.bicep' = {
 
 // Grant the API identity its roles. Runs regardless of deployApi so the roles
 // are in place (and propagated) before the container app is ever created.
-module rbac 'modules/rbac.bicep' = {
+// Skippable (deployRbac=false) on redeploys where the assignments already exist.
+module rbac 'modules/rbac.bicep' = if (deployRbac) {
   name: 'rbac'
   params: {
     principalId: identity.outputs.principalId
@@ -149,9 +159,9 @@ module rbac 'modules/rbac.bicep' = {
 
 module containerApp 'modules/containerapp.bicep' = if (deployApi) {
   name: 'containerapp'
-  dependsOn: [
-    rbac // ensure AcrPull/Blob roles exist before the app pulls its image
-  ]
+  dependsOn: deployRbac
+    ? [rbac] // ensure AcrPull/Blob roles exist before the app pulls its image
+    : []
   params: {
     location: location
     namePrefix: namePrefix
@@ -172,6 +182,10 @@ module containerApp 'modules/containerapp.bicep' = if (deployApi) {
     githubTokenSecretUri: hasGithubToken ? keyVault.outputs.githubTokenSecretUri : ''
     githubModelsTokenSecretUri: hasGithubModelsToken ? keyVault.outputs.githubModelsTokenSecretUri : ''
     githubModelsModel: githubModelsModel
+    aiProvider: aiProvider
+    copilotModel: copilotModel
+    storageAccountName: storage.outputs.storageAccountName
+    copilotShareName: storage.outputs.copilotShareName
     appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
   }
 }

@@ -167,6 +167,46 @@ export async function sendChat(messages: ChatMessage[]): Promise<{ content: stri
   return data as { content: string; model: string };
 }
 
+export interface AIConfig {
+  provider: 'copilot' | 'github-models';
+  model: string;
+  available: boolean;
+  authenticated: boolean;
+  username?: string;
+  hasToken: boolean;
+}
+
+/** Fetch AI provider/config + auth state. */
+export async function fetchAIConfig(): Promise<AIConfig> {
+  const res = await fetch(`${API_BASE}/api/ai/config`);
+  if (!res.ok) throw new Error(`Failed to load AI config (${res.status})`);
+  return res.json();
+}
+
+/** Start GitHub Copilot device-flow sign-in. */
+export async function startCopilotLogin(): Promise<{
+  userCode?: string;
+  verificationUri?: string;
+  alreadySignedIn?: boolean;
+}> {
+  const res = await fetch(`${API_BASE}/api/ai/login`, { method: 'POST' });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Sign-in failed (${res.status})`);
+  return data;
+}
+
+/** Poll Copilot auth status. */
+export async function fetchCopilotStatus(): Promise<{ authenticated: boolean; username?: string }> {
+  const res = await fetch(`${API_BASE}/api/ai/status`);
+  if (!res.ok) throw new Error(`Failed to load status (${res.status})`);
+  return res.json();
+}
+
+/** Sign out of GitHub Copilot. */
+export async function copilotLogout(): Promise<void> {
+  await fetch(`${API_BASE}/api/ai/logout`, { method: 'POST' });
+}
+
 /** Map a file extension to the language executed by the sandbox. */
 export function extToLanguage(ext: string): Language {
   switch (ext) {
