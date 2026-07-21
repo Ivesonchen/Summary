@@ -9,6 +9,9 @@ interface SolutionPaneProps {
   onChange: (value: string) => void;
   onReset: () => void;
   onSave: () => void;
+  onRun: () => void;
+  runnable: boolean;
+  running: boolean;
   canSave: boolean;
   dirty: boolean;
   saving: boolean;
@@ -22,6 +25,9 @@ export default function SolutionPane({
   onChange,
   onReset,
   onSave,
+  onRun,
+  runnable,
+  running,
   canSave,
   dirty,
   saving,
@@ -53,6 +59,15 @@ export default function SolutionPane({
             <Icon name={saving ? 'progress_activity' : 'save'} size={14} className={saving ? 'animate-spin' : ''} />
             {saving ? 'Saving…' : 'Save'}
           </button>
+          <button
+            onClick={onRun}
+            disabled={!runnable || running}
+            title={runnable ? 'Run this solution (Ctrl/Cmd+R)' : 'This language cannot be executed by the sandbox'}
+            className="flex items-center gap-xs px-sm py-0.5 rounded font-body-sm text-body-sm bg-primary-container text-on-primary-container hover:bg-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Icon name={running ? 'progress_activity' : 'play_arrow'} size={14} className={running ? 'animate-spin' : ''} />
+            Run
+          </button>
         </div>
       </div>
       <div className="flex-1 min-h-0 relative">
@@ -67,6 +82,7 @@ export default function SolutionPane({
             onChange={(v) => onChange(v ?? '')}
             onMount={(editor, monaco) => {
               editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => onSave());
+              editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyR, () => onRun());
             }}
             options={{
               minimap: { enabled: false },

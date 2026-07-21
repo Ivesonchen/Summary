@@ -246,31 +246,38 @@ export default function App() {
     [refreshTree, handleSelectProblem]
   );
 
-  const handleRun = useCallback(async () => {
-    if (running) return;
-    if (practiceLang === 'unknown') {
-      setStatus('This language cannot be executed by the sandbox.');
-      return;
-    }
+  // Run the code from either pane: 'practice' (right playground) or 'solution' (left).
+  const handleRun = useCallback(
+    async (source: 'practice' | 'solution' = 'practice') => {
+      if (running) return;
 
-    setRunning(true);
-    setStatus('Submitting to sandbox…');
+      const code = source === 'solution' ? solution : practice;
+      const lang = source === 'solution' ? language : practiceLang;
+      if (lang === 'unknown') {
+        setStatus('This language cannot be executed by the sandbox.');
+        return;
+      }
 
-    const pRes = await runCode(practice, practiceLang, stdin);
-    setPracticeResult(pRes);
+      setRunning(true);
+      setStatus('Submitting to sandbox…');
 
-    // Auto-compare against the standard solution only when it is the same language.
-    if (language !== 'unknown' && language === practiceLang) {
-      setStatus('Comparing against standard solution…');
-      const refRes = await runCode(solution, language, stdin);
-      setTestOutcome(compareRuns(pRes, refRes));
-    } else {
-      setTestOutcome(null);
-    }
+      const res = await runCode(code, lang, stdin);
+      setPracticeResult(res);
 
-    setStatus(pRes.ok ? `${pRes.statusText} · ${pRes.timeMs ?? '?'}ms` : pRes.statusText || 'Error');
-    setRunning(false);
-  }, [running, practiceLang, language, practice, stdin, solution]);
+      // Auto-compare only when running the playground against a same-language solution.
+      if (source === 'practice' && language !== 'unknown' && language === practiceLang) {
+        setStatus('Comparing against standard solution…');
+        const refRes = await runCode(solution, language, stdin);
+        setTestOutcome(compareRuns(res, refRes));
+      } else {
+        setTestOutcome(null);
+      }
+
+      setStatus(res.ok ? `${res.statusText} · ${res.timeMs ?? '?'}ms` : res.statusText || 'Error');
+      setRunning(false);
+    },
+    [running, practiceLang, language, practice, stdin, solution]
+  );
 
   // Global Ctrl/Cmd+R shortcut.
   useEffect(() => {
@@ -291,7 +298,7 @@ export default function App() {
         group={group}
         runnable={practiceLang !== 'unknown'}
         running={running}
-        onRun={handleRun}
+        onRun={() => handleRun('practice')}
         onToggleNav={() => setNavOpen((v) => !v)}
       />
       <main className="flex-1 flex overflow-hidden min-h-0 relative">
@@ -321,6 +328,9 @@ export default function App() {
               }}
               onReset={handleResetSolution}
               onSave={handleSaveSolution}
+              onRun={() => handleRun('solution')}
+              runnable={language !== 'unknown'}
+              running={running}
               canSave={activeProblem != null}
               dirty={solutionDirty}
               saving={savingSolution}
@@ -333,7 +343,7 @@ export default function App() {
               onSwitchLanguage={handleSwitchPracticeLanguage}
               onChange={setPractice}
               onReset={() => setPractice(STARTER[practiceLang])}
-              onRun={handleRun}
+              onRun={() => handleRun('practice')}
               onSave={handleSavePractice}
               canSave={activeProblem != null && practiceLang !== 'unknown'}
               saving={savingVariant}
