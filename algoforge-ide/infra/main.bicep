@@ -52,6 +52,13 @@ param githubSyncBranch string = 'algoforge-sync'
 @secure()
 param githubToken string = ''
 
+@description('GitHub Models token (AI chat). Stored in Key Vault and injected as a Container App secret. Leave empty to disable AI chat.')
+@secure()
+param githubModelsToken string = ''
+
+@description('GitHub Models model id for the AI chat (empty uses the server default openai/gpt-4o-mini).')
+param githubModelsModel string = ''
+
 @description('Deploy the API Container App. Set false for the first pass (before the image exists), true once the real image is in ACR.')
 param deployApi bool = false
 
@@ -60,6 +67,7 @@ param apiImage string = ''
 
 var pistonPort = 2000
 var hasGithubToken = !empty(githubToken)
+var hasGithubModelsToken = !empty(githubModelsToken)
 
 module network 'modules/network.bicep' = {
   name: 'network'
@@ -100,6 +108,7 @@ module keyVault 'modules/keyvault.bicep' = {
     location: location
     namePrefix: namePrefix
     githubToken: githubToken
+    githubModelsToken: githubModelsToken
   }
 }
 
@@ -161,6 +170,8 @@ module containerApp 'modules/containerapp.bicep' = if (deployApi) {
     githubBranch: githubBranch
     githubSyncBranch: githubSyncBranch
     githubTokenSecretUri: hasGithubToken ? keyVault.outputs.githubTokenSecretUri : ''
+    githubModelsTokenSecretUri: hasGithubModelsToken ? keyVault.outputs.githubModelsTokenSecretUri : ''
+    githubModelsModel: githubModelsModel
     appInsightsConnectionString: monitoring.outputs.appInsightsConnectionString
   }
 }

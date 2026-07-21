@@ -14,6 +14,10 @@ param tenantId string = subscription().tenantId
 @secure()
 param githubToken string = ''
 
+@description('Optional GitHub Models token (AI chat) to store as a secret (leave empty to skip).')
+@secure()
+param githubModelsToken string = ''
+
 var kvName = take(toLower(replace('${namePrefix}kv${uniqueString(resourceGroup().id)}', '-', '')), 24)
 
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
@@ -41,9 +45,20 @@ resource githubTokenSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = if (
   }
 }
 
+// Store the GitHub Models token (AI chat) as a secret only when one is supplied.
+resource githubModelsTokenSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = if (!empty(githubModelsToken)) {
+  parent: keyVault
+  name: 'github-models-token'
+  properties: {
+    value: githubModelsToken
+  }
+}
+
 output keyVaultName string = keyVault.name
 output keyVaultId string = keyVault.id
 output keyVaultUri string = keyVault.properties.vaultUri
 // Stable, version-less secret URI the Container App references (only valid when a token was stored).
 output githubTokenSecretUri string = '${keyVault.properties.vaultUri}secrets/github-token'
+// Stable, version-less secret URI for the GitHub Models token (only valid when stored).
+output githubModelsTokenSecretUri string = '${keyVault.properties.vaultUri}secrets/github-models-token'
 

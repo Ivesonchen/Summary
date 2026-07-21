@@ -56,12 +56,20 @@ param githubSyncBranch string = 'algoforge-sync'
 @description('Key Vault secret URI holding the GitHub token. Empty to skip wiring the token.')
 param githubTokenSecretUri string = ''
 
+@description('Key Vault secret URI holding the GitHub Models token (AI chat). Empty to skip.')
+param githubModelsTokenSecretUri string = ''
+
+@description('GitHub Models model id for the AI chat (empty uses the server default).')
+param githubModelsModel string = ''
+
 @description('Container port the API listens on.')
 param targetPort int = 3001
 
 var envName = '${namePrefix}-cae'
 var appName = '${namePrefix}-api'
 var useGithubToken = !empty(githubTokenSecretUri)
+var useGithubModelsToken = !empty(githubModelsTokenSecretUri)
+var useGithubModelsModel = !empty(githubModelsModel)
 
 // Base env vars, plus GitHub sync vars (token via Key Vault secret ref when present).
 var baseEnv = [
@@ -79,10 +87,17 @@ var baseEnv = [
   { name: 'GITHUB_SYNC_BRANCH', value: githubSyncBranch }
 ]
 var githubTokenEnv = useGithubToken ? [{ name: 'GITHUB_TOKEN', secretRef: 'github-token' }] : []
-var appEnv = concat(baseEnv, githubTokenEnv)
-var appSecrets = useGithubToken
-  ? [{ name: 'github-token', keyVaultUrl: githubTokenSecretUri, identity: userAssignedIdentityId }]
-  : []
+var githubModelsTokenEnv = useGithubModelsToken ? [{ name: 'GITHUB_MODELS_TOKEN', secretRef: 'github-models-token' }] : []
+var githubModelsModelEnv = useGithubModelsModel ? [{ name: 'GITHUB_MODELS_MODEL', value: githubModelsModel }] : []
+var appEnv = concat(baseEnv, githubTokenEnv, githubModelsTokenEnv, githubModelsModelEnv)
+var appSecrets = concat(
+  useGithubToken
+    ? [{ name: 'github-token', keyVaultUrl: githubTokenSecretUri, identity: userAssignedIdentityId }]
+    : [],
+  useGithubModelsToken
+    ? [{ name: 'github-models-token', keyVaultUrl: githubModelsTokenSecretUri, identity: userAssignedIdentityId }]
+    : []
+)
 
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' existing = {
