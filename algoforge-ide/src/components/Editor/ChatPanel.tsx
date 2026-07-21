@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import Icon from '../Icon';
 import { sendChat } from '../../lib/api';
 import type { ChatMessage } from '../../types';
@@ -26,7 +28,7 @@ const SUGGESTIONS = [
 function buildSystemPrompt(ctx: ChatContext): string {
   const parts = [
     'You are an expert coding assistant embedded in AlgoForge IDE, an app for studying data-structures & algorithm problems.',
-    'Give clear, concise explanations. Prefer short code snippets in fenced blocks. Focus on correctness, complexity, and idiomatic style.',
+    'Give clear, concise explanations. Format ALL responses in GitHub-flavored Markdown: use headings, bold, bullet/numbered lists, tables, inline `code`, and fenced code blocks with a language tag. Focus on correctness, complexity, and idiomatic style.',
   ];
   if (ctx.title) parts.push(`The user is currently viewing the problem: "${ctx.title}".`);
   if (ctx.language && ctx.language !== 'unknown') parts.push(`The active language is ${ctx.language}.`);
@@ -68,23 +70,71 @@ function CodeBlock({ code }: { code: string }) {
   );
 }
 
-// Very small Markdown-ish renderer: fenced code blocks + inline code, everything
-// else as plain wrapped text. Avoids pulling in a Markdown dependency.
-function renderContent(content: string) {
-  const blocks = content.split(/```/);
-  return blocks.map((block, i) => {
-    const isCode = i % 2 === 1;
-    if (isCode) {
-      // Drop an optional language hint on the first line.
-      const body = block.replace(/^[a-zA-Z0-9+#-]*\n/, '');
-      return <CodeBlock key={i} code={body} />;
-    }
-    return (
-      <span key={i} className="whitespace-pre-wrap">
-        {block}
-      </span>
-    );
-  });
+// Extract raw text from a React node tree (react-markdown passes parsed children).
+function nodeToText(node: React.ReactNode): string {
+  if (node == null || typeof node === 'boolean') return '';
+  if (typeof node === 'string' || typeof node === 'number') return String(node);
+  if (Array.isArray(node)) return node.map(nodeToText).join('');
+  if (typeof node === 'object' && 'props' in (node as never)) {
+    return nodeToText((node as { props: { children?: React.ReactNode } }).props.children);
+  }
+  return '';
+}
+
+// Render assistant/user message content as GitHub-flavored Markdown, themed to
+// match the IDE. Fenced code blocks get a copy button; other elements are styled.
+function MessageMarkdown({ content }: { content: string }) {
+  return (
+    <div className="space-y-2 leading-relaxed break-words">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          p: ({ children }) => <p className="whitespace-pre-wrap">{children}</p>,
+          h1: ({ children }) => <h1 className="text-body-sm font-bold text-on-surface mt-2">{children}</h1>,
+          h2: ({ children }) => <h2 className="text-body-sm font-bold text-on-surface mt-2">{children}</h2>,
+          h3: ({ children }) => <h3 className="font-bold text-on-surface mt-2">{children}</h3>,
+          ul: ({ children }) => <ul className="list-disc pl-5 space-y-0.5">{children}</ul>,
+          ol: ({ children }) => <ol className="list-decimal pl-5 space-y-0.5">{children}</ol>,
+          li: ({ children }) => <li className="marker:text-outline">{children}</li>,
+          a: ({ children, href }) => (
+            <a href={href} target="_blank" rel="noreferrer" className="text-primary underline hover:no-underline">
+              {children}
+            </a>
+          ),
+          strong: ({ children }) => <strong className="font-bold text-on-surface">{children}</strong>,
+          em: ({ children }) => <em className="italic">{children}</em>,
+          blockquote: ({ children }) => (
+            <blockquote className="border-l-2 border-outline-variant pl-2 text-on-surface-variant italic">
+              {children}
+            </blockquote>
+          ),
+          hr: () => <hr className="border-outline-variant/40" />,
+          table: ({ children }) => (
+            <div className="overflow-x-auto custom-scrollbar">
+              <table className="border-collapse text-code-sm">{children}</table>
+            </div>
+          ),
+          th: ({ children }) => (
+            <th className="border border-outline-variant/50 px-2 py-0.5 text-left font-bold">{children}</th>
+          ),
+          td: ({ children }) => <td className="border border-outline-variant/50 px-2 py-0.5">{children}</td>,
+          code: ({ className, children }) => {
+            // Block code carries a language- className; inline code does not.
+            const isBlock = /language-/.test(className || '');
+            if (isBlock) return <CodeBlock code={nodeToText(children).replace(/\n$/, '')} />;
+            return (
+              <code className="px-1 py-0.5 rounded bg-surface-container-high border border-outline-variant/40 font-code-sm text-code-sm text-tertiary-fixed">
+                {children}
+              </code>
+            );
+          },
+          pre: ({ children }) => <>{children}</>,
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
+  );
 }
 
 export default function ChatPanel({ context }: ChatPanelProps) {
@@ -92,11 +142,61 @@ export default function ChatPanel({ context }: ChatPanelProps) {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [summary, setSummary] = useState<string | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, loading]);
+
+  // Auto-present the opened solution as a structured problem write-up so the
+  // empty-state gives a full overview. Keyed by title+language so it runs once
+  // per problem and refreshes when a different problem/file is opened. The
+  // request key guards against React StrictMode's double-invoke and re-renders.
+  const requestedKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!context.solution.trim()) {
+      requestedKeyRef.current = null;
+      setSummary(null);
+      setSummaryLoading(false);
+      return;
+    }
+    const key = `${context.title ?? ''}::${context.language}`;
+    if (requestedKeyRef.current === key) return; // already summarized/in-flight for this problem
+    requestedKeyRef.current = key;
+
+    setSummary(null);
+    setSummaryLoading(true);
+    sendChat([
+      {
+        role: 'system',
+        content:
+          'You are given a coding problem\'s solution code. Reverse-engineer the original problem and present it in GitHub-flavored Markdown with EXACTLY these three sections:\n' +
+          '## Problem\nDescribe the full problem in natural language (what is asked, constraints, and any relevant rules).\n' +
+          '## Input / Output\nDescribe the expected input and output, with a short example.\n' +
+          '## Complexity\nState the target time and space complexity (Big-O) that the shown solution achieves.\n' +
+          'Do not include the solution code itself. Be accurate and concise.',
+      },
+      {
+        role: 'user',
+        content: `Problem title: ${context.title ?? 'Unknown'}\nLanguage: ${context.language}\nSolution code:\n\`\`\`\n${context.solution.slice(0, 6000)}\n\`\`\``,
+      },
+    ])
+      .then(({ content }) => {
+        // Only apply if this is still the most recently requested problem.
+        if (requestedKeyRef.current === key) setSummary(content.trim());
+      })
+      .catch(() => {
+        if (requestedKeyRef.current === key) {
+          setSummary(null);
+          requestedKeyRef.current = null; // allow a retry on next open
+        }
+      })
+      .finally(() => {
+        if (requestedKeyRef.current === key) setSummaryLoading(false);
+      });
+  }, [context.title, context.solution, context.language]);
 
   const submit = async (text: string) => {
     const trimmed = text.trim();
@@ -137,6 +237,31 @@ export default function ChatPanel({ context }: ChatPanelProps) {
               <Icon name="smart_toy" size={16} />
               <span className="font-label-caps uppercase tracking-wider text-label-caps">AI Assistant</span>
             </div>
+
+            {/* Structured AI write-up of the currently opened problem/solution. */}
+            {context.title && (
+              <div className="rounded-lg border border-outline-variant/50 bg-surface-container/60 p-2.5 space-y-1">
+                <div className="flex items-center gap-xs text-on-surface-variant">
+                  <Icon name="description" size={14} className="text-primary" />
+                  <span className="font-label-caps uppercase tracking-wider text-label-caps truncate">
+                    {context.title}
+                  </span>
+                </div>
+                {summaryLoading ? (
+                  <div className="flex items-center gap-xs text-outline">
+                    <Icon name="progress_activity" size={13} className="animate-spin text-primary" />
+                    Summarizing the current problem…
+                  </div>
+                ) : summary ? (
+                  <div className="text-on-surface-variant">
+                    <MessageMarkdown content={summary} />
+                  </div>
+                ) : (
+                  <p className="italic">No summary available for this problem.</p>
+                )}
+              </div>
+            )}
+
             <p>Ask about the open problem, complexity, or your playground code.</p>
             <div className="space-y-1">
               {SUGGESTIONS.map((s) => (
@@ -161,7 +286,11 @@ export default function ChatPanel({ context }: ChatPanelProps) {
                   : 'bg-surface-container text-on-surface border border-outline-variant/40'
               }`}
             >
-              {renderContent(m.content)}
+              {m.role === 'user' ? (
+                <span className="whitespace-pre-wrap">{m.content}</span>
+              ) : (
+                <MessageMarkdown content={m.content} />
+              )}
             </div>
           </div>
         ))}
