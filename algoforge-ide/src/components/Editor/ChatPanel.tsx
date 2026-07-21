@@ -39,6 +39,35 @@ function buildSystemPrompt(ctx: ChatContext): string {
   return parts.join('\n\n');
 }
 
+// A fenced code block with a copy button in the top-right corner.
+function CodeBlock({ code }: { code: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard?.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* clipboard unavailable */
+    }
+  };
+  return (
+    <div className="relative group my-1">
+      <button
+        onClick={copy}
+        title={copied ? 'Copied!' : 'Copy code'}
+        className="absolute top-1 right-1 z-10 flex items-center gap-xs px-1.5 py-0.5 rounded bg-surface-container border border-outline-variant/60 text-outline hover:text-primary opacity-70 hover:opacity-100 transition-opacity font-code-sm text-code-sm"
+      >
+        <Icon name={copied ? 'check' : 'content_copy'} size={13} className={copied ? 'text-secondary' : ''} />
+        {copied ? 'Copied' : 'Copy'}
+      </button>
+      <pre className="p-2 pt-7 rounded bg-surface-container-high border border-outline-variant/50 overflow-x-auto custom-scrollbar font-code-sm text-code-sm text-on-surface whitespace-pre">
+        {code}
+      </pre>
+    </div>
+  );
+}
+
 // Very small Markdown-ish renderer: fenced code blocks + inline code, everything
 // else as plain wrapped text. Avoids pulling in a Markdown dependency.
 function renderContent(content: string) {
@@ -48,14 +77,7 @@ function renderContent(content: string) {
     if (isCode) {
       // Drop an optional language hint on the first line.
       const body = block.replace(/^[a-zA-Z0-9+#-]*\n/, '');
-      return (
-        <pre
-          key={i}
-          className="my-1 p-2 rounded bg-surface-container-high border border-outline-variant/50 overflow-x-auto custom-scrollbar font-code-sm text-code-sm text-on-surface whitespace-pre"
-        >
-          {body}
-        </pre>
-      );
+      return <CodeBlock key={i} code={body} />;
     }
     return (
       <span key={i} className="whitespace-pre-wrap">
