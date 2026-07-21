@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { createFileStore, FileError } from './fileStore.mjs';
 import { getGitHubConfig, setGitHubConfig, syncToGitHub } from './github.mjs';
 import { isSupportedLanguage, runInSandbox } from './piston.mjs';
+import { chatCompletion, getAIConfig } from './ai.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -181,6 +182,25 @@ app.post('/api/run', async (req, res) => {
     res.json(result);
   } catch (err) {
     res.status(502).json({ ok: false, statusText: 'Execution error', error: err.message });
+  }
+});
+
+// GET /api/ai/config -> { model, hasToken } (never returns the token).
+app.get('/api/ai/config', (_req, res) => {
+  res.json(getAIConfig());
+});
+
+// POST /api/chat { messages:[{ role, content }] } -> { content, model }.
+// Proxies to the GitHub Models API; the token stays server-side.
+app.post('/api/chat', async (req, res) => {
+  const { messages } = req.body || {};
+  try {
+    const result = await chatCompletion(messages);
+    res.json(result);
+  } catch (err) {
+    if (err instanceof FileError) return res.status(err.status).json({ error: err.message });
+    console.error('chat error:', err);
+    res.status(502).json({ error: 'AI request failed' });
   }
 });
 

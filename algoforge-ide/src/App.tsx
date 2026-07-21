@@ -334,6 +334,12 @@ export default function App() {
               canSave={activeProblem != null}
               dirty={solutionDirty}
               saving={savingSolution}
+              chatContext={{
+                title,
+                language,
+                solution,
+                practice,
+              }}
             />
             <PracticePane
               value={practice}

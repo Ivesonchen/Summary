@@ -96,3 +96,9 @@ export interface TestOutcome {
   expected?: string;
   actual?: string;
 }
+
+/** One turn in the AI assistant conversation. */
+export interface ChatMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}

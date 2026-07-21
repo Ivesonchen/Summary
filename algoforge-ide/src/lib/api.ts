@@ -1,4 +1,5 @@
 import type {
+  ChatMessage,
   FileResponse,
   GitHubConfig,
   Language,
@@ -152,6 +153,18 @@ export async function syncToRepo(): Promise<SyncResult> {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || `Sync failed (${res.status})`);
   return data as SyncResult;
+}
+
+/** Send the conversation to the AI assistant (GitHub Models, proxied server-side). */
+export async function sendChat(messages: ChatMessage[]): Promise<{ content: string; model: string }> {
+  const res = await fetch(`${API_BASE}/api/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `AI request failed (${res.status})`);
+  return data as { content: string; model: string };
 }
 
 /** Map a file extension to the language executed by the sandbox. */

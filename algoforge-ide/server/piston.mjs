@@ -28,6 +28,18 @@ const LANGUAGES = {
   go: { piston: 'go', file: 'main.go' },
 };
 
+// Piston's `tsc` defaults to an old target/lib (ES5), so modern APIs like
+// Array.prototype.fill or String.prototype.includes fail type-checking with
+// "Property 'x' does not exist ...". A triple-slash `lib` reference injects the
+// ES2015+ type declarations without changing the emit target (Node supports the
+// runtime methods natively). Prepend it unless the source already declares libs.
+function prepareSource(languageKey, source) {
+  if (languageKey !== 'typescript') return source;
+  if (/\/\/\/\s*<reference\s+lib=/.test(source)) return source;
+  return `/// <reference lib="es2021" />\n${source}`;
+}
+
+
 export function isSupportedLanguage(key) {
   return Object.prototype.hasOwnProperty.call(LANGUAGES, key);
 }
@@ -114,7 +126,7 @@ export async function runInSandbox({ source, languageKey, stdin = '' }) {
       body: JSON.stringify({
         language: lang.piston,
         version,
-        files: [{ name: lang.file, content: source }],
+        files: [{ name: lang.file, content: prepareSource(languageKey, source) }],
         stdin,
         compile_timeout: COMPILE_TIMEOUT_MS,
         run_timeout: RUN_TIMEOUT_MS,
