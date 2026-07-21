@@ -16,6 +16,7 @@
 // backend/copilot-client-factory.ts.
 
 import { spawn } from 'node:child_process';
+import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
@@ -89,13 +90,39 @@ function cleanEnv() {
 // off the repo to be safe.
 const WORK_DIR = os.tmpdir();
 
+// Where the Copilot CLI persists its session (mounted to a volume in Azure).
+const COPILOT_CONFIG_PATH = path.join(os.homedir(), '.copilot', 'config.json');
+
+// Read the CLI config and report whether a user session has been written. Used
+// as a lightweight check during device-flow login so we don't spawn an SDK
+// client that competes with the running `copilot login` subprocess for the
+// shared ~/.copilot files.
+function configHasUser() {
+  try {
+    const raw = fs.readFileSync(COPILOT_CONFIG_PATH, 'utf8');
+    // The CLI's config.json is JSON-with-comments — strip block & line comments.
+    const stripped = raw.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+    const parsed = JSON.parse(stripped);
+    const users = parsed.logged_in_users;
+    return (Array.isArray(users) && users.length > 0) || Boolean(parsed.last_logged_in_user);
+  } catch {
+    return false;
+  }
+}
+
 // Device-flow login timeouts.
 const DEVICE_CODE_TIMEOUT_MS = 30_000;
-const PROCESS_LIFETIME_MS = 5 * 60_000;
+// Keep the login subprocess alive long enough for the operator to authorize in
+// the browser (device flow polls GitHub until then, then writes the token).
+const PROCESS_LIFETIME_MS = 15 * 60_000;
 
 let client = null;
 let clientInit = null;
 let loginProc = null;
+// True from when a device-flow code is shown until sign-in is confirmed. While
+// set, status checks re-read auth with a FRESH client because the SDK caches
+// auth state at start() time and won't notice a newly written token otherwise.
+let loginPending = false;
 
 async function createClient() {
   const { CopilotClient, RuntimeConnection } = await loadSdk();
@@ -152,6 +179,15 @@ export function isCopilotAvailable() {
 /** Current auth status: { authenticated, username? }. Never throws. */
 export async function getCopilotStatus() {
   try {
+    // During an active device-flow login, avoid spawning an SDK client (it would
+    // compete with the running `copilot login` subprocess for ~/.copilot). Wait
+    // until the CLI has written a user session to config.json, then finalize.
+    if (loginPending) {
+      if (!configHasUser()) return { authenticated: false };
+      loginPending = false;
+      cancelLogin(); // stop the (now finished) login subprocess
+      await resetClient(); // ensure the next client read reflects the new token
+    }
     const c = await ensureClient();
     const status = await c.getAuthStatus();
     if (status?.isAuthenticated) return { authenticated: true, username: status.login };
@@ -170,6 +206,9 @@ export async function getCopilotStatus() {
 export function startCopilotLogin() {
   cancelLogin();
   const cliPath = getCliPath();
+  // Stop the long-lived SDK client so the login subprocess has exclusive access
+  // to ~/.copilot while it writes the new session (avoids file contention).
+  void resetClient();
   return new Promise((resolve, reject) => {
     const proc = spawn(cliPath, ['login'], { stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true, env: cleanEnv() });
     loginProc = proc;
@@ -197,6 +236,7 @@ export function startCopilotLogin() {
       const uriMatch = output.match(/(https:\/\/github\.com\/login\/device)/i);
       if (codeMatch) {
         resolved = true;
+        loginPending = true; // status polls will now re-read auth with a fresh client
         if (timer) clearTimeout(timer);
         timer = setTimeout(() => {
           try {
@@ -223,6 +263,7 @@ export function startCopilotLogin() {
       if (!resolved) {
         if (code === 0) {
           resolved = true;
+          loginPending = false;
           resolve({ alreadySignedIn: true });
         } else {
           fail(`login exited ${code}: ${output.slice(0, 300)}`);

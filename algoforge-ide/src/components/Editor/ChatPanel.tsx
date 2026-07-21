@@ -159,23 +159,49 @@ export default function ChatPanel({ context }: ChatPanelProps) {
   };
   useEffect(loadConfig, []);
 
+  const [checking, setChecking] = useState(false);
+
+  // Check auth once; returns true if signed in. Used by the poll loop and the
+  // manual "Check now" button.
+  const checkAuthOnce = async (): Promise<boolean> => {
+    try {
+      const s = await fetchCopilotStatus();
+      if (s.authenticated) {
+        setSigningIn(false);
+        setSignInInfo(null);
+        loadConfig();
+        return true;
+      }
+    } catch {
+      /* keep polling */
+    }
+    return false;
+  };
+
   // While a Copilot sign-in is in progress, poll status until authenticated.
+  // Uses a self-scheduling timeout (not setInterval) so each check — which on
+  // the server restarts the CLI client — fully completes before the next.
   useEffect(() => {
     if (!signingIn) return;
-    const id = setInterval(async () => {
-      try {
-        const s = await fetchCopilotStatus();
-        if (s.authenticated) {
-          setSigningIn(false);
-          setSignInInfo(null);
-          loadConfig();
-        }
-      } catch {
-        /* keep polling */
-      }
-    }, 3000);
-    return () => clearInterval(id);
+    let cancelled = false;
+    let handle: ReturnType<typeof setTimeout>;
+    const tick = async () => {
+      const done = await checkAuthOnce();
+      if (!cancelled && !done) handle = setTimeout(tick, 3000);
+    };
+    handle = setTimeout(tick, 3000);
+    return () => {
+      cancelled = true;
+      clearTimeout(handle);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signingIn]);
+
+  const manualCheck = async () => {
+    setChecking(true);
+    await checkAuthOnce();
+    setChecking(false);
+  };
 
   const beginSignIn = async () => {
     setAuthError(null);
@@ -324,6 +350,14 @@ export default function ChatPanel({ context }: ChatPanelProps) {
                 <Icon name="progress_activity" size={14} className="animate-spin text-primary" />
                 Waiting for authorization…
               </div>
+              <button
+                onClick={manualCheck}
+                disabled={checking}
+                className="w-full flex items-center justify-center gap-xs px-sm py-1.5 rounded border border-outline-variant/60 text-on-surface-variant hover:text-primary hover:border-primary/50 transition-colors disabled:opacity-40 font-code-sm text-code-sm"
+              >
+                <Icon name={checking ? 'progress_activity' : 'refresh'} size={14} className={checking ? 'animate-spin' : ''} />
+                {checking ? 'Checking…' : "I've authorized — check now"}
+              </button>
             </div>
           ) : (
             <button
