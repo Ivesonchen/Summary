@@ -29,6 +29,13 @@ ENV PORT=3001
 # $HOME/.copilot (mount a volume there in production to survive restarts).
 ENV HOME=/home/node
 
+# ca-certificates: the native Copilot CLI binary validates TLS against the OS
+# trust store (unlike Node's fetch, which bundles its own roots). node:20-slim
+# ships without it, so GitHub calls fail with "fetch failed" until it's added.
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
 # Install production dependencies only. On this linux/amd64 image npm also pulls
 # the optional @github/copilot-linux-x64 binary needed by the copilot provider.
 COPY package*.json ./
