@@ -3,18 +3,12 @@ import Icon from './Icon';
 interface TopNavBarProps {
   fileName: string | null;
   group: number | null;
-  runnable: boolean;
-  running: boolean;
-  onRun: () => void;
   onToggleNav: () => void;
 }
 
 export default function TopNavBar({
   fileName,
   group,
-  runnable,
-  running,
-  onRun,
   onToggleNav,
 }: TopNavBarProps) {
   return (
@@ -47,16 +41,6 @@ export default function TopNavBar({
             )}
           </div>
         </nav>
-      </div>
-      <div className="flex items-center gap-md">
-        <button
-          onClick={onRun}
-          disabled={!runnable || running}
-          className="bg-primary-container text-on-primary-container px-md py-1.5 rounded font-bold font-body-sm text-body-sm hover:bg-primary transition-colors active:scale-95 duration-100 flex items-center gap-xs disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <Icon name={running ? 'progress_activity' : 'play_arrow'} size={18} className={running ? 'animate-spin' : ''} />
-          {running ? 'Running…' : 'Run Code'}
-        </button>
       </div>
     </header>
   );

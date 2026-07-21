@@ -296,9 +296,6 @@ export default function App() {
       <TopNavBar
         fileName={title}
         group={group}
-        runnable={practiceLang !== 'unknown'}
-        running={running}
-        onRun={() => handleRun('practice')}
         onToggleNav={() => setNavOpen((v) => !v)}
       />
       <main className="flex-1 flex overflow-hidden min-h-0 relative">
@@ -351,6 +348,8 @@ export default function App() {
               onReset={() => setPractice(STARTER[practiceLang])}
               onRun={() => handleRun('practice')}
               onSave={handleSavePractice}
+              runnable={practiceLang !== 'unknown'}
+              running={running}
               canSave={activeProblem != null && practiceLang !== 'unknown'}
               saving={savingVariant}
             />

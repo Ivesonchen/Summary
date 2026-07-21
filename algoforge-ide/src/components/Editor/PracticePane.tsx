@@ -22,6 +22,8 @@ interface PracticePaneProps {
   onReset: () => void;
   onRun: () => void;
   onSave: () => void;
+  runnable: boolean;
+  running: boolean;
   canSave: boolean;
   saving: boolean;
 }
@@ -36,6 +38,8 @@ export default function PracticePane({
   onReset,
   onRun,
   onSave,
+  runnable,
+  running,
   canSave,
   saving,
 }: PracticePaneProps) {
@@ -64,7 +68,7 @@ export default function PracticePane({
           )}
           <button
             onClick={() => navigator.clipboard?.writeText(value)}
-            title="Copy"
+            title="Copy code"
             className="text-outline hover:text-on-surface"
           >
             <Icon name="content_copy" size={16} />
@@ -76,10 +80,19 @@ export default function PracticePane({
             onClick={onSave}
             disabled={!canSave || saving}
             title={canSave ? 'Save this as a new solution to the problem' : 'Open a problem to save a new solution'}
-            className="flex items-center gap-xs px-sm py-0.5 rounded font-body-sm text-body-sm bg-secondary-container text-on-secondary-container hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-xs px-sm py-0.5 rounded font-body-sm text-body-sm border border-outline-variant text-on-surface-variant hover:text-secondary disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Icon name={saving ? 'progress_activity' : 'save_as'} size={14} className={saving ? 'animate-spin' : ''} />
-            {saving ? 'Saving…' : 'Save as solution'}
+            {saving ? 'Saving…' : 'Save'}
+          </button>
+          <button
+            onClick={onRun}
+            disabled={!runnable || running}
+            title={runnable ? 'Run this code (Ctrl/Cmd+R)' : 'This language cannot be executed by the sandbox'}
+            className="flex items-center gap-xs px-sm py-0.5 rounded font-body-sm text-body-sm bg-primary-container text-on-primary-container hover:bg-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Icon name={running ? 'progress_activity' : 'play_arrow'} size={14} className={running ? 'animate-spin' : ''} />
+            Run
           </button>
         </div>
       </div>
@@ -92,6 +105,7 @@ export default function PracticePane({
           onChange={(v) => onChange(v ?? '')}
           onMount={(editor, monaco) => {
             editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyR, () => onRun());
+            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => onSave());
           }}
           options={{
             minimap: { enabled: false },

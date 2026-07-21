@@ -144,6 +144,7 @@ export default function ChatPanel({ context }: ChatPanelProps) {
   const [error, setError] = useState<string | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // AI provider config + Copilot sign-in state.
@@ -379,37 +380,48 @@ export default function ChatPanel({ context }: ChatPanelProps) {
         <>
       {/* Message list */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar p-sm space-y-3">
+        {/* Problem summary — pinned at the top so it stays visible during chat. */}
+        {context.title && (
+          <div className="rounded-lg border border-outline-variant/50 bg-surface-container/60 p-2.5 space-y-1">
+            <button
+              onClick={() => setSummaryOpen((o) => !o)}
+              className="w-full flex items-center gap-xs text-on-surface-variant hover:text-on-surface"
+              title={summaryOpen ? 'Collapse problem summary' : 'Expand problem summary'}
+            >
+              <Icon name="description" size={14} className="text-primary shrink-0" />
+              <span className="font-label-caps uppercase tracking-wider text-label-caps truncate">
+                {context.title}
+              </span>
+              <Icon
+                name={summaryOpen ? 'expand_less' : 'expand_more'}
+                size={16}
+                className="ml-auto shrink-0 text-outline"
+              />
+            </button>
+            {summaryOpen &&
+              (summaryLoading ? (
+                <div className="flex items-center gap-xs text-outline font-code-sm text-code-sm">
+                  <Icon name="progress_activity" size={13} className="animate-spin text-primary" />
+                  Summarizing the current problem…
+                </div>
+              ) : summary ? (
+                <div className="text-on-surface-variant font-code-sm text-code-sm">
+                  <MessageMarkdown content={summary} />
+                </div>
+              ) : (
+                <p className="italic text-outline font-code-sm text-code-sm">
+                  No summary available for this problem.
+                </p>
+              ))}
+          </div>
+        )}
+
         {messages.length === 0 && !loading && (
-          <div className="text-outline font-code-sm text-code-sm space-y-3 pt-2">
+          <div className="text-outline font-code-sm text-code-sm space-y-3 pt-1">
             <div className="flex items-center gap-xs text-secondary">
               <Icon name="smart_toy" size={16} />
               <span className="font-label-caps uppercase tracking-wider text-label-caps">AI Assistant</span>
             </div>
-
-            {/* Structured AI write-up of the currently opened problem/solution. */}
-            {context.title && (
-              <div className="rounded-lg border border-outline-variant/50 bg-surface-container/60 p-2.5 space-y-1">
-                <div className="flex items-center gap-xs text-on-surface-variant">
-                  <Icon name="description" size={14} className="text-primary" />
-                  <span className="font-label-caps uppercase tracking-wider text-label-caps truncate">
-                    {context.title}
-                  </span>
-                </div>
-                {summaryLoading ? (
-                  <div className="flex items-center gap-xs text-outline">
-                    <Icon name="progress_activity" size={13} className="animate-spin text-primary" />
-                    Summarizing the current problem…
-                  </div>
-                ) : summary ? (
-                  <div className="text-on-surface-variant">
-                    <MessageMarkdown content={summary} />
-                  </div>
-                ) : (
-                  <p className="italic">No summary available for this problem.</p>
-                )}
-              </div>
-            )}
-
             <p>Ask about the open problem, complexity, or your playground code.</p>
             <div className="space-y-1">
               {SUGGESTIONS.map((s) => (

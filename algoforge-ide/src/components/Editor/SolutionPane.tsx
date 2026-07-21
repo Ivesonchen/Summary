@@ -71,6 +71,13 @@ export default function SolutionPane({
             {fileName && <span className="ml-auto font-code-sm text-code-sm text-outline truncate">{fileName}</span>}
             <div className={`flex items-center gap-sm ${fileName ? '' : 'ml-auto'}`}>
               <button
+                onClick={() => navigator.clipboard?.writeText(content)}
+                title="Copy code"
+                className="text-outline hover:text-on-surface"
+              >
+                <Icon name="content_copy" size={16} />
+              </button>
+              <button
                 onClick={onReset}
                 disabled={!dirty || saving}
                 title="Revert unsaved changes to the saved file"
