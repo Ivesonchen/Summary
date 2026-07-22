@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Icon from '../Icon';
 import type { FileNode, FolderNode, ProblemNode, Section, TreeNode } from '../../types';
 
@@ -260,6 +260,47 @@ export default function FileExplorer({
     onSelectProblem(problem);
     onClose?.();
   };
+
+  // Desktop-only adjustable width (persisted). Mobile keeps the fixed drawer width.
+  const MIN_WIDTH = 200;
+  const MAX_WIDTH = 560;
+  const [width, setWidth] = useState<number>(() => {
+    const saved = Number(localStorage.getItem('sidebarWidth'));
+    return saved >= MIN_WIDTH && saved <= MAX_WIDTH ? saved : 256;
+  });
+  const resizingRef = useRef(false);
+
+  const onResizeMove = useCallback((e: MouseEvent) => {
+    if (!resizingRef.current) return;
+    const next = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, e.clientX));
+    setWidth(next);
+  }, []);
+
+  const stopResize = useCallback(() => {
+    if (!resizingRef.current) return;
+    resizingRef.current = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    setWidth((w) => {
+      localStorage.setItem('sidebarWidth', String(w));
+      return w;
+    });
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('mousemove', onResizeMove);
+    window.addEventListener('mouseup', stopResize);
+    return () => {
+      window.removeEventListener('mousemove', onResizeMove);
+      window.removeEventListener('mouseup', stopResize);
+    };
+  }, [onResizeMove, stopResize]);
+
+  const startResize = () => {
+    resizingRef.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  };
   return (
     <>
       {/* Mobile backdrop */}
@@ -271,7 +312,8 @@ export default function FileExplorer({
         }`}
       />
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] md:static md:z-auto md:w-64 md:max-w-none flex flex-col h-full overflow-hidden bg-surface-container-low border-r border-outline-variant shrink-0 safe-top safe-left transition-transform duration-200 ${
+        style={{ ['--sidebar-w' as string]: `${width}px` }}
+        className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] md:z-auto md:w-[var(--sidebar-w)] md:max-w-none flex flex-col h-full overflow-hidden bg-surface-container-low border-r border-outline-variant shrink-0 safe-top safe-left transition-transform duration-200 md:relative ${
           open ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0`}
       >
@@ -294,7 +336,12 @@ export default function FileExplorer({
         </div>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-sm">
-          {loading && <div className="p-md text-outline font-code-sm text-code-sm">Loading files…</div>}
+          {loading && (
+            <div className="p-md flex items-center gap-xs text-outline font-code-sm text-code-sm">
+              <Icon name="progress_activity" size={16} className="animate-spin text-primary" />
+              Loading files…
+            </div>
+          )}
           {error && <div className="p-md text-error font-code-sm text-code-sm">{error}</div>}
 
           {!loading &&
@@ -328,6 +375,19 @@ export default function FileExplorer({
             Sync to GitHub
           </button>
         </div>
+
+        {/* Desktop resize handle (drag the right edge to adjust width). */}
+        <div
+          onMouseDown={startResize}
+          onDoubleClick={() => {
+            setWidth(256);
+            localStorage.setItem('sidebarWidth', '256');
+          }}
+          role="separator"
+          aria-orientation="vertical"
+          title="Drag to resize · double-click to reset"
+          className="hidden md:block absolute top-0 right-0 h-full w-1 cursor-col-resize hover:bg-primary/40 active:bg-primary/60 transition-colors"
+        />
       </aside>
     </>
   );

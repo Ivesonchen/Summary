@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import TopNavBar from './components/TopNavBar';
 import FileExplorer from './components/Sidebar/FileExplorer';
 import SolutionPane from './components/Editor/SolutionPane';
@@ -92,6 +92,47 @@ export default function App() {
   const [createOpen, setCreateOpen] = useState(false);
   const [githubOpen, setGithubOpen] = useState(false);
   const [navOpen, setNavOpen] = useState(false); // mobile sidebar drawer
+
+  // Adjustable split between the two editor panes (left width %, desktop only).
+  const editorRowRef = useRef<HTMLDivElement>(null);
+  const splitResizingRef = useRef(false);
+  const [leftPct, setLeftPct] = useState<number>(() => {
+    const saved = Number(localStorage.getItem('editorSplit'));
+    return saved >= 20 && saved <= 80 ? saved : 50;
+  });
+
+  const onSplitMove = useCallback((e: MouseEvent) => {
+    if (!splitResizingRef.current || !editorRowRef.current) return;
+    const rect = editorRowRef.current.getBoundingClientRect();
+    const pct = ((e.clientX - rect.left) / rect.width) * 100;
+    setLeftPct(Math.min(80, Math.max(20, pct)));
+  }, []);
+
+  const stopSplit = useCallback(() => {
+    if (!splitResizingRef.current) return;
+    splitResizingRef.current = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    setLeftPct((p) => {
+      localStorage.setItem('editorSplit', String(Math.round(p)));
+      return p;
+    });
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('mousemove', onSplitMove);
+    window.addEventListener('mouseup', stopSplit);
+    return () => {
+      window.removeEventListener('mousemove', onSplitMove);
+      window.removeEventListener('mouseup', stopSplit);
+    };
+  }, [onSplitMove, stopSplit]);
+
+  const startSplit = () => {
+    splitResizingRef.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  };
 
   const refreshTree = useCallback(async (): Promise<Section[]> => {
     const t = await fetchTree();
@@ -313,30 +354,50 @@ export default function App() {
           onClose={() => setNavOpen(false)}
         />
         <div className="flex-1 flex flex-col min-w-0">
-          <div className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden gap-panel-gap bg-outline-variant/30 min-h-0">
-            <SolutionPane
-              content={solution}
-              monacoLang={monacoLang}
-              fileName={solutionName}
-              loading={fileLoading}
-              onChange={(v) => {
-                setSolution(v);
-                setSolutionDirty(true);
+          <div
+            ref={editorRowRef}
+            className="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden gap-panel-gap bg-outline-variant/30 min-h-0"
+          >
+            <div
+              className="flex w-full md:w-[var(--editor-split)] md:min-w-0 min-h-[60vh] md:min-h-0"
+              style={{ ['--editor-split' as string]: `${leftPct}%` }}
+            >
+              <SolutionPane
+                content={solution}
+                monacoLang={monacoLang}
+                fileName={solutionName}
+                loading={fileLoading}
+                onChange={(v) => {
+                  setSolution(v);
+                  setSolutionDirty(true);
+                }}
+                onReset={handleResetSolution}
+                onSave={handleSaveSolution}
+                onRun={() => handleRun('solution')}
+                runnable={language !== 'unknown'}
+                running={running}
+                canSave={activeProblem != null}
+                dirty={solutionDirty}
+                saving={savingSolution}
+                chatContext={{
+                  title,
+                  language,
+                  solution,
+                  practice,
+                }}
+              />
+            </div>
+            {/* Draggable divider between the two editor panes (desktop only). */}
+            <div
+              onMouseDown={startSplit}
+              onDoubleClick={() => {
+                setLeftPct(50);
+                localStorage.setItem('editorSplit', '50');
               }}
-              onReset={handleResetSolution}
-              onSave={handleSaveSolution}
-              onRun={() => handleRun('solution')}
-              runnable={language !== 'unknown'}
-              running={running}
-              canSave={activeProblem != null}
-              dirty={solutionDirty}
-              saving={savingSolution}
-              chatContext={{
-                title,
-                language,
-                solution,
-                practice,
-              }}
+              role="separator"
+              aria-orientation="vertical"
+              title="Drag to resize · double-click to reset"
+              className="hidden md:block w-1 shrink-0 cursor-col-resize hover:bg-primary/40 active:bg-primary/60 transition-colors"
             />
             <PracticePane
               value={practice}
