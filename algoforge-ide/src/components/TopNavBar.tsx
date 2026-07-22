@@ -12,7 +12,7 @@ export default function TopNavBar({
   onToggleNav,
 }: TopNavBarProps) {
   return (
-    <header className="flex justify-between items-center w-full px-md h-12 z-50 bg-background border-b border-outline-variant shrink-0 safe-top safe-left safe-right">
+    <header className="flex justify-between items-center w-full px-md h-12 z-50 bg-background/70 backdrop-blur-xl border-b border-outline-variant shrink-0 safe-top safe-left safe-right">
       <div className="flex items-center gap-sm md:gap-lg min-w-0">
         <button
           onClick={onToggleNav}
@@ -21,8 +21,8 @@ export default function TopNavBar({
         >
           <Icon name="menu" size={22} />
         </button>
-        <span className="font-headline-md text-headline-md font-bold text-primary tracking-tight shrink-0">
-          AlgoForge IDE
+        <span className="font-headline-md text-headline-md font-semibold text-primary tracking-tight shrink-0">
+          Algo Playground
         </span>
         <nav className="hidden md:flex gap-md items-center">
           <div className="flex items-center gap-xs text-on-surface-variant font-body-sm text-body-sm">

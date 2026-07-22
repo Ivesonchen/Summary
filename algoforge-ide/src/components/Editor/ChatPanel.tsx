@@ -27,7 +27,7 @@ const SUGGESTIONS = [
 
 function buildSystemPrompt(ctx: ChatContext): string {
   const parts = [
-    'You are an expert coding assistant embedded in AlgoForge IDE, an app for studying data-structures & algorithm problems.',
+    'You are an expert coding assistant embedded in Algo Playground, an app for studying data-structures & algorithm problems.',
     'Give clear, concise explanations. Format ALL responses in GitHub-flavored Markdown: use headings, bold, bullet/numbered lists, tables, inline `code`, and fenced code blocks with a language tag. Focus on correctness, complexity, and idiomatic style.',
   ];
   if (ctx.title) parts.push(`The user is currently viewing the problem: "${ctx.title}".`);
