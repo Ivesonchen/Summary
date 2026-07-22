@@ -107,41 +107,42 @@ export default function SolutionPane({
           </>
         )}
       </div>
-      {tab === 'chat' ? (
+      {/* Both panes stay mounted; we toggle visibility so the AI chat keeps its
+          state (and doesn't re-summarize) when switching back and forth. */}
+      <div className={`flex-1 min-h-0 ${tab === 'chat' ? 'flex flex-col' : 'hidden'}`}>
         <ChatPanel context={chatContext} />
-      ) : (
-        <div className="flex-1 min-h-0 relative">
-          {loading ? (
-            <div className="p-md text-outline font-code-sm text-code-sm">Loading…</div>
-          ) : content || fileName ? (
-            <Editor
-              height="100%"
-              theme="vs-dark"
-              language={monacoLang}
-              value={content}
-              onChange={(v) => onChange(v ?? '')}
-              onMount={(editor, monaco) => {
-                editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => onSave());
-                editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyR, () => onRun());
-              }}
-              options={{
-                minimap: { enabled: false },
-                fontSize: 13,
-                fontFamily: 'JetBrains Mono, monospace',
-                lineNumbers: 'on',
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-                tabSize: 2,
-              }}
-            />
-          ) : (
-            <div className="h-full flex flex-col items-center justify-center text-outline gap-sm">
-              <Icon name="code_blocks" size={40} />
-              <span className="font-code-sm text-code-sm">Select a file from the explorer</span>
-            </div>
-          )}
-        </div>
-      )}
+      </div>
+      <div className={`flex-1 min-h-0 relative ${tab === 'solution' ? '' : 'hidden'}`}>
+        {loading ? (
+          <div className="p-md text-outline font-code-sm text-code-sm">Loading…</div>
+        ) : content || fileName ? (
+          <Editor
+            height="100%"
+            theme="vs-dark"
+            language={monacoLang}
+            value={content}
+            onChange={(v) => onChange(v ?? '')}
+            onMount={(editor, monaco) => {
+              editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => onSave());
+              editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyR, () => onRun());
+            }}
+            options={{
+              minimap: { enabled: false },
+              fontSize: 13,
+              fontFamily: 'JetBrains Mono, monospace',
+              lineNumbers: 'on',
+              scrollBeyondLastLine: false,
+              automaticLayout: true,
+              tabSize: 4,
+            }}
+          />
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center text-outline gap-sm">
+            <Icon name="code_blocks" size={40} />
+            <span className="font-code-sm text-code-sm">Select a file from the explorer</span>
+          </div>
+        )}
+      </div>
     </section>
   );
 }

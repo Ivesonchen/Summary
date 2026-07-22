@@ -114,7 +114,7 @@ export default function PracticePane({
             lineNumbers: 'on',
             scrollBeyondLastLine: false,
             automaticLayout: true,
-            tabSize: 2,
+            tabSize: 4,
           }}
         />
       </div>
