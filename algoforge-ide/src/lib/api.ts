@@ -207,6 +207,27 @@ export async function copilotLogout(): Promise<void> {
   await fetch(`${API_BASE}/api/ai/logout`, { method: 'POST' });
 }
 
+/** Fetch the persisted study set (cross-device). Returns [] on any failure. */
+export async function fetchStudy<T = unknown>(): Promise<T[]> {
+  try {
+    const res = await fetch(`${API_BASE}/api/study`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? (data as T[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Persist the study set (overwrites the stored document). */
+export async function saveStudy<T = unknown>(entries: T[]): Promise<void> {
+  await fetch(`${API_BASE}/api/study`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(entries),
+  });
+}
+
 /** Map a file extension to the language executed by the sandbox. */
 export function extToLanguage(ext: string): Language {
   switch (ext) {

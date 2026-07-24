@@ -8,6 +8,7 @@ import { getGitHubConfig, setGitHubConfig, syncToGitHub } from './github.mjs';
 import { isSupportedLanguage, runInSandbox } from './piston.mjs';
 import { chatCompletion, getAIConfig } from './ai.mjs';
 import { copilotLogout, getCopilotStatus, startCopilotLogin } from './copilot.mjs';
+import { createStudyStore } from './studyStore.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -44,6 +45,9 @@ app.use((req, res, next) => {
 
 // The file store is disk-backed locally and Blob-backed in the cloud (FILE_SOURCE).
 const store = await createFileStore();
+
+// Study progress store (shared JSON doc), same backing as FILE_SOURCE.
+const studyStore = await createStudyStore();
 
 // GET /api/tree -> { categories, companies, root }
 app.get('/api/tree', async (_req, res) => {
@@ -235,6 +239,34 @@ app.post('/api/chat', async (req, res) => {
     if (err instanceof FileError) return res.status(err.status).json({ error: err.message });
     console.error('chat error:', err);
     res.status(502).json({ error: 'AI request failed' });
+  }
+});
+
+// GET /api/study -> the persisted study entries array (cross-device).
+app.get('/api/study', async (_req, res) => {
+  try {
+    res.json(await studyStore.get());
+  } catch (err) {
+    console.error('study get error:', err);
+    res.status(500).json({ error: 'Failed to load study data' });
+  }
+});
+
+// PUT /api/study (body: array of entries) -> overwrite the study set.
+app.put('/api/study', async (req, res) => {
+  const entries = req.body;
+  if (!Array.isArray(entries)) {
+    return res.status(400).json({ error: 'Expected an array of study entries' });
+  }
+  if (entries.length > 5000) {
+    return res.status(413).json({ error: 'Too many study entries' });
+  }
+  try {
+    await studyStore.set(entries);
+    res.json({ ok: true, count: entries.length });
+  } catch (err) {
+    console.error('study set error:', err);
+    res.status(500).json({ error: 'Failed to save study data' });
   }
 });
 

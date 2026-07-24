@@ -18,6 +18,9 @@ interface SolutionPaneProps {
   canSave: boolean;
   dirty: boolean;
   saving: boolean;
+  onMarkDone: (grade: 1 | 2 | 3 | 4) => void;
+  canMarkDone: boolean;
+  isDone: boolean;
   chatContext: ChatContext;
 }
 
@@ -35,9 +38,13 @@ export default function SolutionPane({
   canSave,
   dirty,
   saving,
+  onMarkDone,
+  canMarkDone,
+  isDone,
   chatContext,
 }: SolutionPaneProps) {
   const [tab, setTab] = useState<'solution' | 'chat'>('solution');
+  const [rateOpen, setRateOpen] = useState(false);
   return (
     <section className="flex-1 min-w-0 min-h-[60vh] md:min-h-0 bg-surface-container-low flex flex-col overflow-hidden">
       <div className="h-9 px-md flex items-center gap-sm bg-surface-container border-b border-outline-variant shrink-0">
@@ -94,6 +101,60 @@ export default function SolutionPane({
                 <Icon name={saving ? 'progress_activity' : 'save'} size={14} className={saving ? 'animate-spin' : ''} />
                 {saving ? 'Saving…' : 'Save'}
               </button>
+              <div className="relative">
+                <button
+                  onClick={() => setRateOpen((o) => !o)}
+                  disabled={!canMarkDone}
+                  title={
+                    canMarkDone
+                      ? isDone
+                        ? 'Rate this review (updates the FSRS schedule)'
+                        : 'Mark done & rate recall (adds to your study set)'
+                      : 'Open a problem to mark it done'
+                  }
+                  className={`flex items-center gap-xs px-sm py-0.5 rounded font-body-sm text-body-sm border transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                    isDone
+                      ? 'border-secondary/60 text-secondary hover:text-secondary'
+                      : 'border-outline-variant text-on-surface-variant hover:text-secondary'
+                  }`}
+                >
+                  <Icon name={isDone ? 'task_alt' : 'check_circle'} size={14} />
+                  Done
+                  <Icon name="expand_more" size={14} />
+                </button>
+                {rateOpen && canMarkDone && (
+                  <>
+                    {/* click-away backdrop */}
+                    <div className="fixed inset-0 z-40" onClick={() => setRateOpen(false)} />
+                    <div className="absolute right-0 top-full mt-1 z-50 w-40 rounded-lg border border-outline-variant bg-surface-container-high shadow-lg overflow-hidden">
+                      <div className="px-2.5 pt-1.5 pb-1 font-label-caps text-[9px] uppercase tracking-wider text-outline">
+                        Rate recall
+                      </div>
+                      {(
+                        [
+                          { g: 1, label: 'Again', desc: 'Forgot', icon: 'replay', color: 'text-error' },
+                          { g: 2, label: 'Hard', desc: 'Struggled', icon: 'trending_down', color: 'text-tertiary-fixed-dim' },
+                          { g: 3, label: 'Good', desc: 'Recalled', icon: 'check', color: 'text-secondary' },
+                          { g: 4, label: 'Easy', desc: 'Effortless', icon: 'bolt', color: 'text-primary' },
+                        ] as const
+                      ).map((r) => (
+                        <button
+                          key={r.g}
+                          onClick={() => {
+                            onMarkDone(r.g);
+                            setRateOpen(false);
+                          }}
+                          className="w-full flex items-center gap-xs px-2.5 py-1.5 text-left hover:bg-surface-variant/60 transition-colors"
+                        >
+                          <Icon name={r.icon} size={15} className={`${r.color} shrink-0`} />
+                          <span className="font-body-sm text-body-sm text-on-surface">{r.label}</span>
+                          <span className="ml-auto font-code-sm text-code-sm text-outline">{r.desc}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
               <button
                 onClick={onRun}
                 disabled={!runnable || running}

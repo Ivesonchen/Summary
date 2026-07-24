@@ -8,6 +8,7 @@ import CreateDialog from './components/CreateDialog';
 import GitHubDialog from './components/GitHubDialog';
 import { extToLanguage, extToMonaco, fetchFile, fetchProblem, fetchTree, runCode, saveSolution, saveVariantSolution } from './lib/api';
 import { compareRuns } from './lib/compare';
+import { pickReviewNext, useStudy } from './lib/study';
 import type {
   FileNode,
   Language,
@@ -134,6 +135,9 @@ export default function App() {
     document.body.style.userSelect = 'none';
   };
 
+  // Study / spaced-repetition set (localStorage-backed).
+  const study = useStudy();
+
   const refreshTree = useCallback(async (): Promise<Section[]> => {
     const t = await fetchTree();
     setSections(t.sections);
@@ -199,6 +203,50 @@ export default function App() {
         .catch(() => {});
     },
     [loadSolution, applyPracticeLanguage]
+  );
+
+  // Open a study-set problem by its path (resolve the node from the tree).
+  const handleOpenStudy = useCallback(
+    (path: string) => {
+      const found = findProblem(sections, path);
+      if (found) handleSelectProblem(found);
+      else setStatus('That problem is no longer in the tree.');
+    },
+    [sections, handleSelectProblem]
+  );
+
+  // Pick the most-due problem from the study set and open it.
+  const handleReviewNext = useCallback(() => {
+    const next = pickReviewNext(study.entries);
+    if (!next) {
+      setStatus('No problems marked as done yet.');
+      return;
+    }
+    handleOpenStudy(next.path);
+  }, [study.entries, handleOpenStudy]);
+
+  // Mark the currently-open problem as done with an FSRS grade (Again/Hard/Good/Easy).
+  const handleMarkDone = useCallback(
+    (grade: 1 | 2 | 3 | 4 = 3) => {
+      if (!activeProblem) return;
+      const alreadyDone = study.isDone(activeProblem.path);
+      study.markDone(
+        {
+          path: activeProblem.path,
+          title: activeProblem.name,
+          group: activeProblem.group ?? null,
+          ext: activeProblem.languages[0]?.ext ?? null,
+        },
+        grade
+      );
+      const label = { 1: 'Again', 2: 'Hard', 3: 'Good', 4: 'Easy' }[grade];
+      setStatus(
+        alreadyDone
+          ? `Reviewed “${activeProblem.name}” (${label})`
+          : `Marked “${activeProblem.name}” as done (${label})`
+      );
+    },
+    [activeProblem, study]
   );
 
   // Revert unsaved edits in the LEFT (solution) pane back to the loaded file.
@@ -352,6 +400,10 @@ export default function App() {
           error={treeError}
           open={navOpen}
           onClose={() => setNavOpen(false)}
+          studyEntries={study.entries}
+          onOpenStudy={handleOpenStudy}
+          onReviewNext={handleReviewNext}
+          onRemoveStudy={study.remove}
         />
         <div className="flex-1 flex flex-col min-w-0">
           <div
@@ -379,6 +431,9 @@ export default function App() {
                 canSave={activeProblem != null}
                 dirty={solutionDirty}
                 saving={savingSolution}
+                onMarkDone={handleMarkDone}
+                canMarkDone={activeProblem != null}
+                isDone={activeProblem != null && study.isDone(activeProblem.path)}
                 chatContext={{
                   title,
                   language,

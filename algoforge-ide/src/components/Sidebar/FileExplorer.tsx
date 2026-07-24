@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Icon from '../Icon';
+import StudySection from './StudySection';
+import type { StudyEntry } from '../../lib/study';
 import type { FileNode, FolderNode, ProblemNode, Section, TreeNode } from '../../types';
 
 interface FileExplorerProps {
@@ -14,6 +16,10 @@ interface FileExplorerProps {
   error: string | null;
   open?: boolean;
   onClose?: () => void;
+  studyEntries: StudyEntry[];
+  onOpenStudy: (path: string) => void;
+  onReviewNext: () => void;
+  onRemoveStudy: (path: string) => void;
 }
 
 // Icon per known top-level section; falls back to a folder icon.
@@ -250,6 +256,10 @@ export default function FileExplorer({
   error,
   open = false,
   onClose,
+  studyEntries,
+  onOpenStudy,
+  onReviewNext,
+  onRemoveStudy,
 }: FileExplorerProps) {
   // On mobile, selecting an item should also dismiss the drawer.
   const selectAndClose = (file: FileNode) => {
@@ -336,6 +346,13 @@ export default function FileExplorer({
         </div>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-sm">
+          <StudySection
+            entries={studyEntries}
+            onOpen={onOpenStudy}
+            onReviewNext={onReviewNext}
+            onRemove={onRemoveStudy}
+            selectedPath={selectedPath}
+          />
           {loading && (
             <div className="p-md flex items-center gap-xs text-outline font-code-sm text-code-sm">
               <Icon name="progress_activity" size={16} className="animate-spin text-primary" />
