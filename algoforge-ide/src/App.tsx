@@ -6,12 +6,13 @@ import PracticePane from './components/Editor/PracticePane';
 import BottomPanel from './components/BottomPanel/Console';
 import CreateDialog from './components/CreateDialog';
 import GitHubDialog from './components/GitHubDialog';
-import { extToLanguage, extToMonaco, fetchFile, fetchProblem, fetchTree, runCode, saveSolution, saveVariantSolution } from './lib/api';
+import { extToLanguage, extToMonaco, fetchFile, fetchProblem, fetchTree, runCode, saveSolution, savePlaygroundSolution } from './lib/api';
 import { compareRuns } from './lib/compare';
 import { pickReviewNext, useStudy } from './lib/study';
 import type {
   FileNode,
   Language,
+  ProblemLanguage,
   ProblemNode,
   RunResult,
   Section,
@@ -205,6 +206,23 @@ export default function App() {
     [loadSolution, applyPracticeLanguage]
   );
 
+  // Open a SPECIFIC solution file within a problem (a chosen language/variant),
+  // keeping the problem context and matching the playground language.
+  const handleSelectProblemFile = useCallback(
+    async (problem: ProblemNode, lang: ProblemLanguage) => {
+      setSelectedPath(lang.path);
+      setTitle(problem.name);
+      setActiveProblem(problem);
+      setGroup(problem.group ?? null);
+      await loadSolution(lang.path, lang.ext);
+      applyPracticeLanguage(lang.ext);
+      fetchProblem(problem.path)
+        .then((p) => setGroup(p.meta?.group ?? null))
+        .catch(() => {});
+    },
+    [loadSolution, applyPracticeLanguage]
+  );
+
   // Open a study-set problem by its path (resolve the node from the tree).
   const handleOpenStudy = useCallback(
     (path: string) => {
@@ -280,21 +298,17 @@ export default function App() {
     [applyPracticeLanguage]
   );
 
-  // Save the playground code as a new named-variant solution to the problem.
+  // Save the playground code as a language-typed solution under the problem.
+  // Auto-names the file server-side (solution.<ext> or next solution.v<N>.<ext>),
+  // then refreshes the tree and opens the saved file in the left pane.
   const handleSavePractice = useCallback(async () => {
     if (!activeProblem || !practiceExt || savingVariant) return;
-    const name = window.prompt(
-      'Save playground as a new solution. Enter a short name (letters, numbers, dashes):',
-      'v2'
-    );
-    if (name == null) return; // cancelled
     setSavingVariant(true);
-    setStatus('Saving new solution…');
+    setStatus('Saving solution…');
     try {
-      const { solutionPath } = await saveVariantSolution({
+      const { solutionPath } = await savePlaygroundSolution({
         problemPath: activeProblem.path,
         ext: practiceExt,
-        variant: name,
         content: practice,
       });
       const next = await refreshTree();
@@ -394,6 +408,7 @@ export default function App() {
           selectedPath={selectedPath}
           onSelect={handleSelect}
           onSelectProblem={handleSelectProblem}
+          onSelectProblemFile={handleSelectProblemFile}
           onCreate={() => setCreateOpen(true)}
           onSync={() => setGithubOpen(true)}
           loading={treeLoading}

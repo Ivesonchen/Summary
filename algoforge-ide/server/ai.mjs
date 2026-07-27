@@ -51,6 +51,7 @@ export async function getAIConfig() {
       available,
       authenticated: Boolean(status.authenticated),
       username: status.username,
+      reasoningEffort: (process.env.COPILOT_REASONING_EFFORT || '').trim().toLowerCase() || 'default',
       // Copilot manages its own token; "hasToken" mirrors auth for UI parity.
       hasToken: Boolean(status.authenticated),
     };

@@ -68,6 +68,9 @@ param aiProvider string = 'github-models'
 @description('Copilot model id (used when aiProvider=copilot), e.g. claude-opus-4.8.')
 param copilotModel string = ''
 
+@description('Copilot reasoning effort (low|medium|high|xhigh|max). Empty uses the model default.')
+param copilotReasoningEffort string = ''
+
 @description('Key Vault secret URI holding the Copilot auth token (COPILOT_GITHUB_TOKEN). Empty to skip.')
 param copilotGithubTokenSecretUri string = ''
 
@@ -113,8 +116,9 @@ var githubModelsTokenEnv = useGithubModelsToken ? [{ name: 'GITHUB_MODELS_TOKEN'
 var githubModelsModelEnv = useGithubModelsModel ? [{ name: 'GITHUB_MODELS_MODEL', value: githubModelsModel }] : []
 var aiProviderEnv = [{ name: 'AI_PROVIDER', value: aiProvider }]
 var copilotModelEnv = (copilotEnabled && !empty(copilotModel)) ? [{ name: 'COPILOT_MODEL', value: copilotModel }] : []
+var copilotEffortEnv = (copilotEnabled && !empty(copilotReasoningEffort)) ? [{ name: 'COPILOT_REASONING_EFFORT', value: copilotReasoningEffort }] : []
 var copilotTokenEnv = useCopilotToken ? [{ name: 'COPILOT_GITHUB_TOKEN', secretRef: 'copilot-github-token' }] : []
-var appEnv = concat(baseEnv, githubTokenEnv, githubModelsTokenEnv, githubModelsModelEnv, aiProviderEnv, copilotModelEnv, copilotTokenEnv)
+var appEnv = concat(baseEnv, githubTokenEnv, githubModelsTokenEnv, githubModelsModelEnv, aiProviderEnv, copilotModelEnv, copilotEffortEnv, copilotTokenEnv)
 var appSecrets = concat(
   useGithubToken
     ? [{ name: 'github-token', keyVaultUrl: githubTokenSecretUri, identity: userAssignedIdentityId }]

@@ -37,6 +37,9 @@
     },
     "copilotModel": {
       "value": "claude-opus-4.8"
+    },
+    "copilotReasoningEffort": {
+      "value": "low"
     }
   }
 }

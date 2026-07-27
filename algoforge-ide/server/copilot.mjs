@@ -303,6 +303,11 @@ function denyAllPermissions() {
 
 const CHAT_TIMEOUT_MS = Number(process.env.COPILOT_CHAT_TIMEOUT_MS || 120000);
 
+// Reasoning effort for models that support it. "low" is the fastest; valid
+// values are low | medium | high | xhigh | max (model-dependent). Empty leaves
+// the model default. Set COPILOT_REASONING_EFFORT=low for the quickest replies.
+const REASONING_EFFORT = (process.env.COPILOT_REASONING_EFFORT || '').trim().toLowerCase();
+
 /**
  * Send a conversation to Copilot and return the assistant reply.
  * `messages` is [{ role, content }]. Creates a fresh, tool-less session, sends a
@@ -333,6 +338,7 @@ export async function copilotChat(messages) {
     streaming: true,
     onPermissionRequest: denyAllPermissions(),
     ...(preferredModel ? { model: preferredModel } : {}),
+    ...(REASONING_EFFORT ? { reasoningEffort: REASONING_EFFORT } : {}),
   });
 
   try {

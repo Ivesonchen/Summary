@@ -138,6 +138,20 @@ app.post('/api/solution/variant', async (req, res) => {
   }
 });
 
+// POST /api/solution/playground { problemPath, ext, content } -> save playground as
+// a language-typed solution (auto-named: solution.<ext> or next solution.v<N>.<ext>).
+app.post('/api/solution/playground', async (req, res) => {
+  const { problemPath, ext, content } = req.body || {};
+  try {
+    const result = await store.savePlaygroundSolution({ problemPath, ext, content });
+    res.status(201).json(result);
+  } catch (err) {
+    if (err instanceof FileError) return res.status(err.status).json({ error: err.message });
+    console.error('save playground error:', err);
+    res.status(500).json({ error: 'Failed to save playground solution' });
+  }
+});
+
 // GET /api/github/config -> { repo, branch, syncBranch, hasToken } (never returns the token).
 app.get('/api/github/config', (_req, res) => {
   res.json(getGitHubConfig());

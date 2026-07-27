@@ -65,6 +65,9 @@ param aiProvider string = 'github-models'
 @description('Copilot model id (used when aiProvider=copilot), e.g. claude-opus-4.8.')
 param copilotModel string = ''
 
+@description('Copilot reasoning effort (low|medium|high|xhigh|max) for models that support it. low = fastest; empty uses the model default.')
+param copilotReasoningEffort string = ''
+
 @description('Copilot auth token (COPILOT_GITHUB_TOKEN). Stored in Key Vault and injected as a Container App secret. Enables headless Copilot auth (no device flow).')
 @secure()
 param copilotGithubToken string = ''
@@ -190,6 +193,7 @@ module containerApp 'modules/containerapp.bicep' = if (deployApi) {
     githubModelsModel: githubModelsModel
     aiProvider: aiProvider
     copilotModel: copilotModel
+    copilotReasoningEffort: copilotReasoningEffort
     copilotGithubTokenSecretUri: hasCopilotGithubToken ? keyVault.outputs.copilotGithubTokenSecretUri : ''
     storageAccountName: storage.outputs.storageAccountName
     copilotShareName: storage.outputs.copilotShareName

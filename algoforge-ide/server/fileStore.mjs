@@ -294,6 +294,32 @@ class FileStore {
     return { solutionPath, variant: v };
   }
 
+  /**
+   * Save the playground code as a language-typed solution under a problem,
+   * auto-naming the file: uses the primary `solution.<ext>` when that language
+   * has no solution yet, otherwise the next free `solution.v<N>.<ext>` variant.
+   * No prompt required. Returns { solutionPath, variant, ext }.
+   */
+  async savePlaygroundSolution({ problemPath, ext, content }) {
+    const prob = safeParentPath(problemPath);
+    if (!prob) throw new FileError('Invalid problem path', 400);
+    if (!SECTIONS.includes(prob.split('/')[0])) throw new FileError('Path must be within a known section', 400);
+    if (!EXT_STARTERS[ext]) throw new FileError(`Unsupported language: ${ext}`, 400);
+    if (typeof content !== 'string') throw new FileError('Missing content', 400);
+
+    let solutionPath = `${prob}/solution.${ext}`;
+    let variant = null;
+    if (await this.exists(solutionPath)) {
+      let n = 2;
+      while (await this.exists(`${prob}/solution.v${n}.${ext}`)) n += 1;
+      variant = `v${n}`;
+      solutionPath = `${prob}/solution.${variant}.${ext}`;
+    }
+    await this.writeFile(solutionPath, content);
+    this.invalidateTree();
+    return { solutionPath, variant, ext };
+  }
+
   /** Read the numeric `group` for each problem folder path (batched). */
   async getGroupsForProblems(problemPaths) {
     const groups = new Map();

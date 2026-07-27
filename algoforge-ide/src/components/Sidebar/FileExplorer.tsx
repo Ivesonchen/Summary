@@ -1,8 +1,23 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import Icon from '../Icon';
 import StudySection from './StudySection';
 import type { StudyEntry } from '../../lib/study';
-import type { FileNode, FolderNode, ProblemNode, Section, TreeNode } from '../../types';
+import type { FileNode, FolderNode, ProblemLanguage, ProblemNode, Section, TreeNode } from '../../types';
+
+// Callback to open a specific solution file within a problem. Provided via context
+// so it doesn't need threading through every tree-rendering function.
+const ProblemFileContext = createContext<((p: ProblemNode, lang: ProblemLanguage) => void) | null>(null);
+
+// Short label per extension for the per-language solution rows.
+const EXT_LABEL: Record<string, string> = {
+  java: 'Java',
+  py: 'Python',
+  js: 'JavaScript',
+  ts: 'TypeScript',
+  cpp: 'C++',
+  c: 'C',
+  go: 'Go',
+};
 
 interface FileExplorerProps {
   sections: Section[];
@@ -10,6 +25,7 @@ interface FileExplorerProps {
   selectedPath: string | null;
   onSelect: (file: FileNode) => void;
   onSelectProblem: (problem: ProblemNode) => void;
+  onSelectProblemFile: (problem: ProblemNode, lang: ProblemLanguage) => void;
   onCreate: () => void;
   onSync: () => void;
   loading: boolean;
@@ -59,27 +75,74 @@ function ProblemRow({
   selectedPath: string | null;
   onSelectProblem: (p: ProblemNode) => void;
 }) {
-  const selected = node.path === selectedPath;
+  const onSelectProblemFile = useContext(ProblemFileContext);
+  const [open, setOpen] = useState(false);
+  // Highlight the problem row when it (or one of its solution files) is active.
+  const selfSelected = node.path === selectedPath;
+  const childSelected = node.languages.some((l) => l.path === selectedPath);
+  const selected = selfSelected || (childSelected && !open);
+  // A friendly label for a solution file (e.g. "Java", "Python · v2").
+  const fileLabel = (l: ProblemLanguage) => {
+    const base = EXT_LABEL[l.ext] ?? l.ext.toUpperCase();
+    return l.variant ? `${base} · ${l.variant}` : base;
+  };
   return (
-    <div
-      onClick={() => onSelectProblem(node)}
-      style={{ paddingLeft: `${depth * 12 + 8}px` }}
-      className={`flex items-center gap-xs py-1 pr-sm cursor-pointer rounded font-code-sm text-code-sm truncate ${
-        selected
-          ? 'bg-surface-variant/40 text-secondary-fixed-dim border-l-2 border-secondary-fixed-dim'
-          : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/40'
-      }`}
-      title={`${node.name} — ${node.languages.map((l) => l.ext).join(', ')}`}
-    >
-      <Icon name="code" size={15} className="text-secondary shrink-0" />
-      <span className="truncate">{node.name}</span>
-      <span className="ml-auto flex items-center gap-[3px] shrink-0">
-        {[...new Set(node.languages.map((l) => l.ext))].map((ext) => (
-          <span key={ext} className={`text-[8px] font-bold uppercase ${EXT_COLOR[ext] ?? 'text-outline'}`}>
-            {ext}
+    <div>
+      <div
+        style={{ paddingLeft: `${depth * 12 + 8}px` }}
+        className={`flex items-center gap-xs py-1 pr-sm cursor-pointer rounded font-code-sm text-code-sm ${
+          selected
+            ? 'bg-surface-variant/40 text-secondary-fixed-dim border-l-2 border-secondary-fixed-dim'
+            : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/40'
+        }`}
+        title={`${node.name} — ${node.languages.map((l) => l.ext).join(', ')}`}
+      >
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpen((o) => !o);
+          }}
+          className="shrink-0 text-outline hover:text-on-surface"
+          aria-label={open ? 'Collapse' : 'Expand solutions'}
+        >
+          <Icon name={open ? 'expand_more' : 'chevron_right'} size={14} />
+        </button>
+        <div className="flex items-center gap-xs min-w-0 flex-1" onClick={() => onSelectProblem(node)}>
+          <Icon name="code" size={15} className="text-secondary shrink-0" />
+          <span className="truncate">{node.name}</span>
+          <span className="ml-auto flex items-center gap-[3px] shrink-0">
+            {[...new Set(node.languages.map((l) => l.ext))].map((ext) => (
+              <span key={ext} className={`text-[8px] font-bold uppercase ${EXT_COLOR[ext] ?? 'text-outline'}`}>
+                {ext}
+              </span>
+            ))}
           </span>
-        ))}
-      </span>
+        </div>
+      </div>
+      {open && (
+        <div>
+          {node.languages.map((l) => {
+            const fileSelected = l.path === selectedPath;
+            return (
+              <div
+                key={l.path}
+                onClick={() => onSelectProblemFile?.(node, l)}
+                style={{ paddingLeft: `${depth * 12 + 34}px` }}
+                className={`flex items-center gap-xs py-1 pr-sm cursor-pointer rounded font-code-sm text-code-sm ${
+                  fileSelected
+                    ? 'bg-surface-variant/40 text-secondary-fixed-dim border-l-2 border-secondary-fixed-dim'
+                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/40'
+                }`}
+                title={l.path.split('/').pop()}
+              >
+                <Icon name="description" size={14} className={`shrink-0 ${EXT_COLOR[l.ext] ?? 'text-outline'}`} />
+                <span className="truncate">{fileLabel(l)}</span>
+                <span className="ml-auto text-[9px] uppercase text-outline shrink-0">{l.ext}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -250,6 +313,7 @@ export default function FileExplorer({
   selectedPath,
   onSelect,
   onSelectProblem,
+  onSelectProblemFile,
   onCreate,
   onSync,
   loading,
@@ -268,6 +332,10 @@ export default function FileExplorer({
   };
   const selectProblemAndClose = (problem: ProblemNode) => {
     onSelectProblem(problem);
+    onClose?.();
+  };
+  const selectProblemFileAndClose = (problem: ProblemNode, lang: ProblemLanguage) => {
+    onSelectProblemFile(problem, lang);
     onClose?.();
   };
 
@@ -364,14 +432,15 @@ export default function FileExplorer({
           {!loading &&
             !error &&
             sections.map((section, i) => (
-              <SectionGroup
-                key={section.name}
-                section={section}
-                selectedPath={selectedPath}
-                onSelect={selectAndClose}
-                onSelectProblem={selectProblemAndClose}
-                defaultOpen={i === 0}
-              />
+              <ProblemFileContext.Provider key={section.name} value={selectProblemFileAndClose}>
+                <SectionGroup
+                  section={section}
+                  selectedPath={selectedPath}
+                  onSelect={selectAndClose}
+                  onSelectProblem={selectProblemAndClose}
+                  defaultOpen={i === 0}
+                />
+              </ProblemFileContext.Provider>
             ))}
         </div>
 

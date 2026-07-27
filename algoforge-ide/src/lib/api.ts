@@ -90,6 +90,25 @@ export async function saveVariantSolution(input: {
   return data;
 }
 
+/**
+ * Save playground code as a language-typed solution under a problem, auto-named
+ * server-side (solution.<ext> or the next solution.v<N>.<ext>). No prompt needed.
+ */
+export async function savePlaygroundSolution(input: {
+  problemPath: string;
+  ext: string;
+  content: string;
+}): Promise<{ solutionPath: string; variant: string | null; ext: string }> {
+  const res = await fetch(`${API_BASE}/api/solution/playground`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || `Failed to save solution (${res.status})`);
+  return data;
+}
+
 export async function fetchFile(path: string): Promise<FileResponse> {
   const res = await fetch(`${API_BASE}/api/file?path=${encodeURIComponent(path)}`);
   if (!res.ok) {
