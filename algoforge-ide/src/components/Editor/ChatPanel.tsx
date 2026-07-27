@@ -29,6 +29,7 @@ function buildSystemPrompt(ctx: ChatContext): string {
   const parts = [
     'You are an expert coding assistant embedded in Algo Playground, an app for studying data-structures & algorithm problems.',
     'Give clear, concise explanations. Format ALL responses in GitHub-flavored Markdown: use headings, bold, bullet/numbered lists, tables, inline `code`, and fenced code blocks with a language tag. Focus on correctness, complexity, and idiomatic style.',
+    'When illustrating a binary tree, N-ary tree, or graph, draw it as a multi-line ASCII diagram inside a fenced ```text code block (with branches like / and \\), never collapsed onto a single line, so its structure is visually clear.',
   ];
   if (ctx.title) parts.push(`The user is currently viewing the problem: "${ctx.title}".`);
   if (ctx.language && ctx.language !== 'unknown') parts.push(`The active language is ${ctx.language}.`);
@@ -256,7 +257,11 @@ export default function ChatPanel({ context }: ChatPanelProps) {
           '## Problem\nDescribe the full problem in natural language (what is asked, constraints, and any relevant rules).\n' +
           '## Input / Output\nDescribe the expected input and output, with a short example.\n' +
           '## Complexity\nState the target time and space complexity (Big-O) that the shown solution achieves.\n' +
-          'Do not include the solution code itself. Be accurate and concise.',
+          'Do not include the solution code itself. Be accurate and concise.\n' +
+          'If the problem involves a binary tree, N-ary tree, or graph, ALWAYS draw the example structure as a multi-line ASCII diagram inside a fenced ```text code block (never collapse it onto one line). ' +
+          'Use branches like this and align nodes clearly:\n' +
+          '```text\n      1\n     / \\\n    2   3\n       / \\\n      4   5\n```\n' +
+          'Then show the input array/serialization and the output on separate lines below the diagram so the tree shape is obvious.',
       },
       {
         role: 'user',
