@@ -361,6 +361,14 @@ for (char c : s.toCharArray()) cnt[c - 'a']++;       // 统计每个字母出现
 
 // anagram key —— 字母异位词的归一化键（排序后相同即为一组）
 char[] k = s.toCharArray(); Arrays.sort(k); String key = new String(k);
+// 例："eat" -> 排序后 "aet"；"tea" -> 也是 "aet"；"tan" -> "ant"
+//     用该 key 分组，"eat"、"tea" 归入同一组，"tan" 单独一组
+Map<String, List<String>> groups = new HashMap<>();
+for (String w : new String[]{"eat", "tea", "tan", "ate", "nat", "bat"}) {
+    char[] ck = w.toCharArray(); Arrays.sort(ck);
+    groups.computeIfAbsent(new String(ck), z -> new ArrayList<>()).add(w);
+}
+// 结果 -> {aet=[eat, tea, ate], ant=[tan, nat], abt=[bat]}
 ```
 
 ---
